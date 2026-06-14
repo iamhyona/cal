@@ -152,6 +152,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
   <button class="tab" onclick="sw('daily',this)">Daily</button>
   <button class="tab" onclick="sw('weekly',this)">Weekly</button>
   <button class="tab" onclick="sw('report',this)">주간업무보고</button>
+  <button class="tab" onclick="sw('projects',this)">Projects</button>
+  <button class="tab" onclick="sw('settings',this)">Settings</button>
   <div class="tabs-spacer"></div>
   <button class="btn-settings" id="btn-db" title="DB 시트 열기" onclick="openDBSheet()" style="margin-right:6px;font-size:10px;width:auto;padding:0 8px;font-family:var(--f);font-weight:600">DB 시트열기</button>
   <button class="btn-settings" id="btn-settings" title="컬러 설정" onclick="openSettings()">⚙</button>
@@ -266,7 +268,63 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
     <div class="wk-outer" id="wk-outer"></div>
   </div>
 
-  <!-- REPORT: 주간업무보고 -->
+  <!-- PROJECTS -->
+  <div class="panel" id="panel-projects">
+    <div class="ptop">
+      <div class="ptitle">Projects</div>
+      <div class="ptop-right">
+        <button class="vbtn" id="proj-sync-btn" onclick="loadProjects()">↺ 새로고침</button>
+        <button class="btn-add" onclick="openProjModal(null)" style="height:27px;padding:0 14px;font-size:11px;border-radius:6px;border:none;background:var(--t1);color:var(--bg);font-family:var(--f);font-weight:600;cursor:pointer">+ 프로젝트 추가</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="proj-filter-bar">
+      <button class="vbtn on" onclick="filterProjects('all',this)">전체</button>
+      <button class="vbtn" onclick="filterProjects('진행중',this)">진행중</button>
+      <button class="vbtn" onclick="filterProjects('완료',this)">완료</button>
+    </div>
+    <div id="proj-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div class="ptop">
+      <div class="ptitle">Settings</div>
+      <div class="ptop-right">
+        <button class="vbtn" onclick="syncSettingsFromGS()" id="settings-sync-btn">↺ GS 동기화</button>
+      </div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:var(--f);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)">디자이너</div>
+        <button class="vbtn" onclick="openSettingsItemModal('designer',null)" style="font-size:10px;height:24px;padding:0 10px">+ 추가</button>
+      </div>
+      <div id="settings-designers" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:var(--f);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)">소속사</div>
+        <button class="vbtn" onclick="openSettingsItemModal('agency',null)" style="font-size:10px;height:24px;padding:0 10px">+ 추가</button>
+      </div>
+      <div id="settings-agencies" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:var(--f);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)">아티스트</div>
+        <button class="vbtn" onclick="openSettingsItemModal('artist',null)" style="font-size:10px;height:24px;padding:0 10px">+ 추가</button>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px" id="settings-agency-tabs"></div>
+      <div id="settings-artists" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:var(--f);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)">프로젝트 구분</div>
+        <button class="vbtn" onclick="openSettingsItemModal('category',null)" style="font-size:10px;height:24px;padding:0 10px">+ 추가</button>
+      </div>
+      <div id="settings-categories" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
   <div class="panel" id="panel-report">
     <div class="ptop">
       <div>
@@ -294,8 +352,65 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 
 </div>
 
+</div>
+
 <!-- DB 시트열기 모달 -->
 <div class="mo-back" id="db-back" onclick="closeDBSheet()"></div>
+
+<!-- 프로젝트 추가/수정 모달 -->
+<div class="mo-back" id="proj-modal-back"></div>
+<div class="mo-box" id="proj-modal-box" style="width:min(520px,92vw)">
+  <div class="mo-hd">
+    <div class="mo-title" id="proj-modal-title">프로젝트 추가</div>
+    <button class="mo-close" onclick="closeProjModal()">✕</button>
+  </div>
+  <div style="padding:0 0 6px">
+    <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 10px;border-bottom:1px solid var(--b2);margin-bottom:14px">프로젝트 정보</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="form-row"><label>소속사</label><select class="form-sel" id="pf-agency" onchange="onProjAgencyChange()"><option value="">선택</option></select></div>
+      <div class="form-row"><label>아티스트</label><select class="form-sel" id="pf-artist"><option value="">소속사 먼저 선택</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="form-row"><label>프로젝트 구분</label><select class="form-sel" id="pf-cat"></select></div>
+      <div class="form-row"><label>프로젝트 표기명</label><input class="form-inp" id="pf-pn" placeholder="예: 2nd Album Part.2"></div>
+    </div>
+    <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 10px;border-bottom:1px solid var(--b2);margin-bottom:14px">주요 일정</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="form-row"><label>샘플 데드라인</label><input class="form-inp" id="pf-sample" type="date"></div>
+      <div class="form-row"><label>본작업 데드라인</label><input class="form-inp" id="pf-work" type="date"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="form-row"><label>예판 오픈일</label><input class="form-inp" id="pf-notice" type="date"></div>
+      <div class="form-row"><label>런칭일</label><input class="form-inp" id="pf-launch" type="date"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid var(--b)">
+      <button id="pf-delete-btn" onclick="deleteProjFromModal()" style="display:none;height:31px;padding:0 15px;border-radius:6px;background:none;border:1px solid rgba(244,63,94,.4);font-family:var(--f);font-size:11px;color:#f43f5e;cursor:pointer">삭제</button>
+      <div style="display:flex;gap:7px;margin-left:auto">
+        <button class="btn-cancel" onclick="closeProjModal()">취소</button>
+        <button class="btn-add" onclick="saveProjModal()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings 아이템 추가/수정 모달 -->
+<div class="mo-back" id="si-modal-back"></div>
+<div class="mo-box" id="si-modal-box" style="width:min(380px,92vw)">
+  <div class="mo-hd">
+    <div class="mo-title" id="si-modal-title">항목 추가</div>
+    <button class="mo-close" onclick="closeSIModal()">✕</button>
+  </div>
+  <div style="padding:4px 0 10px;display:flex;flex-direction:column;gap:10px" id="si-modal-body">
+    <!-- JS로 채워짐 -->
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid var(--b)">
+    <button id="si-delete-btn" onclick="deleteSIItem()" style="display:none;height:31px;padding:0 15px;border-radius:6px;background:none;border:1px solid rgba(244,63,94,.4);font-family:var(--f);font-size:11px;color:#f43f5e;cursor:pointer">삭제</button>
+    <div style="display:flex;gap:7px;margin-left:auto">
+      <button class="btn-cancel" onclick="closeSIModal()">취소</button>
+      <button class="btn-add" onclick="saveSIItem()">저장</button>
+    </div>
+  </div>
+</div>
 <div class="mo-box" id="db-box" style="width:min(480px,92vw)">
   <div class="mo-hd">
     <div class="mo-title">DB 시트 열기</div>
@@ -344,27 +459,16 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
     <button class="mo-close" onclick="closeAddMo()">✕</button>
   </div>
   <div class="add-mo-body">
-    <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2)">프로젝트 정보</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-row">
-        <label>소속사</label>
-        <select class="form-sel" id="f-agency" onchange="onAddAgencyChange()"><option value="">선택</option></select>
-      </div>
-      <div class="form-row">
-        <label>아티스트</label>
-        <select class="form-sel" id="f-artist"><option value="">소속사 먼저 선택</option></select>
-      </div>
+    <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2)">프로젝트</div>
+    <div class="form-row">
+      <label>프로젝트 선택</label>
+      <select class="form-sel" id="f-project" onchange="onAddProjectChange()">
+        <option value="">선택</option>
+      </select>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-row">
-        <label>프로젝트 구분</label>
-        <select class="form-sel" id="f-cat"><option value="기타">기타</option></select>
-      </div>
-      <div class="form-row">
-        <label>프로젝트 표기명</label>
-        <input class="form-inp" id="f-pn" placeholder="예: 2nd Album Part.2">
-      </div>
-    </div>
+    <!-- 선택된 프로젝트 미리보기 -->
+    <div id="f-project-preview" style="display:none;padding:8px 12px;background:var(--sf);border:1px solid var(--b);border-radius:7px;font-family:var(--f);font-size:11px;color:var(--t2)"></div>
+
     <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2);margin-top:4px">업무 정보</div>
     <div class="form-row">
       <label>업무명</label>
@@ -373,7 +477,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="form-row">
         <label>담당자</label>
-        <!-- ★ GS getBase() 로드 후 동적으로 채워짐 -->
         <select class="form-sel" id="f-who"></select>
       </div>
       <div class="form-row">
@@ -397,15 +500,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
       <label>마감 시간 (선택)</label>
       <input class="form-inp" id="f-hr" type="number" min="0" max="23" placeholder="시 (예: 18, 없으면 빈칸)">
     </div>
-    <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2);margin-top:4px">주요 일정</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-row"><label>샘플 데드라인</label><input class="form-inp" id="f-sample" type="date"></div>
-      <div class="form-row"><label>본작업 데드라인</label><input class="form-inp" id="f-work" type="date"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-row"><label>예판 오픈일</label><input class="form-inp" id="f-notice" type="date"></div>
-      <div class="form-row"><label>런칭일</label><input class="form-inp" id="f-launch" type="date"></div>
-    </div>
   </div>
   <div class="add-mo-foot">
     <button class="btn-cancel" onclick="closeAddMo()">취소</button>
@@ -421,7 +515,7 @@ const DOW_KO = ['일','월','화','수','목','금','토'];
 // ══════════════════════════════════════════════════════════
 // ★ PATCH 1: API URL — GS 배포 후 실제 URL로 교체
 // ══════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbx8eyPDj7y6I2xhSYfkcZ8neYoYVxMlDkqp_ZrwIYcg4NJNLgk3bPc-PQbtGGBtChR87g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxLJqzbDX2WkXXAxFnBBMk3BIKfEqu4NmYaw0mQQI15LvXl6cC-diUAaRR4gn0qlpoG/exec';
 let API_READY = false;
 let nextId    = 1; // ★ PATCH 5: 초기값 1 (GS 로드 후 max+1로 갱신)
 
@@ -498,6 +592,7 @@ async function loadBaseFromAPI() {
       buildDesignerDropdowns();
       buildArtistDropdowns();
       populateFormDropdowns();
+      renderSettings();
 
       console.log('✅ GS 기본설정 로드 완료 — 디자이너:', base.designers);
     }
@@ -587,6 +682,7 @@ async function loadFromAPI() {
       nextId = Math.max(...tasks.map(t => Number(t.id) || 0)) + 1;
       hideLoadingBanner();
       buildArtistDropdowns(); // 로드 후 아티스트 목록 갱신
+      renderSettings();       // Settings 탭 초기 렌더
       rM(); rD(); rW();
       console.log(`✅ GS Tasks ${tasks.length}건 로드, nextId=${nextId}`);
     } else {
@@ -667,8 +763,28 @@ function populateFormDropdowns() {
   if (efCat) populateCatSelect(efCat, efCat.value);
 }
 function onAddAgencyChange() {
-  const ag = document.getElementById('f-agency').value;
-  populateArtistSelect(document.getElementById('f-artist'), ag, '');
+  const ag = document.getElementById('f-agency')?.value;
+  if (ag) populateArtistSelect(document.getElementById('f-artist'), ag, '');
+}
+
+// 프로젝트 선택 시 미리보기 표시
+function onAddProjectChange() {
+  const sel     = document.getElementById('f-project');
+  const preview = document.getElementById('f-project-preview');
+  const opt     = sel.options[sel.selectedIndex];
+  const proj    = opt?._proj;
+  if (!proj || !sel.value) { preview.style.display = 'none'; return; }
+
+  const fmtD = s => { if (!s) return null; const d = new Date(s); return isNaN(d) ? null : `${d.getMonth()+1}/${d.getDate()}`; };
+  const parts = [];
+  if (proj.agency)      parts.push(proj.agency);
+  if (proj.cat)         parts.push(proj.cat);
+  if (proj.sampleDL)    parts.push(`샘플 ${fmtD(proj.sampleDL)}`);
+  if (proj.workDL)      parts.push(`본작업 ${fmtD(proj.workDL)}`);
+  if (proj.launchDate)  parts.push(`런칭 ${fmtD(proj.launchDate)}`);
+
+  preview.style.display = 'block';
+  preview.textContent   = parts.join('  ·  ');
 }
 function onEditAgencyChange() {
   const ag = document.getElementById('ef-agency')?.value;
@@ -676,13 +792,34 @@ function onEditAgencyChange() {
   if (ag && ar) populateArtistSelect(ar, ag, '');
 }
 function initAddModal() {
-  const agSel = document.getElementById('f-agency');
-  const caSel = document.getElementById('f-cat');
-  if (!agSel) return;
-  populateAgencySelect(agSel, '');
-  const first = Object.keys(BASE_DATA.artistMap || {})[0] || '';
-  if (first) { agSel.value = first; populateArtistSelect(document.getElementById('f-artist'), first, ''); }
-  if (caSel) populateCatSelect(caSel, '');
+  const projSel = document.getElementById('f-project');
+  const whoSel  = document.getElementById('f-who');
+  if (!projSel) return;
+
+  // 프로젝트 목록 채우기 (GS_PROJECTS 기준, 없으면 DATA에서 추출)
+  const projList = GS_PROJECTS.length > 0
+    ? GS_PROJECTS.filter(p => !p.done)
+    : [...new Map(DATA.filter(d => d.p).map(d => [d.p + '::' + (d.pn||''), d])).values()];
+
+  projSel.innerHTML = '<option value="">선택</option>';
+  projList.forEach((proj, i) => {
+    const label = proj.pn
+      ? `${proj.artist || proj.p} · ${proj.pn}`
+      : (proj.artist || proj.p);
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = label;
+    opt._proj = proj;
+    projSel.appendChild(opt);
+  });
+
+  document.getElementById('f-project-preview').style.display = 'none';
+
+  // 담당자
+  if (whoSel) {
+    const members = MEMBERS.length > 0 ? MEMBERS : ['박현아','박경아','이혜선','유이시','허희원'];
+    whoSel.innerHTML = members.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="전체">전체</option>';
+  }
 }
 function initEditModalDropdowns(ev) {
   const agSel = document.getElementById('ef-agency');
@@ -818,7 +955,9 @@ function sw(id,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   el.classList.add('on');document.getElementById('panel-'+id).classList.add('on');
-  if(id==='report') rReport();
+  if(id==='report')   rReport();
+  if(id==='projects') loadProjects();
+  if(id==='settings') syncSettingsFromGS();
 }
 function setMV(v,el){
   mView=v;
@@ -1168,38 +1307,49 @@ function closeSettings(){document.getElementById('settings-back').classList.remo
 // ADD EVENT
 document.getElementById('btn-add-ev').addEventListener('click',()=>{
   const s=dk(TODAY);
-  document.getElementById('f-start').value=s;document.getElementById('f-end').value=s;
-  ['f-title','f-pn','f-hr','f-sample','f-work','f-notice','f-launch'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('mback').classList.add('on');document.getElementById('add-mbox').classList.add('on');
+  document.getElementById('f-start').value=s;
+  document.getElementById('f-end').value=s;
+  document.getElementById('f-title').value='';
+  document.getElementById('f-hr').value='';
+  document.getElementById('mback').classList.add('on');
+  document.getElementById('add-mbox').classList.add('on');
   initAddModal();
 });
 function closeAddMo(){document.getElementById('mback').classList.remove('on');document.getElementById('add-mbox').classList.remove('on');}
 document.getElementById('mback').addEventListener('click',()=>{closeMo();closeAddMo();});
 
 function submitAdd(){
-  const title=document.getElementById('f-title').value.trim();
-  const s=document.getElementById('f-start').value;const e=document.getElementById('f-end').value;
-  if(!title||!s||!e){alert('업무명, 시작일, 마감일을 입력해주세요.');return;}
-  const hr=document.getElementById('f-hr').value.trim();
-  const newTask={
-    id:nextId++,
-    p:document.getElementById('f-artist').value,
-    agency:document.getElementById('f-agency').value||null,
-    cat:document.getElementById('f-cat').value||'기타',
-    pn:document.getElementById('f-pn').value.trim()||null,
-    t:title,
-    who:document.getElementById('f-who').value,
-    s,e,st:'진행중',
-    ty:document.getElementById('f-ty').value,
-    hr:hr!==''?parseInt(hr):null,
-    sampleDate:document.getElementById('f-sample').value||null,
-    workDate:document.getElementById('f-work').value||null,
-    noticeDate:document.getElementById('f-notice').value||null,
-    launchDate:document.getElementById('f-launch').value||null,
+  const title = document.getElementById('f-title').value.trim();
+  const s     = document.getElementById('f-start').value;
+  const e     = document.getElementById('f-end').value;
+  if (!title||!s||!e) { alert('업무명, 시작일, 마감일을 입력해주세요.'); return; }
+
+  // 선택된 프로젝트에서 p/agency/cat/pn/날짜 가져오기
+  const sel  = document.getElementById('f-project');
+  const opt  = sel?.options[sel.selectedIndex];
+  const proj = opt?._proj || null;
+
+  const hr = document.getElementById('f-hr').value.trim();
+  const newTask = {
+    id:         nextId++,
+    p:          proj?.artist || proj?.p || '',
+    agency:     proj?.agency || null,
+    cat:        proj?.cat    || '기타',
+    pn:         proj?.pn     || null,
+    t:          title,
+    who:        document.getElementById('f-who').value,
+    s, e, st:  '진행중',
+    ty:         document.getElementById('f-ty').value,
+    hr:         hr !== '' ? parseInt(hr) : null,
+    // 주요일정은 프로젝트에서 상속
+    sampleDate:  proj?.sampleDL    || null,
+    workDate:    proj?.workDL      || null,
+    noticeDate:  proj?.presaleDate || null,
+    launchDate:  proj?.launchDate  || null,
   };
   DATA.push(newTask);
-  closeAddMo();rM();rD();rW();
-  saveToSheet(newTask); // ★ 저장 후 GS id로 자동 갱신
+  closeAddMo(); rM(); rD(); rW();
+  saveToSheet(newTask);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1467,6 +1617,476 @@ function copyReport() {
     if (btn) { btn.textContent = '✓ 복사됨'; setTimeout(() => btn.textContent = '📋 복사', 2000); }
   }).catch(() => alert(text));
 }
+
+// ══════════════════════════════════════════════════════════
+// PROJECTS 탭 — GS 프로젝트 탭 직접 연동
+// ══════════════════════════════════════════════════════════
+
+let GS_PROJECTS  = [];   // GS에서 로드한 프로젝트 목록
+let projFilter   = 'all';
+let editingProjRowIdx = null; // 수정 중인 GS 행 번호
+
+async function loadProjects() {
+  const btn  = document.getElementById('proj-sync-btn');
+  const list = document.getElementById('proj-list');
+  if (btn) { btn.textContent = '로딩 중...'; btn.disabled = true; }
+  list.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:20px 0">GS에서 불러오는 중...</div>`;
+  try {
+    const res  = await fetch(`${API_URL}?action=getProjects`);
+    const data = await res.json();
+    GS_PROJECTS = (data.rows || []);
+    renderProjects();
+  } catch(e) {
+    list.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:20px 0">로드 실패. API 연결을 확인해주세요.</div>`;
+  }
+  if (btn) { btn.textContent = '↺ 새로고침'; btn.disabled = false; }
+}
+
+function filterProjects(f, el) {
+  projFilter = f;
+  document.querySelectorAll('#proj-filter-bar .vbtn').forEach(b => b.classList.remove('on'));
+  if (el) el.classList.add('on');
+  renderProjects();
+}
+
+function renderProjects() {
+  const list = document.getElementById('proj-list');
+  if (!list) return;
+
+  let projs = projFilter === 'all'    ? GS_PROJECTS
+            : projFilter === '완료'   ? GS_PROJECTS.filter(p => p.done)
+            : GS_PROJECTS.filter(p => !p.done);
+
+  if (projs.length === 0) {
+    list.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:20px 0">프로젝트가 없습니다.</div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  projs.forEach(proj => {
+    const p   = pr(proj.artist || proj.agency || '?');
+    const done = proj.done;
+
+    // D-day 계산 (런칭일 기준)
+    let ddStr = '', ddColor = 'var(--t3)';
+    if (proj.launchDate) {
+      const ld   = new Date(proj.launchDate);
+      const diff = Math.ceil((ld - TODAY) / 86400000);
+      ddStr  = diff === 0 ? 'D-DAY' : diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
+      ddColor = diff <= 7 && diff >= 0 ? 'var(--leave)' : done ? 'var(--t3)' : 'var(--t2)';
+    }
+
+    const fmtD = s => {
+      if (!s) return '—';
+      const d = new Date(s);
+      return isNaN(d) ? s : `${d.getMonth()+1}/${d.getDate()}`;
+    };
+
+    const card = document.createElement('div');
+    card.style.cssText = `background:var(--sf);border:1px solid var(--b);border-left:3px solid ${p.c};border-radius:8px;padding:12px 14px;margin-bottom:8px;transition:border-color .15s;opacity:${done?'.5':'1'}`;
+    card.onmouseover = () => card.style.borderColor = 'rgba(255,255,255,.2)';
+    card.onmouseout  = () => card.style.borderColor = 'var(--b)';
+    card.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap">
+            <span style="font-family:var(--f);font-size:13px;font-weight:700;color:${p.c}">${proj.artist||'—'}</span>
+            ${proj.agency ? `<span style="font-family:var(--f);font-size:10px;color:var(--t3)">${proj.agency}</span>` : ''}
+            ${proj.cat    ? `<span style="font-family:var(--f);font-size:10px;padding:1px 7px;border-radius:4px;background:var(--sf2);color:var(--t2)">${proj.cat}</span>` : ''}
+          </div>
+          ${proj.pn ? `<div style="font-family:var(--f);font-size:12px;color:var(--t1);margin-bottom:7px">${proj.pn}</div>` : ''}
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            ${proj.sampleDL  ? `<div style="font-family:var(--f);font-size:10px;color:var(--t3)">샘플 <span style="color:var(--t2)">${fmtD(proj.sampleDL)}</span></div>` : ''}
+            ${proj.workDL    ? `<div style="font-family:var(--f);font-size:10px;color:var(--t3)">본작업 <span style="color:var(--t2)">${fmtD(proj.workDL)}</span></div>` : ''}
+            ${proj.presaleDate ? `<div style="font-family:var(--f);font-size:10px;color:var(--t3)">예판 <span style="color:var(--t2)">${fmtD(proj.presaleDate)}</span></div>` : ''}
+            ${proj.launchDate  ? `<div style="font-family:var(--f);font-size:10px;color:var(--t3)">런칭 <span style="color:var(--t2)">${fmtD(proj.launchDate)}</span></div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+          ${ddStr ? `<span style="font-family:var(--f);font-size:11px;font-weight:700;color:${ddColor}">${ddStr}</span>` : ''}
+          <span style="font-family:var(--f);font-size:10px;color:${done?'#34d399':'var(--t3)'}">${done?'✓ 런칭완료':'진행중'}</span>
+          <button onclick="openProjModal(${proj.rowIdx})" style="height:24px;padding:0 10px;border-radius:5px;background:var(--sf2);border:1px solid var(--b2);font-family:var(--f);font-size:10px;color:var(--t2);cursor:pointer">수정</button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+// 프로젝트 모달
+function openProjModal(rowIdx) {
+  editingProjRowIdx = rowIdx || null;
+  document.getElementById('proj-modal-title').textContent = rowIdx ? '프로젝트 수정' : '프로젝트 추가';
+  document.getElementById('pf-delete-btn').style.display  = rowIdx ? 'block' : 'none';
+
+  populateAgencySelect(document.getElementById('pf-agency'), '');
+  populateCatSelect(document.getElementById('pf-cat'), '');
+
+  if (rowIdx) {
+    const proj = GS_PROJECTS.find(p => p.rowIdx === rowIdx);
+    if (proj) {
+      document.getElementById('pf-agency').value = proj.agency  || '';
+      onProjAgencyChange(proj.artist);
+      document.getElementById('pf-artist').value = proj.artist  || '';
+      document.getElementById('pf-cat').value    = proj.cat     || '';
+      document.getElementById('pf-pn').value     = proj.pn      || '';
+      document.getElementById('pf-sample').value = proj.sampleDL   || '';
+      document.getElementById('pf-work').value   = proj.workDL     || '';
+      document.getElementById('pf-notice').value = proj.presaleDate|| '';
+      document.getElementById('pf-launch').value = proj.launchDate || '';
+    }
+  } else {
+    ['pf-pn','pf-sample','pf-work','pf-notice','pf-launch'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('pf-agency').value = '';
+    document.getElementById('pf-artist').innerHTML = '<option value="">소속사 먼저 선택</option>';
+    document.getElementById('pf-cat').value = '';
+  }
+
+  document.getElementById('proj-modal-back').classList.add('on');
+  document.getElementById('proj-modal-box').classList.add('on');
+}
+
+function closeProjModal() {
+  document.getElementById('proj-modal-back').classList.remove('on');
+  document.getElementById('proj-modal-box').classList.remove('on');
+  editingProjRowIdx = null;
+}
+
+function onProjAgencyChange(selectedArtist) {
+  const ag = document.getElementById('pf-agency').value;
+  populateArtistSelect(document.getElementById('pf-artist'), ag, selectedArtist || '');
+}
+
+async function saveProjModal() {
+  const body = {
+    agency:      document.getElementById('pf-agency').value,
+    artist:      document.getElementById('pf-artist').value,
+    cat:         document.getElementById('pf-cat').value,
+    pn:          document.getElementById('pf-pn').value.trim(),
+    sampleDL:    document.getElementById('pf-sample').value || null,
+    workDL:      document.getElementById('pf-work').value   || null,
+    presaleDate: document.getElementById('pf-notice').value || null,
+    launchDate:  document.getElementById('pf-launch').value || null,
+  };
+  if (!body.artist) { showToast('아티스트를 선택해주세요'); return; }
+
+  const saveBtn = document.querySelector('#proj-modal-box .btn-add');
+  if (saveBtn) { saveBtn.textContent = '저장 중...'; saveBtn.disabled = true; }
+
+  try {
+    if (editingProjRowIdx) {
+      body.action = 'updateProject';
+      body.rowIdx = editingProjRowIdx;
+    } else {
+      body.action = 'addProject';
+    }
+    await fetch(API_URL, { method:'POST', body: JSON.stringify(body) });
+    closeProjModal();
+    await loadProjects();
+    showToast(editingProjRowIdx ? '프로젝트 수정됨' : '프로젝트 추가됨');
+  } catch(e) {
+    showToast('저장 실패');
+  }
+  if (saveBtn) { saveBtn.textContent = '저장'; saveBtn.disabled = false; }
+}
+
+async function deleteProjFromModal() {
+  if (!editingProjRowIdx) return;
+  const proj = GS_PROJECTS.find(p => p.rowIdx === editingProjRowIdx);
+  const name = proj ? (proj.pn || proj.artist || '이 프로젝트') : '이 프로젝트';
+  if (!confirm(`"${name}"를 삭제할까요?`)) return;
+  try {
+    await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'deleteProject', rowIdx: editingProjRowIdx }) });
+    closeProjModal();
+    await loadProjects();
+    showToast('프로젝트 삭제됨');
+  } catch(e) { showToast('삭제 실패'); }
+}
+
+document.getElementById('proj-modal-back').addEventListener('click', closeProjModal);
+
+// ══════════════════════════════════════════════════════════
+// SETTINGS 탭 — GS 기본설정 탭 직접 연동
+// ══════════════════════════════════════════════════════════
+
+let siType        = null;
+let siEditIdx     = null;
+let siAgencyFilter = '';
+
+async function syncSettingsFromGS() {
+  const btn = document.getElementById('settings-sync-btn');
+  if (btn) { btn.textContent = '로딩 중...'; btn.disabled = true; }
+
+  // 로딩 중 표시
+  ['settings-designers','settings-agencies','settings-artists','settings-agency-tabs','settings-categories'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:8px 0">불러오는 중...</div>`;
+  });
+
+  try {
+    const res  = await fetch(`${API_URL}?action=getSettings`);
+    const data = await res.json();
+
+    if (data && (data.designers || data.agencies)) {
+      BASE_DATA.designers    = data.designers    || BASE_DATA.designers;
+      BASE_DATA.agencies     = data.agencies     || BASE_DATA.agencies;
+      BASE_DATA.artistMap    = data.artistMap    || BASE_DATA.artistMap;
+      BASE_DATA.projectTypes = data.categories   || BASE_DATA.projectTypes;
+
+      // MEMBERS도 업데이트 (팀 제외)
+      const members = (data.designers || []).filter(d => d !== '팀');
+      if (members.length > 0) {
+        MEMBERS.splice(0, MEMBERS.length, ...members);
+        buildDesignerDropdowns();
+        buildArtistDropdowns();
+        populateFormDropdowns();
+      }
+    }
+
+    renderSettings();
+    if (btn) showToast('GS 동기화 완료');
+  } catch(e) {
+    ['settings-designers','settings-agencies','settings-artists','settings-categories'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:8px 0">로드 실패. GS API를 확인해주세요.</div>`;
+    });
+    if (btn) showToast('동기화 실패');
+  }
+
+  if (btn) { btn.textContent = '↺ GS 동기화'; btn.disabled = false; }
+}
+
+// BASE_DATA 변경 후 GS에 저장
+async function pushSettingsToGS() {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:     'saveSettings',
+        designers:  BASE_DATA.designers,
+        agencies:   BASE_DATA.agencies,
+        artistMap:  BASE_DATA.artistMap,
+        categories: BASE_DATA.projectTypes,
+      }),
+    });
+  } catch(e) { console.warn('Settings GS 저장 실패:', e); }
+}
+
+function renderSettings() {
+  renderSettingsDesigners();
+  renderSettingsAgencies();
+  renderSettingsArtists();
+  renderSettingsCategories();
+}
+
+function mkSettingRow(text, type, idx) {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--sf);border:1px solid var(--b);border-radius:7px';
+  row.innerHTML = `
+    <span style="font-family:var(--f);font-size:12px;color:var(--t1)">${text}</span>
+    <button onclick="openSettingsItemModal('${type}',${idx})"
+      style="height:24px;padding:0 10px;border-radius:5px;background:var(--sf2);border:1px solid var(--b2);font-family:var(--f);font-size:10px;color:var(--t2);cursor:pointer"
+      onmouseover="this.style.borderColor='rgba(255,255,255,.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,.13)'">수정</button>`;
+  return row;
+}
+
+function renderSettingsDesigners() {
+  const el = document.getElementById('settings-designers'); if (!el) return;
+  el.innerHTML = '';
+  (BASE_DATA.designers || []).forEach((d, i) => el.appendChild(mkSettingRow(d, 'designer', i)));
+}
+function renderSettingsAgencies() {
+  const el = document.getElementById('settings-agencies'); if (!el) return;
+  el.innerHTML = '';
+  (BASE_DATA.agencies || []).forEach((a, i) => el.appendChild(mkSettingRow(a, 'agency', i)));
+}
+function renderSettingsArtists() {
+  const tabBar = document.getElementById('settings-agency-tabs');
+  const el     = document.getElementById('settings-artists');
+  if (!el || !tabBar) return;
+
+  const agencies = Object.keys(BASE_DATA.artistMap || {});
+  if (!agencies.length) {
+    tabBar.innerHTML = '';
+    el.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:8px 0">아티스트가 없습니다.</div>`;
+    return;
+  }
+
+  // 소속사 탭 (전체 + 각 소속사)
+  if (!siAgencyFilter || !agencies.includes(siAgencyFilter)) siAgencyFilter = 'all';
+  tabBar.innerHTML = '';
+
+  // 전체 버튼
+  const allBtn = document.createElement('button');
+  allBtn.className  = 'vbtn' + (siAgencyFilter === 'all' ? ' on' : '');
+  allBtn.style.cssText = 'font-size:10px;height:24px;padding:0 10px;margin-bottom:4px';
+  allBtn.textContent = '전체';
+  allBtn.onclick = () => { siAgencyFilter = 'all'; renderSettingsArtists(); };
+  tabBar.appendChild(allBtn);
+
+  agencies.forEach(ag => {
+    const btn = document.createElement('button');
+    btn.className  = 'vbtn' + (ag === siAgencyFilter ? ' on' : '');
+    btn.style.cssText = 'font-size:10px;height:24px;padding:0 10px;margin-bottom:4px';
+    btn.textContent = `${ag} (${(BASE_DATA.artistMap[ag]||[]).length})`;
+    btn.onclick = () => { siAgencyFilter = ag; renderSettingsArtists(); };
+    tabBar.appendChild(btn);
+  });
+
+  // 아티스트 목록
+  el.innerHTML = '';
+  const toShow = siAgencyFilter === 'all'
+    ? agencies.flatMap(ag => (BASE_DATA.artistMap[ag]||[]).map((a, i) => ({ ag, a, i })))
+    : (BASE_DATA.artistMap[siAgencyFilter]||[]).map((a, i) => ({ ag: siAgencyFilter, a, i }));
+
+  if (!toShow.length) {
+    el.innerHTML = `<div style="font-family:var(--f);font-size:11px;color:var(--t3);padding:8px 0">아티스트가 없습니다.</div>`;
+    return;
+  }
+
+  toShow.forEach(({ ag, a, i }) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--sf);border:1px solid var(--b);border-radius:7px';
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--f);font-size:10px;padding:1px 7px;border-radius:4px;background:var(--sf2);color:var(--t3)">${ag}</span>
+        <span style="font-family:var(--f);font-size:12px;color:var(--t1)">${a}</span>
+      </div>
+      <button onclick="openSettingsItemModal('artist',${i});document.getElementById('si-agency') && (document.getElementById('si-agency').value='${ag}') && (siAgencyFilter='${ag}')"
+        style="height:24px;padding:0 10px;border-radius:5px;background:var(--sf2);border:1px solid var(--b2);font-family:var(--f);font-size:10px;color:var(--t2);cursor:pointer"
+        onmouseover="this.style.borderColor='rgba(255,255,255,.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,.13)'">수정</button>`;
+    el.appendChild(row);
+  });
+}
+function renderSettingsCategories() {
+  const el = document.getElementById('settings-categories'); if (!el) return;
+  el.innerHTML = '';
+  (BASE_DATA.projectTypes || []).forEach((c, i) => el.appendChild(mkSettingRow(c, 'category', i)));
+}
+
+function openSettingsItemModal(type, idx) {
+  siType = type; siEditIdx = (idx !== null && idx !== undefined && idx !== 'null') ? Number(idx) : null;
+  const titleMap = { designer:'디자이너', agency:'소속사', artist:'아티스트', category:'프로젝트 구분' };
+  document.getElementById('si-modal-title').textContent = `${titleMap[type] || type} ${siEditIdx !== null ? '수정' : '추가'}`;
+  document.getElementById('si-delete-btn').style.display = siEditIdx !== null ? 'block' : 'none';
+
+  const body = document.getElementById('si-modal-body');
+  body.innerHTML = '';
+
+  if (type === 'designer') {
+    const cur = siEditIdx !== null ? (BASE_DATA.designers || [])[siEditIdx] : '';
+    body.innerHTML = `<div class="form-row"><label>디자이너 이름</label><input class="form-inp" id="si-val" value="${cur}" placeholder="예: 홍길동"></div>`;
+  } else if (type === 'agency') {
+    const cur = siEditIdx !== null ? (BASE_DATA.agencies || [])[siEditIdx] : '';
+    body.innerHTML = `<div class="form-row"><label>소속사 이름</label><input class="form-inp" id="si-val" value="${cur}" placeholder="예: SM"></div>`;
+  } else if (type === 'artist') {
+    const agList    = Object.keys(BASE_DATA.artistMap || {});
+    const curArtist = siEditIdx !== null ? ((BASE_DATA.artistMap || {})[siAgencyFilter] || [])[siEditIdx] : '';
+    body.innerHTML = `
+      <div class="form-row"><label>소속사</label>
+        <select class="form-sel" id="si-agency">
+          ${agList.map(a => `<option value="${a}"${a===siAgencyFilter?' selected':''}>${a}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label>아티스트 이름</label>
+        <input class="form-inp" id="si-val" value="${curArtist}" placeholder="예: RIIZE">
+      </div>`;
+  } else if (type === 'category') {
+    const cur = siEditIdx !== null ? (BASE_DATA.projectTypes || [])[siEditIdx] : '';
+    body.innerHTML = `<div class="form-row"><label>구분 이름</label><input class="form-inp" id="si-val" value="${cur}" placeholder="예: 앨범"></div>`;
+  }
+
+  document.getElementById('si-modal-back').classList.add('on');
+  document.getElementById('si-modal-box').classList.add('on');
+  setTimeout(() => document.getElementById('si-val')?.focus(), 80);
+}
+
+function closeSIModal() {
+  document.getElementById('si-modal-back').classList.remove('on');
+  document.getElementById('si-modal-box').classList.remove('on');
+  siType = null; siEditIdx = null;
+}
+
+async function saveSIItem() {
+  const val = (document.getElementById('si-val')?.value || '').trim();
+  if (!val) { showToast('값을 입력해주세요'); return; }
+
+  if (siType === 'designer') {
+    if (siEditIdx !== null) BASE_DATA.designers[siEditIdx] = val;
+    else BASE_DATA.designers.push(val);
+    MEMBERS.splice(0, MEMBERS.length, ...BASE_DATA.designers);
+    buildDesignerDropdowns();
+    renderSettingsDesigners();
+
+  } else if (siType === 'agency') {
+    if (siEditIdx !== null) {
+      const old = BASE_DATA.agencies[siEditIdx];
+      BASE_DATA.agencies[siEditIdx] = val;
+      if (BASE_DATA.artistMap[old]) { BASE_DATA.artistMap[val] = BASE_DATA.artistMap[old]; delete BASE_DATA.artistMap[old]; }
+    } else {
+      BASE_DATA.agencies.push(val);
+      BASE_DATA.artistMap[val] = [];
+    }
+    buildArtistDropdowns();
+    renderSettingsAgencies();
+    renderSettingsArtists();
+
+  } else if (siType === 'artist') {
+    const ag = document.getElementById('si-agency')?.value || siAgencyFilter;
+    siAgencyFilter = ag;
+    if (!BASE_DATA.artistMap[ag]) BASE_DATA.artistMap[ag] = [];
+    if (siEditIdx !== null) BASE_DATA.artistMap[ag][siEditIdx] = val;
+    else BASE_DATA.artistMap[ag].push(val);
+    buildArtistDropdowns();
+    renderSettingsArtists();
+
+  } else if (siType === 'category') {
+    if (siEditIdx !== null) BASE_DATA.projectTypes[siEditIdx] = val;
+    else BASE_DATA.projectTypes.push(val);
+    renderSettingsCategories();
+    populateFormDropdowns();
+  }
+
+  closeSIModal();
+  // GS에 반영
+  await pushSettingsToGS();
+  showToast('저장됨 (GS 반영 중)');
+}
+
+async function deleteSIItem() {
+  if (siEditIdx === null) return;
+
+  if (siType === 'designer') {
+    if (!confirm(`"${BASE_DATA.designers[siEditIdx]}" 삭제할까요?`)) return;
+    BASE_DATA.designers.splice(siEditIdx, 1);
+    MEMBERS.splice(0, MEMBERS.length, ...BASE_DATA.designers);
+    buildDesignerDropdowns(); renderSettingsDesigners();
+
+  } else if (siType === 'agency') {
+    if (!confirm(`"${BASE_DATA.agencies[siEditIdx]}" 소속사를 삭제할까요?`)) return;
+    const name = BASE_DATA.agencies.splice(siEditIdx, 1)[0];
+    delete BASE_DATA.artistMap[name];
+    buildArtistDropdowns(); renderSettingsAgencies(); renderSettingsArtists();
+
+  } else if (siType === 'artist') {
+    const ag = siAgencyFilter;
+    if (!confirm(`"${(BASE_DATA.artistMap[ag]||[])[siEditIdx]}" 삭제할까요?`)) return;
+    (BASE_DATA.artistMap[ag] || []).splice(siEditIdx, 1);
+    buildArtistDropdowns(); renderSettingsArtists();
+
+  } else if (siType === 'category') {
+    if (!confirm(`"${BASE_DATA.projectTypes[siEditIdx]}" 삭제할까요?`)) return;
+    BASE_DATA.projectTypes.splice(siEditIdx, 1);
+    renderSettingsCategories(); populateFormDropdowns();
+  }
+
+  closeSIModal();
+  await pushSettingsToGS();
+  showToast('삭제됨 (GS 반영 중)');
+}
+
+document.getElementById('si-modal-back').addEventListener('click', closeSIModal);
 
 // 초기화
 updateHdDate();
