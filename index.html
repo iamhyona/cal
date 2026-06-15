@@ -2076,7 +2076,7 @@ function openSettingsItemModal(type, idx) {
     const curArtist = siEditIdx !== null ? ((BASE_DATA.artistMap || {})[siAgencyFilter] || [])[siEditIdx] : '';
     body.innerHTML = `
       <div class="form-row"><label>소속사</label>
-        <select class="form-sel" id="si-agency">
+        <select class="form-sel" id="si-agency" onchange="siAgencyFilter=this.value">
           ${agList.map(a => `<option value="${a}"${a===siAgencyFilter?' selected':''}>${a}</option>`).join('')}
         </select>
       </div>
@@ -2124,11 +2124,22 @@ async function saveSIItem() {
     renderSettingsArtists();
 
   } else if (siType === 'artist') {
-    const ag = document.getElementById('si-agency')?.value || siAgencyFilter;
-    siAgencyFilter = ag;
-    if (!BASE_DATA.artistMap[ag]) BASE_DATA.artistMap[ag] = [];
-    if (siEditIdx !== null) BASE_DATA.artistMap[ag][siEditIdx] = val;
-    else BASE_DATA.artistMap[ag].push(val);
+    const newAg  = document.getElementById('si-agency')?.value || siAgencyFilter;
+    const origAg = siAgencyFilter; // 모달 열릴 때 세팅된 원래 소속사
+
+    if (!BASE_DATA.artistMap[newAg]) BASE_DATA.artistMap[newAg] = [];
+
+    if (siEditIdx !== null) {
+      // 수정: 기존 소속사에서 제거 후 새 소속사에 추가
+      if (origAg && BASE_DATA.artistMap[origAg]) {
+        BASE_DATA.artistMap[origAg].splice(siEditIdx, 1);
+      }
+      BASE_DATA.artistMap[newAg].push(val);
+    } else {
+      BASE_DATA.artistMap[newAg].push(val);
+    }
+
+    siAgencyFilter = newAg;
     buildArtistDropdowns();
     renderSettingsArtists();
 
