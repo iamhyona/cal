@@ -882,9 +882,9 @@ function initEditModalDropdowns(ev) {
 
 // 아티스트 컬러
 const ARTIST_COLORS = [
-  '#3b82f6','#f97316','#10b981','#a855f7','#f43f5e','#eab308',
+  '#3b82f6','#f97316','#10b981','#a855f7','#eab308',
   '#06b6d4','#ec4899','#84cc16','#f59e0b','#6366f1','#14b8a6',
-  '#ef4444','#8b5cf6','#22c55e','#fb923c','#38bdf8','#e879f9',
+  '#8b5cf6','#22c55e','#fb923c','#38bdf8','#e879f9','#64748b','#0ea5e9',
 ];
 const FIXED_COLORS = {
   '팀공통': { c:'#94a3b8', bg:'rgba(148,163,184,.18)' },
@@ -1121,6 +1121,30 @@ function rM(){
     const de=document.createElement('div');de.className='cdate';
     if(isT){const tc=document.createElement('div');tc.className='today-circle';tc.textContent=day;de.appendChild(tc)}
     else{const sp=document.createElement('span');sp.textContent=day;if(dow===0)sp.style.color='rgba(244,63,94,.7)';else if(dow===6)sp.style.color='rgba(59,130,246,.7)';de.appendChild(sp)}
+
+    // 연차/반차/반반차/대휴 디자이너 이름 표시
+    const LEAVE_TY = ['휴가','대휴'];
+    const NAME_SHORT = { '박현아':'현아', '이혜선':'혜선', '유이시':'이시', '허희원':'희원' };
+    const leaveNames = [];
+    MEMBERS.forEach(member => {
+      const hasLeave = DATA.some(x => {
+        if (x.who !== member) return false;
+        const s=pd(x.s),e=pd(x.e),d=pd(key);
+        return d>=s&&d<=e && LEAVE_TY.includes(x.ty);
+      });
+      if (hasLeave) leaveNames.push(NAME_SHORT[member] || member);
+    });
+    if (leaveNames.length > 0) {
+      const nameEl = document.createElement('span');
+      nameEl.style.cssText = 'font-family:var(--f);font-size:8px;margin-left:4px;display:flex;gap:3px;flex-wrap:wrap;align-items:center';
+      leaveNames.forEach(name => {
+        const n = document.createElement('span');
+        n.textContent = name;
+        n.style.cssText = 'color:rgba(244,63,94,.85);font-weight:700';
+        nameEl.appendChild(n);
+      });
+      de.appendChild(nameEl);
+    }
     cell.appendChild(de);
     const allEvs=DATA.filter(x=>{const s=pd(x.s),e=pd(x.e),d=pd(key);return d>=s&&d<=e;});
     let evs=allEvs;
@@ -1132,7 +1156,9 @@ function rM(){
       const ec=document.createElement('div');
       ec.className='ec'+(ev.st==='완료'?' done':'');
       ec.style.cssText=`background:var(--sf2);color:var(--t1);border:1px solid var(--b);border-left:2px solid ${p.c};display:flex;align-items:center;justify-content:space-between;gap:4px`;
-      const txt=document.createElement('span');txt.style.cssText='overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1';txt.textContent=ev.t;ec.appendChild(txt);
+      const txt=document.createElement('span');txt.style.cssText='overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1';
+      txt.textContent = ev.p && !isTeam ? `[${ev.p}] ${ev.t}` : ev.t;
+      ec.appendChild(txt);
       if(isTeam){const dot=document.createElement('span');dot.style.cssText=`width:9px;height:9px;border-radius:50%;background:${p.c};flex-shrink:0`;ec.appendChild(dot);}
       ec.onclick=e=>{e.stopPropagation();openMo(key,evs)};cell.appendChild(ec);
     });
