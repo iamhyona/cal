@@ -115,18 +115,24 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 .daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
 .daily-grid .slbl{grid-column:1/-1}
 .wk-outer{display:flex;flex-direction:column;gap:18px}
-.mo-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500}
+.mo-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:510}
 .mo-back.on{display:block}
-.mo-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,90vw);background:var(--sf2);border:1px solid var(--b2);border-radius:12px;padding:20px;z-index:501;opacity:0;transition:opacity .18s,transform .18s;max-height:80vh;overflow-y:auto}
+.mo-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,90vw);background:var(--sf2);border:1px solid var(--b2);border-radius:12px;padding:20px;z-index:511;opacity:0;transition:opacity .18s,transform .18s;max-height:80vh;overflow-y:auto}
 .mo-box.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#si-modal-back{z-index:501}
-#si-modal-box{z-index:502}
+#si-modal-back{z-index:510}
+#si-modal-box{z-index:511}
+#proj-modal-back{z-index:510}
+#proj-modal-box{z-index:511}
+#settings-back{z-index:510}
+#settings-box{z-index:511}
+#proj-color-back{z-index:510}
+#proj-color-box{z-index:511}
 .mo-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .mo-title{font-family:var(--f);font-size:12px;font-weight:600;color:var(--t1)}
 .mo-close{width:22px;height:22px;border-radius:5px;background:var(--sf3);border:1px solid var(--b);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;font-family:var(--f)}
 .mo-close:hover{color:var(--t1)}
 .empty{font-family:var(--f);font-size:11px;color:var(--t3);padding:10px 0}
-.add-mo-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(480px,90vw);background:var(--sf2);border:1px solid var(--b2);border-radius:12px;padding:0;z-index:501;opacity:0;transition:opacity .18s,transform .18s;max-height:90vh;overflow-y:auto;pointer-events:none}
+.add-mo-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(480px,90vw);background:var(--sf2);border:1px solid var(--b2);border-radius:12px;padding:0;z-index:512;opacity:0;transition:opacity .18s,transform .18s;max-height:90vh;overflow-y:auto;pointer-events:none}
 .add-mo-box.on{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}
 .add-mo-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 11px;border-bottom:1px solid var(--b)}
 .add-mo-title{font-family:var(--f);font-size:12px;font-weight:600;color:var(--t1)}
@@ -407,6 +413,14 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
       <div class="form-row"><label>프로젝트 구분</label><select class="form-sel" id="pf-cat"></select></div>
       <div class="form-row"><label>프로젝트 표기명</label><input class="form-inp" id="pf-pn" placeholder="예: 2nd Album Part.2"></div>
     </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <label>포인트 컬러</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="pf-color-dot" style="width:20px;height:20px;border-radius:50%;background:#818cf8;flex-shrink:0;border:1px solid var(--b2)"></div>
+        <input type="color" id="pf-color" value="#818cf8" style="width:40px;height:29px;border-radius:6px;border:1px solid var(--b2);background:var(--sf3);cursor:pointer;padding:2px" oninput="document.getElementById('pf-color-dot').style.background=this.value">
+        <span style="font-family:var(--f);font-size:10px;color:var(--t3)">달력·카드에 반영됩니다</span>
+      </div>
+    </div>
     <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 10px;border-bottom:1px solid var(--b2);margin-bottom:14px">주요 일정</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <div class="form-row"><label>샘플 데드라인</label><input class="form-inp" id="pf-sample" type="date"></div>
@@ -432,7 +446,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 
 <!-- Settings 아이템 추가/수정 모달 -->
 <div class="mo-back" id="si-modal-back"></div>
-<div class="mo-box" id="si-modal-box" style="width:min(380px,92vw);z-index:502">
+<div class="mo-box" id="si-modal-box" style="width:min(380px,92vw)">
   <div class="mo-hd">
     <div class="mo-title" id="si-modal-title">항목 추가</div>
     <button class="mo-close" onclick="closeSIModal()">✕</button>
@@ -469,7 +483,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 <!-- 컬러 설정 모달 -->
 <!-- 프로젝트 컬러 설정 모달 -->
 <div class="mo-back" id="proj-color-back"></div>
-<div class="mo-box" id="proj-color-box" style="width:min(420px,92vw);z-index:502">
+<div class="mo-box" id="proj-color-box" style="width:min(420px,92vw)">
   <div class="mo-hd">
     <div class="mo-title">프로젝트 컬러 설정</div>
     <button class="mo-close" onclick="closeProjColors()">✕</button>
@@ -483,7 +497,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 </div>
 
 <div class="mo-back" id="settings-back"></div>
-<div class="mo-box" id="settings-box" style="width:min(480px,92vw);z-index:502">
+<div class="mo-box" id="settings-box" style="width:min(480px,92vw)">
   <div class="mo-hd">
     <div class="mo-title">컬러 설정</div>
     <button class="mo-close" onclick="closeSettings()">✕</button>
@@ -504,7 +518,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:11px;li
 </div>
 
 <div class="mo-back" id="mback"></div>
-<div class="mo-box" id="mbox" style="z-index:503">
+<div class="mo-box" id="mbox">
   <div class="mo-hd">
     <div class="mo-title" id="mo-title"></div>
     <button class="mo-close" onclick="closeMo()">✕</button>
@@ -968,13 +982,15 @@ function wkStart(off=0){
   m.setDate(TODAY.getDate()-dow+(dow===0?-6:1)+off*7);return m;
 }
 // 각 탭 + 버튼 → 일정 추가 모달 열기
-function openAddModal() {
+async function openAddModal() {
   const s = dk(TODAY);
   document.getElementById('f-start').value = s;
   document.getElementById('f-end').value   = s;
   document.getElementById('f-title').value = '';
   document.getElementById('f-hr').value    = '';
   document.getElementById('f-min').value   = '0';
+  // GS_PROJECTS 없으면 먼저 로드
+  if (GS_PROJECTS.length === 0) await loadProjects();
   document.getElementById('mback').classList.add('on');
   document.getElementById('add-mbox').classList.add('on');
   initAddModal();
@@ -1251,7 +1267,7 @@ function rD(){
     if(evs.length){evs.forEach(ev=>colEl.appendChild(mkDayCard(ev)));}
     else{
       const e=document.createElement('div');
-      e.style.cssText='font-family:var(--f);font-size:10px;color:var(--t3);padding:6px 2px;cursor:pointer;text-align:center;border-radius:5px;transition:background .12s';
+      e.style.cssText='font-family:var(--f);font-size:10px;color:var(--t3);padding:0;cursor:pointer;text-align:center;border-radius:5px;transition:background .12s;display:flex;align-items:center;justify-content:center;height:100%;min-height:40px;letter-spacing:0;flex:1';
       e.textContent='+ 추가';
       e.onmouseover=()=>e.style.background='var(--sf2)';
       e.onmouseout =()=>e.style.background='';
@@ -1392,44 +1408,78 @@ function renderMoBody(b,evs){
 function openEditMo(ev){
   closeMo();
   let editBox=document.getElementById('edit-mbox');
-  if(!editBox){editBox=document.createElement('div');editBox.id='edit-mbox';editBox.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(520px,92vw);background:var(--sf2);border:1px solid var(--b2);border-radius:14px;padding:0;z-index:502;opacity:0;transition:opacity .18s,transform .18s;max-height:88vh;overflow-y:auto;pointer-events:none';document.body.appendChild(editBox);}
+  if(!editBox){editBox=document.createElement('div');editBox.id='edit-mbox';editBox.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(480px,92vw);background:var(--sf2);border:1px solid var(--b2);border-radius:14px;padding:0;z-index:511;opacity:0;transition:opacity .18s,transform .18s;max-height:88vh;overflow-y:auto;pointer-events:none';document.body.appendChild(editBox);}
   const TYPES=['디자인','마감','감리','촬영','팀공통','휴가','대휴'];
   const WHO_OPTS=[...MEMBERS,'전체'];
   function r2(a,b){return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${a}${b}</div>`}
   function fd(label,inner){return`<div style="display:flex;flex-direction:column;gap:4px"><label style="font-family:var(--f);font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:-.01em">${label}</label>${inner}</div>`}
   function inp(id,val='',type='text',ph=''){return`<input id="${id}" class="form-inp" type="${type}" value="${val}" placeholder="${ph}">`}
   function sel(id,opts,cur){return`<select id="${id}" class="form-sel">${opts.map(o=>`<option value="${o}"${o===cur?' selected':''}>${o}</option>`).join('')}</select>`}
+
+  // 프로젝트 드롭다운 옵션 생성
+  const projList = GS_PROJECTS.length > 0 ? GS_PROJECTS : [];
+  const currentProjKey = ev.p + '::' + (ev.pn||'');
+  const projOpts = '<option value="">선택 안함</option>' + projList.map((p,i) => {
+    const label = p.pn ? `${p.artist} · ${p.pn}` : (p.artist||'');
+    const selected = (p.artist===ev.p && p.pn===ev.pn) ? ' selected' : '';
+    return `<option value="${i}"${selected}>${label}</option>`;
+  }).join('');
+
   editBox.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--b)">
-      <span style="font-family:var(--f);font-size:15px;font-weight:600;color:var(--t1)">내용 수정</span>
-      <button onclick="closeEditMo()" style="width:28px;height:28px;border-radius:6px;background:var(--sf3);border:1px solid var(--b);color:var(--t2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;border-bottom:1px solid var(--b)">
+      <span style="font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1)">내용 수정</span>
+      <button onclick="closeEditMo()" style="width:24px;height:24px;border-radius:5px;background:var(--sf3);border:1px solid var(--b);color:var(--t2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px">
-      <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2)">프로젝트 정보</div>
-      ${r2(fd('소속사',`<select id="ef-agency" class="form-sel" onchange="onEditAgencyChange()"><option value="">선택</option></select>`),fd('아티스트',`<select id="ef-artist" class="form-sel"><option>소속사 먼저 선택</option></select>`))}
-      ${r2(fd('프로젝트 구분',`<select id="ef-cat" class="form-sel"></select>`),fd('프로젝트 표기명',inp('ef-pn',ev.pn||'','text','예: 2nd Album Part.2')))}
-      <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2);margin-top:4px">업무 정보</div>
+    <div style="padding:14px 20px 18px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-family:var(--f);font-size:12px;font-weight:700;color:var(--t1);padding:10px 0 6px;border-bottom:1px solid var(--b2)">프로젝트</div>
+      ${fd('프로젝트 선택',`<select id="ef-project" class="form-sel" onchange="onEditProjectChange()">${projOpts}</select>`)}
+      <div id="ef-proj-preview" style="display:none;padding:6px 10px;background:var(--sf);border:1px solid var(--b);border-radius:6px;font-family:var(--f);font-size:10px;color:var(--t2)"></div>
+      <div style="font-family:var(--f);font-size:12px;font-weight:700;color:var(--t1);padding:10px 0 6px;border-bottom:1px solid var(--b2);margin-top:2px">업무 정보</div>
       ${fd('업무명',inp('ef-title',ev.t))}
       ${r2(fd('담당자',sel('ef-who',WHO_OPTS,ev.who)),fd('업무 유형',sel('ef-ty',TYPES,ev.ty||'디자인')))}
       ${r2(fd('시작일',inp('ef-start',ev.s,'date')),fd('마감일',inp('ef-end',ev.e,'date')))}
-      ${fd('마감 시간 (선택)',inp('ef-hr',ev.hr!=null?ev.hr:'','number','시 (예: 18)'))}
-      <div style="font-family:var(--f);font-size:13px;font-weight:700;color:var(--t1);padding:14px 0 8px;border-bottom:1px solid var(--b2);margin-top:4px">주요 일정</div>
-      ${r2(fd('샘플 데드라인',inp('ef-sample',ev.sampleDate||'','date')),fd('본작업 데드라인',inp('ef-work',ev.workDate||'','date')))}
-      ${r2(fd('예판 오픈일',inp('ef-notice',ev.noticeDate||'','date')),fd('런칭일',inp('ef-launch',ev.launchDate||'','date')))}
+      ${fd('마감 시간 (선택)',`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <select class="form-sel" id="ef-hr">
+          <option value="">시 선택</option>
+          ${Array.from({length:24},(_,i)=>`<option value="${i}"${ev.hr!=null&&Math.floor(ev.hr)===i?' selected':''}>${String(i).padStart(2,'0')}시</option>`).join('')}
+        </select>
+        <select class="form-sel" id="ef-min">
+          ${[0,5,10,15,20,25,30,35,40,45,50,55].map(m=>`<option value="${m}"${ev.hr!=null&&Math.round((ev.hr%1)*60)===m?' selected':''}>${String(m).padStart(2,'0')}분</option>`).join('')}
+        </select>
+      </div>`)}
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 24px 20px">
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 16px">
       <button class="btn-cancel" onclick="closeEditMo()">취소</button>
       <button class="btn-add" onclick="submitEdit(${ev.id})">저장</button>
     </div>`;
   document.getElementById('mback').classList.add('on');
   editBox.style.pointerEvents='all';editBox.style.opacity='1';editBox.style.transform='translate(-50%,-50%) scale(1)';
-  setTimeout(()=>initEditModalDropdowns(ev),50);
+  // 프로젝트 미리보기 초기 표시
+  setTimeout(()=>onEditProjectChange(), 50);
 }
+
+function onEditProjectChange() {
+  const sel     = document.getElementById('ef-project');
+  const preview = document.getElementById('ef-proj-preview');
+  if (!sel || !preview) return;
+  const idx  = sel.value;
+  const proj = idx !== '' ? GS_PROJECTS[Number(idx)] : null;
+  if (!proj) { preview.style.display='none'; return; }
+  const fmtD = s => { if(!s)return null; const d=new Date(s); return isNaN(d)?null:`${d.getMonth()+1}/${d.getDate()}`; };
+  const parts = [];
+  if (proj.agency)      parts.push(proj.agency);
+  if (proj.cat)         parts.push(proj.cat);
+  if (proj.launchDate)  parts.push(`런칭 ${fmtD(proj.launchDate)}`);
+  preview.style.display = 'block';
+  preview.textContent   = parts.join('  ·  ');
+}
+
 function closeEditMo(){
   const b=document.getElementById('edit-mbox');
   if(b){b.style.opacity='0';b.style.pointerEvents='none';b.style.transform='translate(-50%,-50%) scale(.97)';}
   document.getElementById('mback').classList.remove('on');
 }
+
 function submitEdit(id){
   const ev=DATA.find(x=>x.id===id);if(!ev)return;
   const t=document.getElementById('ef-title').value.trim();
@@ -1437,17 +1487,26 @@ function submitEdit(id){
   const e=document.getElementById('ef-end').value;
   if(!t||!s||!e){alert('업무명, 시작일, 마감일을 입력해주세요.');return;}
   ev.t=t;ev.s=s;ev.e=e;
-  ev.p=document.getElementById('ef-artist').value;
-  ev.agency=document.getElementById('ef-agency').value||null;
-  ev.cat=document.getElementById('ef-cat').value;
-  ev.pn=document.getElementById('ef-pn').value.trim()||null;
   ev.who=document.getElementById('ef-who').value;
-  ev.ty=document.getElementById('ef-ty').value;
-  const hr=document.getElementById('ef-hr').value.trim();ev.hr=hr!==''?parseInt(hr):null;
-  ev.launchDate=document.getElementById('ef-launch').value||null;
-  ev.noticeDate=document.getElementById('ef-notice').value||null;
-  ev.sampleDate=document.getElementById('ef-sample').value||null;
-  ev.workDate=document.getElementById('ef-work').value||null;
+  ev.ty =document.getElementById('ef-ty').value;
+  // 프로젝트 정보 상속
+  const projSel = document.getElementById('ef-project');
+  const projIdx = projSel?.value;
+  const proj    = (projIdx !== '' && projIdx !== null && projIdx !== undefined) ? GS_PROJECTS[Number(projIdx)] : null;
+  if (proj) {
+    ev.p          = proj.artist || proj.p || '';
+    ev.agency     = proj.agency || null;
+    ev.cat        = proj.cat    || '';
+    ev.pn         = proj.pn     || null;
+    ev.sampleDate = proj.sampleDL    || ev.sampleDate;
+    ev.workDate   = proj.workDL      || ev.workDate;
+    ev.noticeDate = proj.presaleDate || ev.noticeDate;
+    ev.launchDate = proj.launchDate  || ev.launchDate;
+  }
+  // 마감 시간
+  const hrVal  = document.getElementById('ef-hr')?.value;
+  const minVal = document.getElementById('ef-min')?.value || '0';
+  ev.hr = hrVal !== '' && hrVal !== undefined ? parseFloat((parseInt(hrVal)+parseInt(minVal)/60).toFixed(4)) : null;
   closeEditMo();rM();rD();rW();updateSheet(ev);
 }
 
@@ -2073,6 +2132,13 @@ function openProjModal(rowIdx) {
       document.getElementById('pf-fileurl').value   = proj.fileUrl   || '';
       document.getElementById('pf-specurl').value   = proj.specUrl   || '';
       document.getElementById('pf-supplyurl').value = proj.supplyUrl || '';
+      // 컬러 피커 세팅
+      const artist = proj.artist || '';
+      const curColor = PROJ_COLORS_CUSTOM[artist] || CUSTOM_COLORS[artist] || ARTIST_COLORS[hashArtist(artist)];
+      const colorPicker = document.getElementById('pf-color');
+      const colorDot    = document.getElementById('pf-color-dot');
+      if (colorPicker) { colorPicker.value = curColor; colorPicker.dataset.artist = artist; }
+      if (colorDot)    colorDot.style.background = curColor;
     }
   } else {
     ['pf-pn','pf-sample','pf-work','pf-notice','pf-launch','pf-fileurl','pf-specurl','pf-supplyurl'].forEach(id => {
@@ -2081,6 +2147,8 @@ function openProjModal(rowIdx) {
     document.getElementById('pf-agency').value = '';
     document.getElementById('pf-artist').innerHTML = '<option value="">소속사 먼저 선택</option>';
     document.getElementById('pf-cat').value = '';
+    const colorPicker = document.getElementById('pf-color');
+    if (colorPicker) { colorPicker.value = '#818cf8'; colorPicker.dataset.artist = ''; }
   }
 
   document.getElementById('proj-modal-back').classList.add('on');
@@ -2113,6 +2181,13 @@ async function saveProjModal() {
     supplyUrl:   document.getElementById('pf-supplyurl').value.trim() || null,
   };
   if (!body.artist) { showToast('아티스트를 선택해주세요'); return; }
+
+  // 컬러 저장
+  const colorPicker = document.getElementById('pf-color');
+  if (colorPicker && body.artist) {
+    PROJ_COLORS_CUSTOM[body.artist] = colorPicker.value;
+    saveProjColorsToStorage();
+  }
 
   const saveBtn = document.querySelector('#proj-modal-box .btn-add');
   if (saveBtn) { saveBtn.textContent = '저장 중...'; saveBtn.disabled = true; }
