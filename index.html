@@ -431,6 +431,8 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 /* TEAM 탭: 프로젝트명 색 없이 */
 .tmv .rph b, .tmv .tmw span, .tmv .tx2 small { color:var(--txt) !important; }
 .tmv .tmw span { color:var(--sub) !important; }
+/* 소속사가 할 일은 흐리게 */
+.it.ag, .mcal .ev.ag { opacity:.42; }
 </style>
 </head>
 <body>
@@ -552,7 +554,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005p';
+var APP_VER = '20261005q';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -638,7 +640,7 @@ function navBar(sub, title, prevId, nextId, todayBtn) {
 function rng(a, b) { return dot(a) + ' – ' + b.slice(5).replace('-', '.'); }
 function itemHtml(e, showDate, noFile, dday) {
   var f = e.file;
-  return '<button class="it" data-e="' + esc(e.id) + '">' + (showDate ? '<span class="d2">' + dw(e.d) + (dday ? '<small>' + dday + '</small>' : '') + '</span>' : '') +
+  return '<button class="it' + (e.k === '소속사' ? ' ag' : '') + '" data-e="' + esc(e.id) + '">' + (showDate ? '<span class="d2">' + dw(e.d) + (dday ? '<small>' + dday + '</small>' : '') + '</span>' : '') +
     '<span class="m">' + (noFile ? '' : '<small>' + (f.type === 'proj' ? '<span style="color:' + f.color + '">' + esc(f.name) + '</span>' : '업무일지') + '</small>') + '<div>' + esc(e.t) + '</div></span></button>';
 }
 function bindItems(root) { (root ? root.querySelectorAll('[data-e]') : $$('[data-e]')).forEach(function (b) { b.onclick = function () { openEdit(b.dataset.e); }; }); }
@@ -738,7 +740,7 @@ function renderMonth() {
     var l = onDay(d, L), w = P(d).getDay(), hl = hol(d), max = 4;
     h += '<button data-d="' + d + '" class="' + (d.slice(0, 7) !== first.slice(0, 7) ? 'out ' : '') + (d === TODAY ? 'td ' : '') + (hl ? 'hol ' : '') + (w === 0 ? 'sun ' : w === 6 ? 'sat ' : '') + (S.sel === d ? 'sel' : '') + '">' +
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
-      l.slice(0, l.length > max ? max - 1 : max).map(function (e) { return '<span class="ev' + (e.k === '데드라인' || e.k === '공식' ? ' dl' : '') + '"><i style="background:' + e.file.color + '"></i>' + esc(e.t) + '</span>'; }).join('') +
+      l.slice(0, l.length > max ? max - 1 : max).map(function (e) { return '<span class="ev' + (e.k === '데드라인' || e.k === '공식' ? ' dl' : '') + (e.k === '소속사' ? ' ag' : '') + '"><i style="background:' + e.file.color + '"></i>' + esc(e.t) + '</span>'; }).join('') +
       (l.length > max ? '<span class="evm">+' + (l.length - max + 1) + '</span>' : '') + (repOf(function (r) { return r.d === d; }).length ? '<span class="rpm"></span>' : '') + '</button>';
   }
   h += '</div></div>';
