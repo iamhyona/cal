@@ -560,7 +560,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005t';
+var APP_VER = '20261005u';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -775,7 +775,7 @@ function pjList(p) {
     var mm = e.d.slice(0, 7);
     if (mm !== cur) { h += (cur ? '</div>' : '') + '<div class="mh">' + mm.replace('-', '.') + '</div><div class="day list">'; cur = mm; }
     if (first && e.d >= TODAY) { h += '<div class="pjnow">오늘 이후</div>'; first = false; }
-    h += itemHtml(e, true, !!p);
+    h += itemHtml(e, true);
   });
   if (cur) h += '</div>';
   var R = p ? repProj(p.name) : [];
