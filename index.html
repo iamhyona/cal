@@ -664,7 +664,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005v2';
+var APP_VER = '20261005v3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -704,6 +704,8 @@ function load() {
 }
 function cached() { try { return JSON.parse(ls.get('d4:data') || 'null'); } catch (e) { return null; } }
 function vis() { return S.D.events.filter(function (e) { return !S.off[e.f]; }); }
+function pvis() { return vis().filter(function (e) { return e.file.type === 'proj'; }); }
+function pfs() { return S.D.files.filter(function (f) { return f.type === 'proj'; }); }
 function onDay(d, list) { return (list || vis()).filter(function (e) { return e.d === d; }); }
 function hol(d) { return (S.D.hol || {})[d] || ''; }
 function label(e) { return (e.file.type === 'proj' ? e.file.short + ' ' : '') + e.t; }
@@ -868,7 +870,7 @@ $('#brand').onclick = function () { S.view = 'home'; ls.set('d4:view', 'home'); 
 $('#rfBtn').onclick = function () { load().then(function () { toast('시트에서 새로 불러왔어요'); }); };
 
 function filterBar() {
-  var fs = S.D.files, all = fs.every(function (f) { return !S.off[f.id]; });
+  var fs = pfs(), all = fs.every(function (f) { return !S.off[f.id]; });
   return '<div class="tabs2" id="flt"><button data-f="" class="' + (all ? 'on' : '') + '">전체</button>' +
     fs.map(function (f) { return '<button data-f="' + f.id + '" class="' + (!all && !S.off[f.id] ? 'on' : '') + '"><i style="background:' + f.color + '"></i>' + esc(f.type === 'work' ? '업무일지' : f.name) + '</button>'; }).join('') + '</div>';
 }
@@ -880,10 +882,10 @@ function bindFilter() {
       else if (S.off[id]) delete S.off[id];
       else {
         // 모두 켜진 상태에서 누르면 그것만 보기
-        if (!Object.keys(S.off).length) S.D.files.forEach(function (f) { if (f.id !== id) S.off[f.id] = 1; });
+        if (!pfs().some(function (f) { return S.off[f.id]; })) pfs().forEach(function (f) { if (f.id !== id) S.off[f.id] = 1; });
         else S.off[id] = 1;
       }
-      if (S.D.files.every(function (f) { return S.off[f.id]; })) S.off = {};
+      if (pfs().every(function (f) { return S.off[f.id]; })) S.off = {};
       ls.set('d4:off', JSON.stringify(S.off)); var y0 = window.scrollY; render(); window.scrollTo(0, y0);
     };
   });
@@ -1020,7 +1022,7 @@ function renderMonthTeam() {
 }
 function renderMonth() {
   if (S.mm === 'team') return renderMonthTeam();
-  var y = S.y, m = S.m, first = y + '-' + pad(m) + '-01', start = sunOf(first), L = vis();
+  var y = S.y, m = S.m, first = y + '-' + pad(m) + '-01', start = sunOf(first), L = pvis();
   var last = F(new Date(y, m, 0)), end = addD(sunOf(last), 6);
   var h = calHead(y, m) + filterBar();
   h += '<div class="mcal' + (S.fold ? ' fold' : '') + '"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
@@ -1043,10 +1045,11 @@ function renderMonth() {
   if ($('#nT')) $('#nT').onclick = function () { S.y = +TODAY.slice(0, 4); S.m = +TODAY.slice(5, 7); render(); };
   $$('.mcal .grid > button').forEach(function (b) { b.onclick = function () { openDay(b.dataset.d); }; });
   bindFold();
+  $$('.mcal .grid > button').forEach(function (b) { b.onclick = function () { openDay(b.dataset.d, 1); }; });
 }
 // WEEK: 하루씩 카드
 function renderWeek() {
-  var ws = S.ws, we = addD(ws, 6), L = vis();
+  var ws = S.ws, we = addD(ws, 6), L = pvis();
   var h = navBar('', rng(ws, we), 'nP', 'nN', ws !== sunOf(TODAY)) + filterBar();
   for (var d = ws; d <= we; d = addD(d, 1)) h += dayCard(d, onDay(d, L));
   $('#main').innerHTML = h; bindFilter(); bindItems(); bindAdd(); bindRepLine();
@@ -1168,9 +1171,9 @@ function openProj(id) {
 }
 
 /* ───── 하루 보기 ───── */
-function openDay(d) {
+function openDay(d, po) {
   S.sel = d;
-  var l = onDay(d), hl = hol(d);
+  var l = onDay(d, po ? pvis() : null), hl = hol(d);
   $('#dyT').innerHTML = mdw(d) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : '');
   var rr = repOf(function (r) { return r.d === d; });
   $('#dyB').innerHTML = (l.length ? l.map(function (e) { return itemHtml(e); }).join('') : '<div class="empty2">일정이 없어요</div>') +
