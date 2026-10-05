@@ -615,7 +615,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005s1';
+var APP_VER = '20261005s2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -720,7 +720,7 @@ function specInfo(info) {
     for (var k = 0; k < r.length; k++) {
       var t = r[k].t, n = r[k + 1];
       if (!title && i === 0 && k === 0 && r[k].c <= 2 && t.length > 6 && !lab.test(t)) { title = t; continue; }
-      if (n && (lab.test(t) || /^\(.+\)/.test(t) && /\d{2,4}-\d{3,4}-\d{4}/.test(n.t))) { out.push([t, n.t]); k++; continue; }
+      if (n && (lab.test(t) || /^0\d{1,2}-\d{3,4}-\d{4}$/.test(n.t) && !/\d{3,4}-\d{4}/.test(t))) { out.push([t, n.t]); k++; continue; }
       out.push(['', t]);
     }
   }
