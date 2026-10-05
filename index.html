@@ -516,6 +516,10 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .mfold .tod { border:0; background:#fff; border-radius:999px; padding:6px 11px; font-size:12px; font-weight:700; color:var(--sub); }
 .mcal .grid > button { min-height:118px; }
 .tmv .mcal .grid > button { min-height:72px; }
+.dpl .pjgo { cursor:pointer; }
+.dpl span small { display:block; font-size:11px; font-weight:600; color:var(--faint); margin-top:1px; }
+.mcal.mtm .ev { white-space:normal; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; word-break:break-all; line-height:12px; padding:1px 2px; }
+.mcal.mtm .ev i { margin-right:2px; }
 </style>
 </head>
 <body>
@@ -638,7 +642,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005t9';
+var APP_VER = '20261005u1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -942,13 +946,12 @@ function renderMonthTeam() {
   var rows = repOf(function (r) { return !pf || r.p === pf; });
   var h = calHead(y, m) +
     '<div class="tabs2" id="pfl"><button data-p="" class="' + (pf ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-p="' + esc(n) + '" class="' + (pf === n ? 'on' : '') + '"><i style="background:' + dcol(n) + '"></i>' + esc(n) + '</button>'; }).join('') + '</div>';
-  h += '<div class="mcal' + (S.fold ? ' fold' : '') + '"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
+  h += '<div class="mcal mtm' + (S.fold ? ' fold' : '') + '"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
     var l = rows.filter(function (r) { return r.d === d; }), w = P(d).getDay(), hl = hol(d), max = 6, bars = [];
-    if (pf) { var gj = {}; l.forEach(function (r) { if (!gj[r.j]) { gj[r.j] = { n: 0, k: 0 }; bars.push(r.j); } gj[r.j].n++; if (r.s === '완료') gj[r.j].k++; });
-      bars = bars.map(function (j) { return '<span class="ev' + (gj[j].k === gj[j].n ? ' fin' : '') + '"><i style="background:' + pinfo(j).color + '"></i>' + esc(j.split(/\s+/)[0]) + '</span>'; }); }
-    else { var gp = {}; l.forEach(function (r) { if (!gp[r.p]) { gp[r.p] = { n: 0, k: 0 }; } gp[r.p].n++; if (r.s === '완료') gp[r.p].k++; });
-      bars = team().filter(function (n) { return gp[n]; }).map(function (n) { return '<span class="ev' + (gp[n].k === gp[n].n ? ' fin' : '') + '"><i></i>' + esc(dshort(n)) + ' ' + gp[n].k + '/' + gp[n].n + '</span>'; }); }
+    // 프로젝트마다 한 줄: 색 점 + 할 일들을 콤마로
+    var gj = {}; l.forEach(function (r) { if (!gj[r.j]) { gj[r.j] = { t: [], n: 0, k: 0 }; bars.push(r.j); } if (gj[r.j].t.indexOf(r.t) < 0) gj[r.j].t.push(r.t); gj[r.j].n++; if (r.s === '완료') gj[r.j].k++; });
+    bars = bars.map(function (j) { return '<span class="ev' + (gj[j].k === gj[j].n ? ' fin' : '') + '"><i style="background:' + pinfo(j).color + '"></i>' + esc(gj[j].t.join(', ')) + '</span>'; });
     h += '<button data-d="' + d + '" class="' + (d.slice(0, 7) !== mo ? 'out ' : '') + (d === TODAY ? 'td ' : '') + (hl ? 'hol ' : '') + (w === 0 ? 'sun ' : w === 6 ? 'sat ' : '') + (bars.length ? 'has ' : '') + (S.sel === d ? 'sel' : '') + '">' +
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
       bars.slice(0, bars.length > max ? max - 1 : max).join('') + (bars.length > max ? '<span class="evm">+' + (bars.length - max + 1) + '</span>' : '') + '</button>';
@@ -1305,6 +1308,11 @@ function renderTeam() {
   if ($('#dSegD')) $('#dSegD').onchange = function () { if (this.value) { S.dd = this.value; render(); } };
   $$('#dfl button').forEach(function (b) { b.onclick = function () { S.dn = b.dataset.n; ls.set('d4:dn', S.dn); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; });
   $$('[data-go]').forEach(function (b) { b.onclick = function () { S.dp = 'd'; ls.set('d4:dp', 'd'); S.dd = b.dataset.go; window.scrollTo(0, 0); render(); }; });
+  $$('[data-pjgo]').forEach(function (b) { b.onclick = function () {
+    var k = pnorm(b.dataset.pjgo), q = projList().filter(function (x) { return pnorm(x.name) === k; })[0];
+    S.view = 'project'; S.pm = 'team'; S.pj = q ? q.name : b.dataset.pjgo; S.lp = 'a';
+    ls.set('d4:view', S.view); ls.set('d4:pm', 'team'); ls.set('d4:pj', S.pj); ls.set('d4:lp', 'a'); window.scrollTo(0, 0); render();
+  }; });
   $$('[data-unit]').forEach(function (b) { b.onclick = function () { S.dp = b.dataset.gp; ls.set('d4:dp', S.dp); S.dd = b.dataset.unit; window.scrollTo(0, 0); render(); }; });
   if ($('#nP')) { $('#nP').onclick = function () { S.dd = dMove(p, S.dd, -1); render(); }; $('#nN').onclick = function () { S.dd = dMove(p, S.dd, 1); render(); }; }
   if ($('#nT')) $('#nT').onclick = function () { S.dd = TODAY; render(); };
@@ -1340,10 +1348,11 @@ function bindSumSwipe() {
   bs.forEach(function (b) { b.onclick = function () { var i = +b.dataset.i; box.scrollTo({ left: i * box.clientWidth, behavior: 'smooth' }); mark(i); }; });
   box.scrollTo({ left: idx * box.clientWidth, behavior: 'auto' }); mark(idx);
 }
+function md5(x) { return x.slice(5).replace('-', '.'); }
 function sumCard(n, rows, units, inner) {
   var days = []; rows.forEach(function (r) { if (days.indexOf(r.d) < 0) days.push(r.d); });
   var k = rows.filter(function (r) { return r.s === '완료'; }).length;
-  var pj = {}; rows.forEach(function (r) { pj[r.j] = (pj[r.j] || 0) + 1; });
+  var pj = {}, pr = {}; rows.forEach(function (r) { pj[r.j] = (pj[r.j] || 0) + 1; var q = pr[r.j] || (pr[r.j] = [r.d, r.d]); if (r.d < q[0]) q[0] = r.d; if (r.d > q[1]) q[1] = r.d; });
   var pl = Object.keys(pj).sort(function (a, b) { return pj[b] - pj[a]; }), mx = pl.length ? pj[pl[0]] : 1;
   var h = (inner ? '' : '<div class="day dsum"><div class="dh"><b>' + esc(n) + '</b></div>') + '<div class="dst"><div><small>참여 프로젝트</small><b>' + pl.length + '<i>개</i></b></div><div><small>일한 날</small><b>' + days.length + '<i>일</i></b></div><div><small>업무</small><b>' + rows.length + '<i>건</i></b></div></div>';
   if (units) {
@@ -1351,7 +1360,7 @@ function sumCard(n, rows, units, inner) {
     var cnt = units.map(function (u) { return rows.filter(function (r) { return r.d.indexOf(u.k) === 0; }).length; }), um = Math.max.apply(null, cnt.concat([1]));
     h += '<div class="mbar">' + units.map(function (u, i) { return '<button data-unit="' + u.go + '" data-gp="' + u.gp + '"><em>' + (cnt[i] || '') + '</em><i style="height:' + Math.max(3, cnt[i] / um * 100) + '%;background:' + (cnt[i] ? pc : '#e5e8eb') + '"></i><span>' + u.l + '</span></button>'; }).join('') + '</div>';
   }
-  h += '<div class="dpl">' + pl.map(function (j) { return '<div><span>' + esc(j) + '</span><i><em style="width:' + Math.round(pj[j] / mx * 100) + '%;background:' + pinfo(j).color + '"></em></i><b>' + pj[j] + '</b></div>'; }).join('') + '</div>' + (inner ? '' : '</div>');
+  h += '<div class="dpl">' + pl.map(function (j) { return '<div class="pjgo" data-pjgo="' + esc(j) + '"><span>' + esc(j) + '<small>' + (pr[j][0] === pr[j][1] ? md5(pr[j][0]) : md5(pr[j][0]) + '–' + md5(pr[j][1])) + '</small></span><i><em style="width:' + Math.round(pj[j] / mx * 100) + '%;background:' + pinfo(j).color + '"></em></i><b>' + pj[j] + '</b></div>'; }).join('') + '</div>' + (inner ? '' : '</div>');
   return h;
 }
 
