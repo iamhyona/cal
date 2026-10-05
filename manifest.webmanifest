@@ -1,6 +1,6 @@
 {
-  "name": "D4 SCHEDULE",
-  "short_name": "D4 SCHEDULE",
+  "name": "SCHEDULE",
+  "short_name": "SCHEDULE",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
