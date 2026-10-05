@@ -619,7 +619,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005t4';
+var APP_VER = '20261005t5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -867,7 +867,7 @@ function renderHome() {
     .filter(function (r) { return !tr.some(function (x) { return x.p === r.p && x.t === r.t; }); });
   h += '<div class="bd"><div class="bdh"><div><b>WEEK</b></div></div>' +
     bds('남은 일정', wl.length) + (wl.length ? wl.map(function (e) { return itemHtml(e, true); }).join('') : '<div class="empty2">이번 주 남은 일정이 없어요</div>') +
-    (carry.length ? bds('지난 보고 중 미완료', carry.length) + repBlock(carry, { byPerson: true }) : '') + '</div>';
+    '</div>';
   // MONTH
   var ml = L.filter(function (e) { return isDl(e) && e.d >= TODAY && e.d.slice(0, 7) === mo; });
   var wait = latestOpen(R0.filter(function (r) { return r.s === '대기' && r.d.slice(0, 7) === mo; }));
@@ -876,7 +876,7 @@ function renderHome() {
       var n = dDiff(TODAY, e.d);
       return itemHtml(e, true, false, n ? 'D-' + n : 'D-DAY');
     }).join('') : '<div class="empty2">이번 달 남은 데드라인이 없어요</div>') +
-    (wait.length ? bds('피드백 대기', wait.length) + repBlock(wait, { byPerson: true }) : '') + '</div>';
+    '</div>';
   $('#main').innerHTML = h; bindItems(); bindAdd(); bindRep();
   if ($('#hPaste')) $('#hPaste').onclick = openPaste;
 }
