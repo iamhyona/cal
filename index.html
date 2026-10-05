@@ -605,7 +605,7 @@ var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TO
 if (S.view === 'designer') S.view = 'team';
 if (['home', 'month', 'project', 'team', 'spec'].indexOf(S.view) < 0) S.view = 'home';
 
-S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || ''; S.fold = !!ls.get('d4:fold'); S.tl = ls.get('d4:tl') || 'date';
+S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || ''; S.fold = !!ls.get('d4:fold'); S.lp = ls.get('d4:lp') || 'a'; S.ld = TODAY; S.tl = ls.get('d4:tl') || 'date';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
 var API_READ = { appHasPin: 1, appCheck: 1, appAll: 1 };
 function call(fn) {
@@ -619,7 +619,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005t3';
+var APP_VER = '20261005t4';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -969,7 +969,7 @@ function pjList(p) { return pjListAll(p); }
 // 전체(프로젝트별): 프로젝트마다 묶어서 날짜순
 function pjListProj() {
   var g = projList().filter(function (q) { return q.f; }).map(function (q) {
-    var E = S.D.events.filter(function (e) { return e.f === q.f.id; }); if (!E.length) return '';
+    var E = S.D.events.filter(function (e) { return e.f === q.f.id && inL(e.d); }); if (!E.length) return '';
     var first = true;
     return '<div class="mh" style="color:' + q.color + '">' + esc(q.name) + '</div><div class="day list">' + E.map(function (e) {
       var x = ''; if (first && e.d >= TODAY) { x = '<div class="pjnow">오늘 이후</div>'; first = false; }
@@ -978,8 +978,10 @@ function pjListProj() {
   }).join('');
   return g || '<div class="day"><div class="empty2">일정이 없어요</div></div>';
 }
+// LIST 기간 안인지
+function inL(d) { var g = S.lrg; return !g || (d >= g[0] && d <= g[1]); }
 function pjListAll(p) {
-  var L = p ? (p.f ? S.D.events.filter(function (e) { return e.f === p.f.id; }) : []) : S.D.events.filter(function (e) { return e.file.type === 'proj'; });
+  var L = (p ? (p.f ? S.D.events.filter(function (e) { return e.f === p.f.id; }) : []) : S.D.events.filter(function (e) { return e.file.type === 'proj'; })).filter(function (e) { return inL(e.d); });
   var h = '', cur = '', first = true;
   L.forEach(function (e) {
     var mm = e.d.slice(0, 7);
@@ -998,7 +1000,7 @@ function tmRow(r, left, sub) {
     '<button class="rpt" data-r="' + r.r + '"><span class="d3">' + left + '</span><span class="tx tx2"><small>' + esc(sub) + '</small>' + esc(r.t) + '</span>' +
     (r.s === '대기' ? '<span class="wt">대기</span>' : '') + '</button></div>';
 }
-function tmSorted() { var T = team(); return (S.D.rep || []).slice().sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (a.r - b.r); }); }
+function tmSorted() { var T = team(); return (S.D.rep || []).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (a.r - b.r); }); }
 // 팀 업무 전체(날짜별): 날짜마다 카드 (최근부터)
 function pjTeamDate() {
   var R = tmSorted(); if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
@@ -1020,7 +1022,7 @@ function pjTeamProj() {
 }
 // 팀 업무: 디자이너별로 한 일 리스트 (최근 날짜부터)
 function pjTeam(p) {
-  var R = (p ? repProj(p.name) : (S.D.rep || []).slice()).sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? 1 : -1); });
+  var R = (p ? repProj(p.name) : (S.D.rep || []).slice()).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? 1 : -1); });
   if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
   return team().filter(function (n) { return R.some(function (r) { return r.p === n; }); }).map(function (n) {
     var mine = R.filter(function (r) { return r.p === n; });
@@ -1033,13 +1035,19 @@ function pjTeam(p) {
   }).join('');
 }
 function renderProject() {
-  var tm = S.pm === 'team';
+  var tm = S.pm === 'team', lp = S.lp || 'a', lrg = dRange(lp, S.ld || TODAY); S.lrg = lp === 'a' ? null : lrg;
+  var lcur = TODAY >= lrg[0] && TODAY <= lrg[1];
+  var top = (lp === 'a' ? phd('', '전체') : navBar('', lrg[2], 'lP', 'lN', !lcur)) +
+    '<div class="seg" id="lSeg">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === lp ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
   var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
   var idx = Math.max(0, ps.findIndex(function (p) { return (p ? p.name : '') === (S.pj || ''); }));
-  var h = '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
+  var h = top + '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
     '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? (p.allp ? '전체(프로젝트별)' : esc(p.name)) : '전체(날짜별)') + '</button>'; }).join('') + '</div>' +
     '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? (p && p.allp ? pjTeamProj() : p ? pjTeam(p) : pjTeamDate()) : p && p.allp ? pjListProj() : pjList(p)) + '</section>'; }).join('') + '</div>';
   $('#main').innerHTML = h; bindItems(); bindRep();
+  $$('#lSeg button').forEach(function (b) { b.onclick = function () { S.lp = b.dataset.p; ls.set('d4:lp', S.lp); render(); }; });
+  if ($('#lP')) { $('#lP').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, -1); render(); }; $('#lN').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, 1); render(); }; }
+  if ($('#nT')) $('#nT').onclick = function () { S.ld = TODAY; render(); };
   $$('#pSeg button').forEach(function (b) { b.onclick = function () { S.pm = b.dataset.m; ls.set('d4:pm', S.pm); render(); }; });
   var box = $('#pjs'), secs = box.children, cur = -1;
   function mark(i) {
