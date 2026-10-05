@@ -414,6 +414,9 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .it .d2, .it.dl .d2 { width:84px; font-size:12px; font-weight:600; color:var(--sub); letter-spacing:-.01em; }
 .it .d2 small { display:block; font-size:11px; font-weight:600; color:var(--mute); margin-top:1px; }
 .bd .sq { display:none; }
+/* 프로젝트 색 표시 전부 끔 */
+.sq, .rph i, .rpl span i, .tmw span i, .pjdd button i, .tabs2 button i { display:none !important; }
+.mcal .ev { border-left-color:#c9cdd2 !important; }
 </style>
 </head>
 <body>
@@ -535,7 +538,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005k';
+var APP_VER = '20261005l';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
