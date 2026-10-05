@@ -493,9 +493,6 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .sprh em { font-style:normal; font-size:12px; color:var(--mute); font-weight:600; margin-left:auto; }
 .spc dl { opacity:.8; }
 .spph b { white-space:normal; }
-.pav { display:flex; gap:6px; margin:0 0 4px; }
-.pav button { border:0; background:#fff; border-radius:999px; padding:7px 13px; font-size:13px; font-weight:600; color:var(--sub); }
-.pav button.on { background:var(--txt); color:#fff; }
 </style>
 </head>
 <body>
@@ -604,7 +601,7 @@ var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TO
 if (S.view === 'designer') S.view = 'team';
 if (['home', 'month', 'project', 'team', 'spec'].indexOf(S.view) < 0) S.view = 'home';
 
-S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || ''; S.pa = ls.get('d4:pa') || 'mix';
+S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || '';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
 var API_READ = { appHasPin: 1, appCheck: 1, appAll: 1 };
 function call(fn) {
@@ -618,7 +615,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005s3';
+var APP_VER = '20261005s5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -948,23 +945,18 @@ function renderWeek() {
 // PROJECT: 프로젝트별 일정 리스트 (단추로 선택 · 좌우 스와이프)
 // PROJECT: [제작일정 | 팀 업무] · 프로젝트 단추 · 좌우 스와이프
 var CKSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-function pjList(p) {
-  if (!p) { // 전체: [날짜순 | 프로젝트별]
-    var tg = '<div class="pav" id="pav"><button data-a="mix" class="' + (S.pa === 'proj' ? '' : 'on') + '">날짜순</button><button data-a="proj" class="' + (S.pa === 'proj' ? 'on' : '') + '">프로젝트별</button></div>';
-    if (S.pa === 'proj') {
-      var g = projList().filter(function (q) { return q.f; }).map(function (q) {
-        var E = S.D.events.filter(function (e) { return e.f === q.f.id; }); if (!E.length) return '';
-        var first = true;
-        return '<div class="mh" style="color:' + q.color + '">' + esc(q.name) + '</div><div class="day list">' + E.map(function (e) {
-          var x = ''; if (first && e.d >= TODAY) { x = '<div class="pjnow">오늘 이후</div>'; first = false; }
-          return x + itemHtml(e, true, true);
-        }).join('') + '</div>';
-      }).join('');
-      return tg + (g || '<div class="day"><div class="empty2">일정이 없어요</div></div>');
-    }
-    return tg + pjListAll();
-  }
-  return pjListAll(p);
+function pjList(p) { return pjListAll(p); }
+// 전체(프로젝트별): 프로젝트마다 묶어서 날짜순
+function pjListProj() {
+  var g = projList().filter(function (q) { return q.f; }).map(function (q) {
+    var E = S.D.events.filter(function (e) { return e.f === q.f.id; }); if (!E.length) return '';
+    var first = true;
+    return '<div class="mh" style="color:' + q.color + '">' + esc(q.name) + '</div><div class="day list">' + E.map(function (e) {
+      var x = ''; if (first && e.d >= TODAY) { x = '<div class="pjnow">오늘 이후</div>'; first = false; }
+      return x + itemHtml(e, true, true);
+    }).join('') + '</div>';
+  }).join('');
+  return g || '<div class="day"><div class="empty2">일정이 없어요</div></div>';
 }
 function pjListAll(p) {
   var L = p ? (p.f ? S.D.events.filter(function (e) { return e.f === p.f.id; }) : []) : S.D.events.filter(function (e) { return e.file.type === 'proj'; });
@@ -979,6 +971,32 @@ function pjListAll(p) {
   if (!h) h = '<div class="day"><div class="empty2">일정이 없어요</div></div>';
   if (p && p.f) h += '<a class="more" style="display:block;text-align:center;text-decoration:none;margin-top:12px" href="' + esc(p.f.url) + '" target="_blank">시트에서 열기</a>';
   return h;
+}
+// 팀 업무 한 줄: 체크 · 왼쪽 칸(날짜 또는 이름) · 작은 글씨 · 업무
+function tmRow(r, left, sub) {
+  return '<div class="rpi pr' + (r.s === '완료' ? ' done' : '') + '" data-ckrow="' + r.r + '"><button class="ck" data-ck="' + r.r + '" aria-label="완료">' + CKSVG + '</button>' +
+    '<button class="rpt" data-r="' + r.r + '"><span class="d3">' + left + '</span><span class="tx tx2"><small>' + esc(sub) + '</small>' + esc(r.t) + '</span>' +
+    (r.s === '대기' ? '<span class="wt">대기</span>' : '') + '</button></div>';
+}
+function tmSorted() { var T = team(); return (S.D.rep || []).slice().sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (a.r - b.r); }); }
+// 팀 업무 전체(날짜별): 날짜마다 카드 (최근부터)
+function pjTeamDate() {
+  var R = tmSorted(); if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
+  var ds = R.map(function (r) { return r.d; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+  return ds.map(function (d) {
+    var mine = R.filter(function (r) { return r.d === d; });
+    return '<div class="day tmv"><div class="dh"><b>' + mdw(d) + '<small>완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + ' / ' + mine.length + '</small></b></div>' +
+      mine.map(function (r) { return tmRow(r, esc(r.p), r.j); }).join('') + '</div>';
+  }).join('');
+}
+// 팀 업무 전체(프로젝트별): 프로젝트마다 카드 (최근 날짜부터)
+function pjTeamProj() {
+  var R = tmSorted(); if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
+  return projList().map(function (q) {
+    var mine = R.filter(function (r) { return pnorm(r.j) === pnorm(q.name); }); if (!mine.length) return '';
+    return '<div class="day tmv"><div class="dh"><b>' + esc(q.name) + '<small>완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + ' / ' + mine.length + '</small></b></div>' +
+      mine.map(function (r) { return tmRow(r, dw(r.d), r.p); }).join('') + '</div>';
+  }).join('');
 }
 // 팀 업무: 디자이너별로 한 일 리스트 (최근 날짜부터)
 function pjTeam(p) {
@@ -996,14 +1014,13 @@ function pjTeam(p) {
 }
 function renderProject() {
   var tm = S.pm === 'team';
-  var ps = [null].concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
+  var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
   var idx = Math.max(0, ps.findIndex(function (p) { return (p ? p.name : '') === (S.pj || ''); }));
   var h = '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
-    '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? esc(p.name) : '전체') + '</button>'; }).join('') + '</div>' +
-    '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? pjTeam(p) : pjList(p)) + '</section>'; }).join('') + '</div>';
+    '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? (p.allp ? '전체(프로젝트별)' : esc(p.name)) : '전체(날짜별)') + '</button>'; }).join('') + '</div>' +
+    '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? (p && p.allp ? pjTeamProj() : p ? pjTeam(p) : pjTeamDate()) : p && p.allp ? pjListProj() : pjList(p)) + '</section>'; }).join('') + '</div>';
   $('#main').innerHTML = h; bindItems(); bindRep();
   $$('#pSeg button').forEach(function (b) { b.onclick = function () { S.pm = b.dataset.m; ls.set('d4:pm', S.pm); render(); }; });
-  $$('#pav button').forEach(function (b) { b.onclick = function () { S.pa = b.dataset.a; ls.set('d4:pa', S.pa); render(); window.scrollTo(0, 0); }; });
   var box = $('#pjs'), secs = box.children, cur = -1;
   function mark(i) {
     if (i === cur) return; cur = i;
