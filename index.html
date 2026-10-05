@@ -510,6 +510,9 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .aseg { display:flex; gap:2px; flex:none; }
 .aseg button { border:0; background:#fff; border-radius:999px; padding:6px 8px; font-size:12px; font-weight:700; color:var(--sub); letter-spacing:-0.02em; }
 .aseg button.on { background:var(--txt); color:#fff; }
+.aseg.sw { background:#e5e8eb; border-radius:10px; padding:3px; gap:0; }
+.aseg.sw button { background:none; border-radius:8px; padding:5px 9px; color:var(--mute); }
+.aseg.sw button.on { background:#fff; color:var(--txt); box-shadow:0 1px 3px rgba(0,0,0,.08); }
 .hm2 .arw { gap:4px; }
 .hm2 .arw button { width:30px; height:30px; font-size:16px; }
 .hm2 .arw .tod { width:auto; height:30px; padding:0 9px; font-size:12px; }
@@ -664,7 +667,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005v4';
+var APP_VER = '20261005v5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -987,7 +990,7 @@ function foldDay(d, sub, body) {
 }
 function bindFoldDay() { S.dop = S.dop || {}; $$('details.fday').forEach(function (x) { x.ontoggle = function () { S.dop[x.dataset.fd] = x.open; }; }); }
 function calHead(y, m) {
-  return '<div class="hm2"><b class="hmt" id="cT">' + y + '.' + pad(m) + '</b><div class="aseg" id="mSeg"><button data-m="sched" class="' + (S.mm !== 'team' ? 'on' : '') + '">제작일정</button><button data-m="team" class="' + (S.mm === 'team' ? 'on' : '') + '">팀 업무</button></div>' +
+  return '<div class="hm2"><b class="hmt" id="cT">' + y + '.' + pad(m) + '</b><div class="aseg sw" id="mSeg"><button data-m="sched" class="' + (S.mm !== 'team' ? 'on' : '') + '">제작일정</button><button data-m="team" class="' + (S.mm === 'team' ? 'on' : '') + '">팀 업무</button></div>' +
     '<div class="arw">' + foldBtn() + '<button id="nP">‹</button><button id="nN">›</button></div></div>';
 }
 function modeSeg() { return '<div class="seg" id="mSeg"><button data-m="sched" class="' + (S.mm !== 'team' ? 'on' : '') + '">제작일정</button><button data-m="team" class="' + (S.mm === 'team' ? 'on' : '') + '">팀 업무</button></div>'; }
