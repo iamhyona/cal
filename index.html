@@ -447,6 +447,24 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .dsd { font-size:13px; font-weight:800; color:var(--txt); margin:14px 0 2px; padding-top:10px; border-top:1px solid #f2f4f6; }
 .dsd .hwd { font-size:11px; }
 #dSeg button { font-size:13px; }
+.wkp { margin-top:8px; } .wkp + .wkp { padding-top:8px; border-top:1px solid #f2f4f6; }
+.wkn { font-size:14px; font-weight:800; margin:2px 0 2px; }
+.goday { cursor:pointer; }
+.tmv .mcal .grid > button { min-height:72px; }
+.dsum .dst { display:flex; gap:8px; margin:6px 0 4px; }
+.dsum .dst > div { flex:1; background:var(--chip); border-radius:12px; padding:10px 12px; }
+.dsum .dst small { display:block; font-size:11px; color:var(--mute); font-weight:700; }
+.dsum .dst b { font-size:19px; font-weight:800; } .dsum .dst b i { font-style:normal; font-size:12px; color:var(--mute); margin-left:2px; font-weight:700; }
+.mbar { display:flex; align-items:flex-end; gap:4px; height:92px; margin:14px 0 6px; }
+.mbar button { flex:1; height:100%; border:0; background:none; padding:0; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:3px; min-width:0; }
+.mbar em { font-style:normal; font-size:10px; color:var(--mute); font-weight:700; height:12px; }
+.mbar i { display:block; width:70%; max-width:22px; background:#d1d6db; border-radius:4px 4px 2px 2px; }
+.mbar span { font-size:10px; color:var(--mute); font-weight:600; white-space:nowrap; }
+.dpl { margin-top:10px; } .dpl > div { display:flex; align-items:center; gap:8px; font-size:13px; padding:4px 0; }
+.dpl span { flex:0 0 44%; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; }
+.dpl i { flex:1; height:6px; background:var(--chip); border-radius:3px; overflow:hidden; } .dpl i em { display:block; height:100%; background:#b0b8c1; border-radius:3px; }
+.dpl b { flex:none; min-width:22px; text-align:right; font-size:12px; color:var(--sub); }
+#dSeg button { font-size:13px; }
 </style>
 </head>
 <body>
@@ -467,7 +485,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="designer">DESIGNER</button><button data-v="team">TO DO</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="team">TO DO</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -552,9 +570,10 @@ var PROJ_K = ['디자인', '리터칭', '소속사', '데드라인', '공식'], 
 var PCOL = ['#6f9fe8', '#e08aa6', '#6dba8f', '#e2aa5e', '#a092e0', '#5fb4d4', '#e48f80', '#6cbcb2', '#c08fd8', '#e7a173'];
 var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TODAY.slice(0, 4), m: +TODAY.slice(5, 7), ws: sunOf(TODAY),
   off: JSON.parse(ls.get('d4:off') || '{}'), D: null, sel: null };
-if (['home', 'month', 'project', 'designer', 'team'].indexOf(S.view) < 0) S.view = 'home';
+if (S.view === 'designer') S.view = 'team';
+if (['home', 'month', 'project', 'team'].indexOf(S.view) < 0) S.view = 'home';
 
-S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'w'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || '';
+S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || '';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
 var API_READ = { appHasPin: 1, appCheck: 1, appAll: 1 };
 function call(fn) {
@@ -568,7 +587,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005x';
+var APP_VER = '20261005y';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -982,25 +1001,74 @@ function lastRepDate() { var ds = (S.D.rep || []).map(function (r) { return r.d;
 
 // TEAM: 디자이너별
 function renderTeam() {
-  if (!S.td) S.td = lastRepDate();
-  var d = S.td, ws = sunOf(d), we = addD(ws, 6);
-  var h = navBar('', mdw(d), 'nP', 'nN', d !== TODAY);
-  var day = repOf(function (r) { return r.d === d; }), wait = day.filter(function (r) { return r.s === '대기'; }).length, dn = day.filter(function (r) { return r.s === '완료'; }).length;
-  h += '<div class="tmsum"><span>보고 <b>' + team().filter(function (n) { return day.some(function (r) { return r.p === n; }); }).length + '</b>명</span><span>업무 <b>' + day.length + '</b>건</span><span>완료 <b class="ok">' + dn + '</b>건</span><span>대기 <b class="w">' + wait + '</b>건</span><button id="rpOpen2">+ 업무보고 붙여넣기</button></div>';
-  team().forEach(function (n) {
-    var mine = day.filter(function (r) { return r.p === n; });
-    var wk = repOf(function (r) { return r.p === n && r.d >= ws && r.d <= we; }), pj = [];
-    wk.forEach(function (r) { if (pj.indexOf(r.j) < 0) pj.push(r.j); });
-    h += '<div class="tm"><div class="tmh"><b>' + esc(n) + '</b><small>' + (mine.length ? '완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + ' / ' + mine.length : '보고 없음') + '</small></div>' +
-      (mine.length ? repBlock(mine, { noWho: true }) : '') +
-      (pj.length ? '<div class="tmw"><small>이번 주</small>' + pj.map(function (j) { return '<span style="color:' + pinfo(j).color + '">' + esc(j) + '</span>'; }).join('') + '</div>' : '') + '</div>';
-  });
+  var p = S.dp || 'd', rg = dRange(p, S.dd), dn = S.dn && team().indexOf(S.dn) >= 0 ? S.dn : '';
+  var R0 = (S.D.rep || []).filter(function (r) { return r.d >= rg[0] && r.d <= rg[1] && (!dn || r.p === dn); });
+  var cur = TODAY >= rg[0] && TODAY <= rg[1];
+  var people = team().filter(function (n) { return !dn || n === dn; });
+  var h = p === 'a' ? phd('', '전체') : navBar('', rg[2], 'nP', 'nN', !cur);
+  h += '<div class="seg" id="dSeg">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  h += '<div class="tabs2" id="dfl"><button data-n="" class="' + (dn ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (dn === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+  var done = R0.filter(function (r) { return r.s === '완료'; }).length, wait = R0.filter(function (r) { return r.s === '대기'; }).length;
+  if (p === 'd' || p === 'w' || p === 'm') h += '<div class="tmsum"><span>업무 <b>' + R0.length + '</b></span><span>완료 <b class="ok">' + done + '</b></span><span>대기 <b class="w">' + wait + '</b></span><button id="rpOpen2">+ 업무보고 붙여넣기</button></div>';
+  var byDate = function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? -1 : 1); };
+  if (p === 'd') {
+    people.forEach(function (n) {
+      var mine = R0.filter(function (r) { return r.p === n; }).sort(byDate);
+      h += '<div class="tm"><div class="tmh"><b>' + esc(n) + '</b><small>' + (mine.length ? '완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + ' / ' + mine.length : '보고 없음') + '</small></div>' + (mine.length ? repBlock(mine, { noWho: true }) : '') + '</div>';
+    });
+  } else if (p === 'w') {
+    for (var d = rg[0]; d <= rg[1]; d = addD(d, 1)) {
+      var l = R0.filter(function (r) { return r.d === d; }).sort(byDate);
+      h += '<div class="day' + (d === TODAY ? ' td' : '') + '"><div class="dh"><b class="goday" data-go="' + d + '">' + mdw(d) + (hol(d) ? '<em class="hwd">' + esc(hol(d)) + '</em>' : '') + '</b><small>' + (l.length ? '완료 ' + l.filter(function (r) { return r.s === '완료'; }).length + ' / ' + l.length : '') + '</small></div>' +
+        (l.length ? (dn ? repBlock(l, { noWho: true }) : people.filter(function (n) { return l.some(function (r) { return r.p === n; }); }).map(function (n) {
+          return '<div class="wkp"><div class="wkn">' + esc(n) + '</div>' + repBlock(l.filter(function (r) { return r.p === n; }), { noWho: true }) + '</div>';
+        }).join('')) : '<div class="empty2">보고 없음</div>') + '</div>';
+    }
+  } else if (p === 'm') {
+    var y = +rg[0].slice(0, 4), m = +rg[0].slice(5, 7), mo = rg[0].slice(0, 7), start = sunOf(rg[0]), end = addD(sunOf(rg[1]), 6);
+    h += '<div class="mcal"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
+    for (var d2 = start; d2 <= end; d2 = addD(d2, 1)) {
+      var l2 = R0.filter(function (r) { return r.d === d2; }), w2 = P(d2).getDay(), hl2 = hol(d2), bars = [];
+      if (dn) { var gj = {}; l2.forEach(function (r) { if (!gj[r.j]) { gj[r.j] = { n: 0, k: 0 }; bars.push(r.j); } gj[r.j].n++; if (r.s === '완료') gj[r.j].k++; });
+        bars = bars.map(function (j) { return '<span class="ev' + (gj[j].k === gj[j].n ? ' fin' : '') + '"><i style="background:' + pinfo(j).color + '"></i>' + esc(j.split(/\s+/)[0]) + '</span>'; }); }
+      else { var gp = {}; l2.forEach(function (r) { if (!gp[r.p]) gp[r.p] = { n: 0, k: 0 }; gp[r.p].n++; if (r.s === '완료') gp[r.p].k++; });
+        bars = team().filter(function (n) { return gp[n]; }).map(function (n) { return '<span class="ev' + (gp[n].k === gp[n].n ? ' fin' : '') + '"><i></i>' + esc(dshort(n)) + ' ' + gp[n].k + '/' + gp[n].n + '</span>'; }); }
+      h += '<button data-go="' + d2 + '" class="' + (d2.slice(0, 7) !== mo ? 'out ' : '') + (d2 === TODAY ? 'td ' : '') + (hl2 ? 'hol ' : '') + (w2 === 0 ? 'sun ' : w2 === 6 ? 'sat ' : '') + '"><span class="dn"><b>' + P(d2).getDate() + '</b>' + (hl2 ? '<small>' + esc(hl2) + '</small>' : '') + '</span>' +
+        bars.slice(0, bars.length > 4 ? 3 : 4).join('') + (bars.length > 4 ? '<span class="evm">+' + (bars.length - 3) + '</span>' : '') + '</button>';
+    }
+    h += '</div></div>';
+    h += people.filter(function (n) { return R0.some(function (r) { return r.p === n; }); }).map(function (n) { return sumCard(n, R0.filter(function (r) { return r.p === n; }), null); }).join('');
+  } else {
+    // 반년 · 한해: 디자이너별 요약 + 월별 막대 / 전체: 요약 + 연도별 막대
+    var units = [];
+    if (p === 'a') { var ys = (S.D.rep || []).map(function (r) { return +r.d.slice(0, 4); }); var y0 = ys.length ? Math.min.apply(null, ys) : +TODAY.slice(0, 4), y1 = Math.max(y0, +TODAY.slice(0, 4)); for (var yy = y0; yy <= y1; yy++) units.push({ k: String(yy), l: String(yy).slice(2) + '년', go: yy + '-01-01', gp: 'y' }); }
+    else { for (var d3 = rg[0]; d3 <= rg[1]; d3 = dMove('m', d3, 1)) units.push({ k: d3.slice(0, 7), l: (+d3.slice(5, 7)) + '월', go: d3.slice(0, 7) + '-01', gp: 'm' }); }
+    var ns = people.filter(function (n) { return R0.some(function (r) { return r.p === n; }); });
+    h += ns.length ? ns.map(function (n) { return sumCard(n, R0.filter(function (r) { return r.p === n; }), units); }).join('') : '<div class="day"><div class="empty2">이 기간 업무보고가 없어요</div></div>';
+  }
   if (S.D.repUrl) h += '<a class="more" style="display:block;text-align:center;text-decoration:none" href="' + esc(S.D.repUrl) + '" target="_blank">업무보고 시트 열기</a>';
   $('#main').innerHTML = '<div class="tmv">' + h + '</div>'; bindRep();
-  $('#nP').onclick = function () { S.td = addD(S.td, -1); render(); };
-  $('#nN').onclick = function () { S.td = addD(S.td, 1); render(); };
-  if ($('#nT')) $('#nT').onclick = function () { S.td = TODAY; render(); };
-  $('#rpOpen2').onclick = openPaste;
+  $$('#dSeg button').forEach(function (b) { b.onclick = function () { S.dp = b.dataset.p; ls.set('d4:dp', S.dp); render(); }; });
+  $$('#dfl button').forEach(function (b) { b.onclick = function () { S.dn = b.dataset.n; ls.set('d4:dn', S.dn); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; });
+  $$('[data-go]').forEach(function (b) { b.onclick = function () { S.dp = 'd'; ls.set('d4:dp', 'd'); S.dd = b.dataset.go; window.scrollTo(0, 0); render(); }; });
+  $$('[data-unit]').forEach(function (b) { b.onclick = function () { S.dp = b.dataset.gp; ls.set('d4:dp', S.dp); S.dd = b.dataset.unit; window.scrollTo(0, 0); render(); }; });
+  if ($('#nP')) { $('#nP').onclick = function () { S.dd = dMove(p, S.dd, -1); render(); }; $('#nN').onclick = function () { S.dd = dMove(p, S.dd, 1); render(); }; }
+  if ($('#nT')) $('#nT').onclick = function () { S.dd = TODAY; render(); };
+  if ($('#rpOpen2')) $('#rpOpen2').onclick = openPaste;
+}
+// 디자이너 요약 카드: 일한 날 · 업무 · 완료율 · (막대) · 프로젝트별 건수
+function sumCard(n, rows, units) {
+  var days = []; rows.forEach(function (r) { if (days.indexOf(r.d) < 0) days.push(r.d); });
+  var k = rows.filter(function (r) { return r.s === '완료'; }).length;
+  var pj = {}; rows.forEach(function (r) { pj[r.j] = (pj[r.j] || 0) + 1; });
+  var pl = Object.keys(pj).sort(function (a, b) { return pj[b] - pj[a]; }), mx = pl.length ? pj[pl[0]] : 1;
+  var h = '<div class="day dsum"><div class="dh"><b>' + esc(n) + '</b></div><div class="dst"><div><small>일한 날</small><b>' + days.length + '<i>일</i></b></div><div><small>업무</small><b>' + rows.length + '<i>건</i></b></div><div><small>완료</small><b>' + (rows.length ? Math.round(k / rows.length * 100) : 0) + '<i>%</i></b></div></div>';
+  if (units) {
+    var cnt = units.map(function (u) { return rows.filter(function (r) { return r.d.indexOf(u.k) === 0; }).length; }), um = Math.max.apply(null, cnt.concat([1]));
+    h += '<div class="mbar">' + units.map(function (u, i) { return '<button data-unit="' + u.go + '" data-gp="' + u.gp + '"><em>' + (cnt[i] || '') + '</em><i style="height:' + Math.max(3, cnt[i] / um * 100) + '%"></i><span>' + u.l + '</span></button>'; }).join('') + '</div>';
+  }
+  h += '<div class="dpl">' + pl.map(function (j) { return '<div><span>' + esc(j) + '</span><i><em style="width:' + Math.round(pj[j] / mx * 100) + '%"></em></i><b>' + pj[j] + '</b></div>'; }).join('') + '</div></div>';
+  return h;
 }
 
 /* 붙여넣기 → 미리보기 → 저장 */
@@ -1070,7 +1138,7 @@ $('#rpS').onclick = function () {
   if (!rows.length) return;
   var al = {}; Object.keys(RP.touched || {}).forEach(function (raw) { al[raw] = RP.map[raw]; });
   var b = $('#rpS'); b.classList.add('busy');
-  call('appRepAdd', S.pin, rows, al).then(function (n) { closeBs(); toast(n + '건 저장했어요'); S.td = rows[0].d; return load(); })
+  call('appRepAdd', S.pin, rows, al).then(function (n) { closeBs(); toast(n + '건 저장했어요'); S.dd = rows[0].d; return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 };
 $('#rpBtn').onclick = openPaste;
