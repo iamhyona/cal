@@ -512,6 +512,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .aseg button.on { background:var(--txt); color:#fff; }
 .aseg.sw { background:#e5e8eb; border-radius:10px; padding:3px; gap:0; }
 .aseg.sw button { background:none; border-radius:8px; padding:5px 9px; color:var(--mute); }
+.it .m small span { font-size:11px; }
 .tabs2 button, #pSeg button { font-size:12px; letter-spacing:-0.02em; }
 .aseg.sw button.on { background:#fff; color:var(--txt); box-shadow:0 1px 3px rgba(0,0,0,.08); }
 .hm2 .arw { gap:4px; }
@@ -668,7 +669,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005v7';
+var APP_VER = '20261005v8';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
