@@ -537,6 +537,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .ckw { border-top:1px solid #f2f4f6; }
 .ckw > .it { border-top:0 !important; }
 .list .ckw:first-child, .pjnow + .ckw { border-top:0; }
+.hm2 .arw .fbtn { font-size:18px; font-weight:500; line-height:1; }
 </style>
 </head>
 <body>
@@ -659,7 +660,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005u9';
+var APP_VER = '20261005v1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -838,7 +839,7 @@ function perHead(id, p, rg, anchor) {
   return '<div class="hm2"><label class="hmt">' + perTitle(p, rg) + (p !== 'a' ? '<input type="date" class="dpk" id="' + id + 'D" value="' + anchor + '">' : '') + '</label>' +
     '<div class="aseg" id="' + id + '">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
 }
-function foldBtn() { return '<button class="tod" id="mFold">' + (S.fold ? '주말 펼치기' : '주말 접기') + '</button>'; }
+function foldBtn() { return '<button id="mFold" class="fbtn" aria-label="' + (S.fold ? '주말 펼치기' : '주말 접기') + '">' + (S.fold ? '+' : '−') + '</button>'; }
 function bindFold() { var b = $('#mFold'); if (b) b.onclick = function () { S.fold = !S.fold; ls.set('d4:fold', S.fold ? '1' : ''); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; }
 function chipVis(bar, smooth) {
   if (!bar) return; var c = bar.querySelector('button.on'); if (!c) return;
