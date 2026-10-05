@@ -418,6 +418,12 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .sq, .rph i, .rpl span i, .tmw span i, .pjdd button i, .tabs2 button i { display:none !important; }
 .mcal .ev { border-left-color:#c9cdd2 !important; }
 .phd { min-height:0; margin-top:4px; align-items:center; }
+.bds { margin:10px 0 0; padding:0; border-bottom:1px solid #f2f4f6; }
+.bdh + .bds { border-bottom:0; margin-top:4px; }
+.rpi .tx2 small { font-weight:700; }
+.it .m small span { font-weight:700; }
+/* 구분(디자인·소속사·데드라인 등)은 달력 구분용 — 목록에선 글자로 안 보임 */
+.kc { display:none !important; }
 </style>
 </head>
 <body>
@@ -539,7 +545,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005m';
+var APP_VER = '20261005n';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -626,12 +632,12 @@ function rng(a, b) { return dot(a) + ' – ' + b.slice(5).replace('-', '.'); }
 function itemHtml(e, showDate, noFile, dday) {
   var f = e.file;
   return '<button class="it" data-e="' + esc(e.id) + '">' + (showDate ? '<span class="d2">' + dw(e.d) + (dday ? '<small>' + dday + '</small>' : '') + '</span>' : '') +
-    '<span class="m">' + (noFile ? '' : '<small>' + (f.type === 'proj' ? '<i class="sq" style="background:' + f.color + '"></i>' + esc(f.name) : '업무일지') + '</small>') + '<div>' + esc(e.t) + '</div></span></button>';
+    '<span class="m">' + (noFile ? '' : '<small>' + (f.type === 'proj' ? '<span style="color:' + f.color + '">' + esc(f.name) + '</span>' : '업무일지') + '</small>') + '<div>' + esc(e.t) + '</div></span></button>';
 }
 function bindItems(root) { (root ? root.querySelectorAll('[data-e]') : $$('[data-e]')).forEach(function (b) { b.onclick = function () { openEdit(b.dataset.e); }; }); }
 
 // HOME: TODAY · WEEK · MONTH 할 일 보드
-function bds(t, n) { return '<div class="bds">' + t + (n != null ? '<small>' + n + '</small>' : '') + '</div>'; }
+function bds() { return '<div class="bds"></div>'; }
 function latestOpen(rows) { // 같은 사람·프로젝트·업무는 가장 최근 것만
   var seen = {}, out = [];
   rows.slice().sort(function (a, b) { return a.d < b.d ? 1 : -1; }).forEach(function (r) { var k = r.p + '|' + pnorm(r.j) + '|' + r.t; if (!seen[k]) { seen[k] = 1; out.push(r); } });
@@ -643,7 +649,7 @@ function renderHome() {
   var h = phd('', mdw(TODAY) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : ''));
   // TODAY
   var te = L.filter(function (e) { return e.d === TODAY; }), tr = R0.filter(function (r) { return r.d === TODAY; });
-  h += '<div class="bd"><div class="bdh"><div><b>TODAY</b><small>일정 ' + te.length + ' · 업무 ' + tr.filter(function (r) { return r.s === '완료'; }).length + '/' + tr.length + '</small></div><button class="add" data-add="' + TODAY + '">+ 일정</button></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>TODAY</b></div><button class="add" data-add="' + TODAY + '">+ 일정</button></div>' +
     bds('제작일정') + (te.length ? te.map(function (e) { return itemHtml(e); }).join('') : '<div class="empty2">오늘 일정이 없어요</div>') +
     bds('팀 업무') + (tr.length ? repBlock(tr, { byPerson: true }) : '<button class="emptyb" id="hPaste">오늘 업무보고 붙여넣기</button>') + '</div>';
   // WEEK
@@ -674,7 +680,7 @@ function dayCard(d, l) {
 function repLine(d) {
   var rr = repOf(function (r) { return r.d === d; }); if (!rr.length) return '';
   var g = {}, o = []; rr.forEach(function (r) { if (!g[r.j]) { g[r.j] = []; o.push(r.j); } if (g[r.j].indexOf(r.p) < 0) g[r.j].push(r.p); });
-  return '<button class="rpl" data-day="' + d + '"><small>업무보고</small>' + o.map(function (j) { return '<span><i style="background:' + pinfo(j).color + '"></i>' + esc(j) + ' <em>' + g[j].map(esc).join(', ') + '</em></span>'; }).join('') + '</button>';
+  return '<button class="rpl" data-day="' + d + '"><small>업무보고</small>' + o.map(function (j) { return '<span><b style="color:' + pinfo(j).color + '">' + esc(j) + '</b> <em>' + g[j].map(esc).join(', ') + '</em></span>'; }).join('') + '</button>';
 }
 function bindRepLine() { $$('[data-day]').forEach(function (b) { b.onclick = function () { openDay(b.dataset.day); }; }); }
 function bindAdd() { $$('[data-add]').forEach(function (b) { b.onclick = function () { openEdit(null, b.dataset.add); }; }); }
@@ -918,7 +924,7 @@ function pcanon(raw) {
 function projList() {
   var out = S.D.files.filter(function (f) { return f.type === 'proj'; }).map(function (f) { return { name: f.name, color: f.color, f: f }; });
   var have = {}; out.forEach(function (p) { have[pnorm(p.name)] = p; });
-  (S.D.rep || []).forEach(function (r) { var k = pnorm(r.j); if (r.j && !have[k]) { have[k] = { name: r.j, color: RCOL, f: null }; out.push(have[k]); } });
+  var ci = out.length; (S.D.rep || []).forEach(function (r) { var k = pnorm(r.j); if (r.j && !have[k]) { have[k] = { name: r.j, color: PCOL[ci++ % PCOL.length], f: null }; out.push(have[k]); } });
   return out;
 }
 function pinfo(name) { var k = pnorm(name); return projList().filter(function (p) { return pnorm(p.name) === k; })[0] || { name: name, color: RCOL, f: null }; }
@@ -930,11 +936,11 @@ function repBlock(rows, opt) {
   var g = {}, order = [];
   rows.forEach(function (r) { var k = opt.byPerson ? r.p : r.j; if (!g[k]) { g[k] = []; order.push(k); } g[k].push(r); });
   return order.map(function (k) {
-    var head = opt.byPerson ? '<b>' + esc(k) + '</b>' : '<i style="background:' + pinfo(k).color + '"></i><b>' + esc(k) + '</b>';
+    var head = opt.byPerson ? '<b>' + esc(k) + '</b>' : '<b style="color:' + pinfo(k).color + '">' + esc(k) + '</b>';
     return '<div class="rpg"><div class="rph">' + head + '</div>' + g[k].map(function (r) {
       return '<div class="rpi' + (r.s === '완료' ? ' done' : '') + '" data-ckrow="' + r.r + '"><button class="ck" data-ck="' + r.r + '" aria-label="완료"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>' +
         '<button class="rpt" data-r="' + r.r + '">' + (opt.byPerson || opt.noWho ? '' : '<span class="who">' + esc(r.p) + '</span>') +
-        (opt.byPerson && !opt.noPj ? '<span class="tx tx2"><small><i class="sq" style="background:' + pinfo(r.j).color + '"></i>' + esc(r.j) + '</small>' + esc(r.t) + '</span>' : '<span class="tx">' + esc(r.t) + '</span>') +
+        (opt.byPerson && !opt.noPj ? '<span class="tx tx2"><small style="color:' + pinfo(r.j).color + '">' + esc(r.j) + '</small>' + esc(r.t) + '</span>' : '<span class="tx">' + esc(r.t) + '</span>') +
         (r.s === '대기' ? '<span class="wt">대기</span>' : '') + '</button></div>';
     }).join('') + '</div>';
   }).join('');
@@ -972,7 +978,7 @@ function renderTeam() {
     wk.forEach(function (r) { if (pj.indexOf(r.j) < 0) pj.push(r.j); });
     h += '<div class="tm"><div class="tmh"><b>' + esc(n) + '</b><small>' + (mine.length ? '완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + ' / ' + mine.length : '보고 없음') + '</small></div>' +
       (mine.length ? repBlock(mine, { noWho: true }) : '') +
-      (pj.length ? '<div class="tmw"><small>이번 주</small>' + pj.map(function (j) { return '<span><i style="background:' + pinfo(j).color + '"></i>' + esc(j) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+      (pj.length ? '<div class="tmw"><small>이번 주</small>' + pj.map(function (j) { return '<span style="color:' + pinfo(j).color + '">' + esc(j) + '</span>'; }).join('') + '</div>' : '') + '</div>';
   });
   if (S.D.repUrl) h += '<a class="more" style="display:block;text-align:center;text-decoration:none" href="' + esc(S.D.repUrl) + '" target="_blank">업무보고 시트 열기</a>';
   $('#main').innerHTML = h; bindRep();
