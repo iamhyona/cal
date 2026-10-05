@@ -461,7 +461,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">MONTH</button><button data-v="week">WEEK</button><button data-v="project">PROJECT</button><button data-v="team">TEAM</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="team">TO DO</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -546,7 +546,7 @@ var PROJ_K = ['디자인', '리터칭', '소속사', '데드라인', '공식'], 
 var PCOL = ['#6f9fe8', '#e08aa6', '#6dba8f', '#e2aa5e', '#a092e0', '#5fb4d4', '#e48f80', '#6cbcb2', '#c08fd8', '#e7a173'];
 var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TODAY.slice(0, 4), m: +TODAY.slice(5, 7), ws: sunOf(TODAY),
   off: JSON.parse(ls.get('d4:off') || '{}'), D: null, sel: null };
-if (['home', 'month', 'week', 'project', 'team'].indexOf(S.view) < 0) S.view = 'home';
+if (['home', 'month', 'project', 'team'].indexOf(S.view) < 0) S.view = 'home';
 
 S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.pf = ls.get('d4:pf') || '';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
@@ -562,7 +562,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005v';
+var APP_VER = '20261005w';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
