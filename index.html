@@ -408,7 +408,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .bdh { align-items:flex-start; }
 .bdh > div { flex:1; min-width:0; }
 .bdh > div b { display:block; font-size:17px; font-weight:800; letter-spacing:0; }
-.bdh > div small { display:block; font-size:11px; font-weight:800; color:var(--mute); letter-spacing:.08em; margin-top:2px; }
+.bdh > div small { display:block; font-size:12px; font-weight:600; color:var(--mute); margin-top:2px; }
 .rpi .tx2 small { margin:0 0 1px; }
 .hwd { font-style:normal; font-size:.62em; font-weight:600; color:var(--mute); margin-left:5px; letter-spacing:0; }
 .it .d2, .it.dl .d2 { width:84px; font-size:12px; font-weight:600; color:var(--sub); letter-spacing:-.01em; }
@@ -533,7 +533,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005g';
+var APP_VER = '20261005h';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -637,20 +637,20 @@ function renderHome() {
   var h = phd('디자인4팀' + (hl ? ' · ' + esc(hl) : ''), mdw(TODAY));
   // TODAY
   var te = L.filter(function (e) { return e.d === TODAY; }), tr = R0.filter(function (r) { return r.d === TODAY; });
-  h += '<div class="bd"><div class="bdh"><div><b>' + mdw(TODAY) + '</b><small>TODAY · 일정 ' + te.length + ' · 업무 ' + tr.filter(function (r) { return r.s === '완료'; }).length + '/' + tr.length + '</small></div><button class="add" data-add="' + TODAY + '">+ 일정</button></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>TODAY</b><small>일정 ' + te.length + ' · 업무 ' + tr.filter(function (r) { return r.s === '완료'; }).length + '/' + tr.length + '</small></div><button class="add" data-add="' + TODAY + '">+ 일정</button></div>' +
     bds('제작일정') + (te.length ? te.map(function (e) { return itemHtml(e); }).join('') : '<div class="empty2">오늘 일정이 없어요</div>') +
     bds('팀 업무') + (tr.length ? repBlock(tr, { byPerson: true }) : '<button class="emptyb" id="hPaste">오늘 업무보고 붙여넣기</button>') + '</div>';
   // WEEK
   var wl = L.filter(function (e) { return e.d > TODAY && e.d <= we; });
   var carry = latestOpen(R0.filter(function (r) { return r.d >= ws && r.d < TODAY && r.s !== '완료'; }))
     .filter(function (r) { return !tr.some(function (x) { return x.p === r.p && x.t === r.t; }); });
-  h += '<div class="bd"><div class="bdh"><div><b>' + rng(ws, we) + '</b><small>WEEK</small></div></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>WEEK</b></div></div>' +
     bds('남은 일정', wl.length) + (wl.length ? wl.map(function (e) { return itemHtml(e, true); }).join('') : '<div class="empty2">이번 주 남은 일정이 없어요</div>') +
     (carry.length ? bds('지난 보고 중 미완료', carry.length) + repBlock(carry, { byPerson: true }) : '') + '</div>';
   // MONTH
   var ml = L.filter(function (e) { return isDl(e) && e.d >= TODAY && e.d.slice(0, 7) === mo; });
   var wait = latestOpen(R0.filter(function (r) { return r.s === '대기' && r.d.slice(0, 7) === mo; }));
-  h += '<div class="bd"><div class="bdh"><div><b>' + mo.slice(0, 4) + '년 ' + (+mo.slice(5)) + '월</b><small>MONTH</small></div></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>MONTH</b></div></div>' +
     bds('데드라인 · 공식', ml.length) + (ml.length ? ml.map(function (e) {
       var n = dDiff(TODAY, e.d);
       return '<div class="dlr"><span class="dd' + (n <= 3 ? ' soon' : '') + '">' + (n ? 'D-' + n : 'D-DAY') + '</span>' + itemHtml(e, true) + '</div>';
