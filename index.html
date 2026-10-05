@@ -433,6 +433,9 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .tmv .tmw span { color:var(--sub) !important; }
 /* 소속사가 할 일은 흐리게 */
 .it.ag, .mcal .ev.ag { opacity:.42; }
+/* 필터 단추: 기본 흰색, 선택만 검정 (루틴과 동일) */
+.tabs2 button { background:#fff !important; color:var(--sub) !important; box-shadow:none !important; font-weight:600; }
+.tabs2 button.on { background:var(--txt) !important; color:#fff !important; }
 </style>
 </head>
 <body>
@@ -554,7 +557,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005q';
+var APP_VER = '20261005r';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -609,9 +612,9 @@ $('#brand').onclick = function () { S.view = 'home'; ls.set('d4:view', 'home'); 
 $('#rfBtn').onclick = function () { load().then(function () { toast('시트에서 새로 불러왔어요'); }); };
 
 function filterBar() {
-  var fs = S.D.files;
-  return '<div class="tabs2" id="flt"><button data-f="" class="' + (fs.every(function (f) { return !S.off[f.id]; }) ? 'on' : '') + '">전체</button>' +
-    fs.map(function (f) { return '<button data-f="' + f.id + '" class="' + (S.off[f.id] ? '' : 'on') + '"><i style="background:' + f.color + '"></i>' + esc(f.type === 'work' ? '업무일지' : f.name) + '</button>'; }).join('') + '</div>';
+  var fs = S.D.files, all = fs.every(function (f) { return !S.off[f.id]; });
+  return '<div class="tabs2" id="flt"><button data-f="" class="' + (all ? 'on' : '') + '">전체</button>' +
+    fs.map(function (f) { return '<button data-f="' + f.id + '" class="' + (!all && !S.off[f.id] ? 'on' : '') + '"><i style="background:' + f.color + '"></i>' + esc(f.type === 'work' ? '업무일지' : f.name) + '</button>'; }).join('') + '</div>';
 }
 function bindFilter() {
   $$('#flt button').forEach(function (b) {
