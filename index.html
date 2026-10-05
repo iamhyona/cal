@@ -436,6 +436,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 /* 필터 단추: 기본 흰색, 선택만 검정 (루틴과 동일) */
 .tabs2 button { background:#fff !important; color:var(--sub) !important; box-shadow:none !important; font-weight:600; }
 .tabs2 button.on { background:var(--txt) !important; color:#fff !important; }
+.dyr { margin-top:16px; padding-top:6px; border-top:1px solid #f2f4f6; }
 </style>
 </head>
 <body>
@@ -557,7 +558,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005r';
+var APP_VER = '20261005s';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -844,7 +845,7 @@ function openDay(d) {
   $('#dyT').innerHTML = mdw(d) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : '');
   var rr = repOf(function (r) { return r.d === d; });
   $('#dyB').innerHTML = (l.length ? l.map(function (e) { return itemHtml(e); }).join('') : '<div class="empty2">일정이 없어요</div>') +
-    (rr.length ? '<div class="sec" style="margin:20px 2px 6px">업무보고<small>' + rr.length + '건</small></div>' + repBlock(rr) : '');
+    (rr.length ? '<div class="tmv dyr">' + repBlock(rr) + '</div>' : '');
   bindItems($('#dyB')); bindRep($('#dyB')); $('#dyAdd').onclick = function () { closeBs(); setTimeout(function () { openEdit(null, d); }, 230); };
   openBs('#dy');
 }
