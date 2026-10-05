@@ -624,7 +624,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005s6';
+var APP_VER = '20261005s7';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -788,8 +788,21 @@ function bindSpecOne(o, d) {
   $$('#spT button').forEach(function (b) { b.onclick = function () { S.st = b.dataset.t; renderSpecOne(); }; });
 }
 
+// 단추 줄: 선택된 단추가 가려졌을 때만 최소한으로 움직여 보이게 (가운데로 휙 돌리지 않음)
+function chipVis(bar, smooth) {
+  if (!bar) return; var c = bar.querySelector('button.on'); if (!c) return;
+  var b = bar.getBoundingClientRect(), r = c.getBoundingClientRect(), pad = 16, to = null;
+  if (r.left < b.left + pad) to = bar.scrollLeft - (b.left + pad - r.left);
+  else if (r.right > b.right - pad) to = bar.scrollLeft + (r.right - (b.right - pad));
+  if (to !== null) bar.scrollTo({ left: Math.max(0, to), behavior: smooth ? 'smooth' : 'auto' });
+}
 function render() {
   if (!S.D) return;
+  var keep = {}; $$('.tabs2[id]').forEach(function (t) { keep[t.id] = t.scrollLeft; });
+  renderView();
+  $$('.tabs2[id]').forEach(function (t) { if (t.id in keep) t.scrollLeft = keep[t.id]; chipVis(t); });
+}
+function renderView() {
   $$('#nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.view); });
   $('#fab').style.display = S.view === 'spec' ? 'none' : '';
   ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, designer: renderDesigner, team: renderTeam, spec: renderSpec })[S.view]();
@@ -1037,7 +1050,7 @@ function renderProject() {
     if (i === cur) return; cur = i;
     var p = ps[i]; S.pj = p ? p.name : ''; ls.set('d4:pj', S.pj);
     $$('#pjc button').forEach(function (b, j) { b.classList.toggle('on', j === i); });
-    var c = $$('#pjc button')[i], bar = $('#pjc'); if (c) bar.scrollTo({ left: c.offsetLeft - (bar.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });
+    chipVis($('#pjc'), true);
     box.style.height = secs[i].offsetHeight + 'px';
   }
   function go(i) { box.scrollTo({ left: i * box.clientWidth, behavior: 'auto' }); mark(i); }
