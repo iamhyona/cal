@@ -441,6 +441,12 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .pjs section > .mh:first-child { margin-top:2px; }
 .rpi.pr .d3 { flex:none; width:84px; font-size:12px; font-weight:600; color:var(--sub); padding-top:1px; }
 .rpi.pr { padding-left:0; }
+.dsg .dpj { display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 6px; }
+.dsg .dpj span { font-size:12px; font-weight:600; color:var(--sub); background:var(--chip); border-radius:999px; padding:3px 10px; }
+.dsg .dpj em { font-style:normal; color:var(--mute); margin-left:2px; }
+.dsd { font-size:13px; font-weight:800; color:var(--txt); margin:14px 0 2px; padding-top:10px; border-top:1px solid #f2f4f6; }
+.dsd .hwd { font-size:11px; }
+#dSeg button { font-size:13px; }
 </style>
 </head>
 <body>
@@ -461,7 +467,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="team">TO DO</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="designer">DESIGNER</button><button data-v="team">TO DO</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -546,9 +552,9 @@ var PROJ_K = ['디자인', '리터칭', '소속사', '데드라인', '공식'], 
 var PCOL = ['#6f9fe8', '#e08aa6', '#6dba8f', '#e2aa5e', '#a092e0', '#5fb4d4', '#e48f80', '#6cbcb2', '#c08fd8', '#e7a173'];
 var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TODAY.slice(0, 4), m: +TODAY.slice(5, 7), ws: sunOf(TODAY),
   off: JSON.parse(ls.get('d4:off') || '{}'), D: null, sel: null };
-if (['home', 'month', 'project', 'team'].indexOf(S.view) < 0) S.view = 'home';
+if (['home', 'month', 'project', 'designer', 'team'].indexOf(S.view) < 0) S.view = 'home';
 
-S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.pf = ls.get('d4:pf') || '';
+S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'w'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || '';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
 var API_READ = { appHasPin: 1, appCheck: 1, appAll: 1 };
 function call(fn) {
@@ -562,7 +568,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005w';
+var APP_VER = '20261005x';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -610,7 +616,7 @@ function label(e) { return (e.file.type === 'proj' ? e.file.short + ' ' : '') + 
 function render() {
   if (!S.D) return;
   $$('#nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.view); });
-  ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, team: renderTeam })[S.view]();
+  ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, designer: renderDesigner, team: renderTeam })[S.view]();
 }
 $$('#nav button').forEach(function (b) { b.onclick = function () { S.view = b.dataset.v; ls.set('d4:view', S.view); window.scrollTo(0, 0); render(); }; });
 $('#brand').onclick = function () { S.view = 'home'; ls.set('d4:view', 'home'); window.scrollTo(0, 0); render(); };
@@ -1096,6 +1102,52 @@ sure($('#reDel'), function () {
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 });
 
+
+// DESIGNER: 디자이너별 업무일지 — 일 · 주 · 월 · 반년 · 한해 · 전체
+var DPER = [['d', '일'], ['w', '주'], ['m', '월'], ['h', '반년'], ['y', '한해'], ['a', '전체']];
+function dRange(p, d) {
+  var y = +d.slice(0, 4), m = +d.slice(5, 7);
+  if (p === 'd') return [d, d, mdw(d)];
+  if (p === 'w') { var a = sunOf(d); return [a, addD(a, 6), rng(a, addD(a, 6))]; }
+  if (p === 'm') return [d.slice(0, 7) + '-01', F(new Date(y, m, 0)), y + '.' + pad(m)];
+  if (p === 'h') { var h1 = m <= 6; return [y + (h1 ? '-01-01' : '-07-01'), y + (h1 ? '-06-30' : '-12-31'), y + ' ' + (h1 ? '상반기' : '하반기')]; }
+  if (p === 'y') return [y + '-01-01', y + '-12-31', y + '년'];
+  return ['0000-00-00', '9999-12-31', '전체'];
+}
+function dMove(p, d, n) {
+  if (p === 'd') return addD(d, n);
+  if (p === 'w') return addD(d, 7 * n);
+  var y = +d.slice(0, 4), m = +d.slice(5, 7) + (p === 'm' ? n : p === 'h' ? 6 * n : 12 * n);
+  while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; }
+  return y + '-' + pad(m) + '-01';
+}
+function renderDesigner() {
+  var p = S.dp, rg = dRange(p, S.dd), dn = S.dn && team().indexOf(S.dn) >= 0 ? S.dn : '';
+  var R0 = (S.D.rep || []).filter(function (r) { return r.d >= rg[0] && r.d <= rg[1] && (!dn || r.p === dn); })
+    .sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? 1 : -1); });
+  var cur = TODAY >= rg[0] && TODAY <= rg[1];
+  var h = p === 'a' ? phd('', '전체') : navBar('', rg[2], 'nP', 'nN', !cur);
+  h += '<div class="seg" id="dSeg">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  h += '<div class="tabs2" id="dfl"><button data-n="" class="' + (dn ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (dn === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+  var ns = team().filter(function (n) { return (!dn || n === dn) && R0.some(function (r) { return r.p === n; }); });
+  if (!ns.length) h += '<div class="day"><div class="empty2">이 기간 업무일지가 없어요</div></div>';
+  ns.forEach(function (n) {
+    var mine = R0.filter(function (r) { return r.p === n; }), ds = [];
+    mine.forEach(function (r) { if (ds.indexOf(r.d) < 0) ds.push(r.d); });
+    var pj = []; mine.forEach(function (r) { if (pj.indexOf(r.j) < 0) pj.push(r.j); });
+    h += '<div class="day tmv dsg"><div class="dh"><b>' + esc(n) + '<small>' + ds.length + '일 · 업무 ' + mine.length + ' · 완료 ' + mine.filter(function (r) { return r.s === '완료'; }).length + '</small></b></div>' +
+      (p !== 'd' ? '<div class="dpj">' + pj.map(function (j) { return '<span>' + esc(j) + ' <em>' + mine.filter(function (r) { return r.j === j; }).length + '</em></span>'; }).join('') + '</div>' : '') +
+      ds.map(function (d) {
+        var l = mine.filter(function (r) { return r.d === d; });
+        return (p !== 'd' ? '<div class="dsd">' + mdw(d) + '</div>' : '') + repBlock(l, { noWho: true });
+      }).join('') + '</div>';
+  });
+  $('#main').innerHTML = h; bindRep();
+  $$('#dSeg button').forEach(function (b) { b.onclick = function () { S.dp = b.dataset.p; ls.set('d4:dp', S.dp); render(); }; });
+  $$('#dfl button').forEach(function (b) { b.onclick = function () { S.dn = b.dataset.n; ls.set('d4:dn', S.dn); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; });
+  if ($('#nP')) { $('#nP').onclick = function () { S.dd = dMove(p, S.dd, -1); render(); }; $('#nN').onclick = function () { S.dd = dMove(p, S.dd, 1); render(); }; }
+  if ($('#nT')) $('#nT').onclick = function () { S.dd = TODAY; render(); };
+}
 /* ───── 바텀시트 ───── */
 function openBs(id) {
   var top = Math.round($('header').getBoundingClientRect().bottom);
