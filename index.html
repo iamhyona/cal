@@ -526,6 +526,16 @@ details.fday[open] .chev { transform:rotate(-135deg); margin-bottom:-2px; }
 details.fday:not([open]) { padding-bottom:14px; }
 details.fday:not([open]) > summary { margin-bottom:0; }
 #flt button i, #pjc button i { display:block !important; width:7px; height:7px; border-radius:50%; flex:none; }
+.ckw { display:flex; align-items:center; gap:10px; }
+.ckw > .it { flex:1; min-width:0; }
+.ckw .ck { flex:none; width:22px; height:22px; border-radius:50%; border:2px solid #d1d6db; background:#fff; padding:0; display:flex; align-items:center; justify-content:center; color:transparent; }
+.ckw .ck svg { width:13px; height:13px; }
+.ckw.done .ck { background:var(--acc); border-color:var(--acc); color:#fff; }
+.ckw.done .it .m div { text-decoration:line-through; color:var(--faint); }
+.ckw.done .it .m small, .ckw.done .it .d2 { opacity:.5; }
+.ckw { border-top:1px solid #f2f4f6; }
+.ckw > .it { border-top:0 !important; }
+.list .ckw:first-child, .pjnow + .ckw { border-top:0; }
 </style>
 </head>
 <body>
@@ -648,7 +658,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005u7';
+var APP_VER = '20261005u8';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -886,6 +896,25 @@ function itemHtml(e, showDate, noFile, dday) {
   return '<button class="it' + (e.k === '소속사' ? ' ag' : '') + '" data-e="' + esc(e.id) + '">' + (showDate ? '<span class="d2">' + dw(e.d) + (dday ? '<small>' + dday + '</small>' : '') + '</span>' : '') +
     '<span class="m">' + (noFile ? '' : '<small>' + (f.type === 'proj' ? '<span style="color:' + f.color + '">' + esc(f.name) + '</span>' : '업무일지') + '</small>') + '<div>' + esc(e.t) + '</div></span></button>';
 }
+// 제작일정 체크: 일정표 이름|날짜|내용 으로 '일정완료' 탭에 저장
+function evKey(e) { return e.file.name + '|' + e.d + '|' + e.t; }
+function evDone(e) { return (S.D.evDone || []).indexOf(evKey(e)) >= 0; }
+function ckItem(e, showDate, noFile) {
+  var k = evKey(e);
+  return '<div class="ckw' + (evDone(e) ? ' done' : '') + '" data-ekrow="' + esc(k) + '"><button class="ck" data-eck="' + esc(e.id) + '" aria-label="완료">' + CKSVG + '</button>' + itemHtml(e, showDate, noFile) + '</div>';
+}
+function bindEvCk(root) {
+  (root || document).querySelectorAll('[data-eck]').forEach(function (b) { b.onclick = function (ev) {
+    ev.stopPropagation();
+    var e = S.D.events.filter(function (x) { return x.id === b.dataset.eck; })[0]; if (!e || e.busy) return;
+    var k = evKey(e), L = S.D.evDone || (S.D.evDone = []), on = L.indexOf(k) < 0;
+    var paint = function (v) { $$('[data-ekrow]').forEach(function (el) { if (el.dataset.ekrow === k) el.classList.toggle('done', v); }); };
+    if (on) L.push(k); else L.splice(L.indexOf(k), 1); paint(on); e.busy = 1;
+    call('appEvDone', S.pin, { n: e.file.name, d: e.d, t: e.t, done: on }).then(function () { saveCache(); })
+      .catch(function (x) { var i = L.indexOf(k); if (on && i >= 0) L.splice(i, 1); if (!on && i < 0) L.push(k); paint(!on); toast(errMsg(x)); })
+      .then(function () { delete e.busy; });
+  }; });
+}
 function bindItems(root) { (root ? root.querySelectorAll('[data-e]') : $$('[data-e]')).forEach(function (b) { b.onclick = function () { openEdit(b.dataset.e); }; }); }
 
 // HOME: TODAY · WEEK · MONTH 할 일 보드
@@ -1031,7 +1060,7 @@ function pjListProj() {
     var first = true;
     return '<div class="mh" style="color:' + q.color + '">' + esc(q.name) + '</div><div class="day list">' + E.map(function (e) {
       var x = ''; if (first && e.d >= TODAY) { x = '<div class="pjnow">오늘 이후</div>'; first = false; }
-      return x + itemHtml(e, true, true);
+      return x + ckItem(e, true, true);
     }).join('') + '</div>';
   }).join('');
   return g || '<div class="day"><div class="empty2">일정이 없어요</div></div>';
@@ -1045,7 +1074,7 @@ function pjListAll(p) {
     var mm = e.d.slice(0, 7);
     if (mm !== cur) { h += (cur ? '</div>' : '') + '<div class="mh">' + mm.replace('-', '.') + '</div><div class="day list">'; cur = mm; }
     if (first && e.d >= TODAY) { h += '<div class="pjnow">오늘 이후</div>'; first = false; }
-    h += itemHtml(e, true);
+    h += ckItem(e, true);
   });
   if (cur) h += '</div>';
   if (!h) h = '<div class="day"><div class="empty2">일정이 없어요</div></div>';
@@ -1101,7 +1130,7 @@ function renderProject() {
   var h = top + '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
     '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? (p.allp ? '전체(프로젝트별)' : p.allw ? '전체(디자이너별)' : '<i style="background:' + p.color + '"></i>' + esc(p.name)) : '전체(날짜별)') + '</button>'; }).join('') + '</div>' +
     '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? (p && p.allp ? pjTeamProj() : p && p.allw ? pjTeam(null) : p ? pjTeam(p) : pjTeamDate()) : p && p.allp ? pjListProj() : pjList(p)) + '</section>'; }).join('') + '</div>';
-  $('#main').innerHTML = h; bindItems(); bindRep();
+  $('#main').innerHTML = h; bindItems(); bindRep(); bindEvCk();
   $$('#lSeg button').forEach(function (b) { b.onclick = function () { S.lp = b.dataset.p; ls.set('d4:lp', S.lp); render(); }; });
   if ($('#lSegD')) $('#lSegD').onchange = function () { if (this.value) { S.ld = this.value; render(); } };
   if ($('#lP')) { $('#lP').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, -1); render(); }; $('#lN').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, 1); render(); }; }
@@ -1257,7 +1286,7 @@ function bindRep(root) {
   (root || document).querySelectorAll('[data-ck]').forEach(function (b) { b.onclick = function (ev) { ev.stopPropagation(); toggleDone(+b.dataset.ck); }; });
 }
 function saveCache() {
-  try { ls.set('d4:data', JSON.stringify({ files: S.D.files.map(function (f) { return { id: f.id, name: f.name, type: f.type, url: f.url, from: f.from, to: f.to }; }), events: S.D.events.map(function (e) { return { id: e.id, f: e.f, d: e.d, k: e.k, s: e.s, t: e.t }; }), hol: S.D.hol, rep: S.D.rep.map(function (y) { return { r: y.r, d: y.d, p: y.p, j: y.j, t: y.t, s: y.s }; }), alias: S.D.alias, repUrl: S.D.repUrl, at: S.D.at })); } catch (e) {}
+  try { ls.set('d4:data', JSON.stringify({ files: S.D.files.map(function (f) { return { id: f.id, name: f.name, type: f.type, url: f.url, from: f.from, to: f.to }; }), events: S.D.events.map(function (e) { return { id: e.id, f: e.f, d: e.d, k: e.k, s: e.s, t: e.t }; }), hol: S.D.hol, rep: S.D.rep.map(function (y) { return { r: y.r, d: y.d, p: y.p, j: y.j, t: y.t, s: y.s }; }), alias: S.D.alias, evDone: S.D.evDone || [], repUrl: S.D.repUrl, at: S.D.at })); } catch (e) {}
 }
 // 체크: 완료 <-> 진행(내용에 '대기'가 있으면 대기)
 function toggleDone(r) {
