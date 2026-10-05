@@ -410,6 +410,8 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .bdh > div b { display:block; font-size:17px; font-weight:800; letter-spacing:0; }
 .bdh > div small { display:block; font-size:11px; font-weight:800; color:var(--mute); letter-spacing:.08em; margin-top:2px; }
 .rpi .tx2 small { margin:0 0 1px; }
+.hwd { font-style:normal; font-size:.62em; font-weight:600; color:var(--mute); margin-left:5px; letter-spacing:0; }
+.it .d2, .it.dl .d2 { width:84px; font-size:12px; font-weight:600; color:var(--sub); letter-spacing:-.01em; }
 </style>
 </head>
 <body>
@@ -501,9 +503,10 @@ function addD(s, n) { var d = P(s); d.setDate(d.getDate() + n); return F(d); }
 function sunOf(s) { var d = P(s); d.setDate(d.getDate() - d.getDay()); return F(d); }
 function dDiff(a, b) { return Math.round((P(b) - P(a)) / 864e5); }
 function md(s) { var d = P(s); return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
-function dot(s) { var d = P(s); return (d.getMonth() + 1) + '.' + pad(d.getDate()); }
-function mdw(s) { return dot(s) + ' ' + W[P(s).getDay()] + '요일'; }
-function dw(s) { return dot(s) + ' ' + W[P(s).getDay()]; }
+// 날짜 표기 (루틴과 동일): 26.10.05 + 연한 작은 요일 / 좁은 곳은 26.10.05(월)
+function dot(s) { return s.slice(2).replace(/-/g, '.'); }
+function mdw(s) { return dot(s) + '<em class="hwd">' + W[P(s).getDay()] + '</em>'; }
+function dw(s) { return dot(s) + '(' + W[P(s).getDay()] + ')'; }
 function full(s) { return s + '(' + W[P(s).getDay()] + ')'; }
 function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 var TODAY = F(new Date());
@@ -530,7 +533,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005f';
+var APP_VER = '20261005g';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -613,7 +616,7 @@ function phd(sub, title, right) { return '<div class="phd"><div class="pt"><smal
 function navBar(sub, title, prevId, nextId, todayBtn) {
   return phd(sub, title, (todayBtn ? '<button class="tod" id="nT">오늘</button>' : '') + '<button id="' + prevId + '">‹</button><button id="' + nextId + '">›</button>');
 }
-function rng(a, b) { return dot(a) + ' – ' + dot(b); }
+function rng(a, b) { return dot(a) + ' – ' + b.slice(5).replace('-', '.'); }
 function itemHtml(e, showDate, noFile) {
   var f = e.file;
   return '<button class="it" data-e="' + esc(e.id) + '">' + (showDate ? '<span class="d2">' + dw(e.d) + '</span>' : '') +
@@ -647,7 +650,7 @@ function renderHome() {
   // MONTH
   var ml = L.filter(function (e) { return isDl(e) && e.d >= TODAY && e.d.slice(0, 7) === mo; });
   var wait = latestOpen(R0.filter(function (r) { return r.s === '대기' && r.d.slice(0, 7) === mo; }));
-  h += '<div class="bd"><div class="bdh"><div><b>' + mo.slice(0, 4) + '.' + mo.slice(5) + '</b><small>MONTH</small></div></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>' + mo.slice(0, 4) + '년 ' + (+mo.slice(5)) + '월</b><small>MONTH</small></div></div>' +
     bds('데드라인 · 공식', ml.length) + (ml.length ? ml.map(function (e) {
       var n = dDiff(TODAY, e.d);
       return '<div class="dlr"><span class="dd' + (n <= 3 ? ' soon' : '') + '">' + (n ? 'D-' + n : 'D-DAY') + '</span>' + itemHtml(e, true) + '</div>';
@@ -680,7 +683,7 @@ function renderMonthTeam() {
   var y = S.y, m = S.m, first = y + '-' + pad(m) + '-01', start = sunOf(first), mo = first.slice(0, 7);
   var last = F(new Date(y, m, 0)), end = addD(sunOf(last), 6), pf = S.pf && team().indexOf(S.pf) >= 0 ? S.pf : '';
   var rows = repOf(function (r) { return !pf || r.p === pf; });
-  var h = navBar(y + '년', m + '월', 'nP', 'nN', mo !== TODAY.slice(0, 7)) + modeSeg() +
+  var h = navBar('월간 일정', y + '년 ' + m + '월', 'nP', 'nN', mo !== TODAY.slice(0, 7)) + modeSeg() +
     '<div class="tabs2" id="pfl"><button data-p="" class="' + (pf ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-p="' + esc(n) + '" class="' + (pf === n ? 'on' : '') + '"><i style="background:' + dcol(n) + '"></i>' + esc(n) + '</button>'; }).join('') + '</div>';
   h += '<div class="mcal"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
@@ -710,7 +713,7 @@ function renderMonth() {
   if (S.mm === 'team') return renderMonthTeam();
   var y = S.y, m = S.m, first = y + '-' + pad(m) + '-01', start = sunOf(first), L = vis();
   var last = F(new Date(y, m, 0)), end = addD(sunOf(last), 6);
-  var h = navBar(y + '년', m + '월', 'nP', 'nN', first.slice(0, 7) !== TODAY.slice(0, 7)) + modeSeg() + filterBar();
+  var h = navBar('월간 일정', y + '년 ' + m + '월', 'nP', 'nN', first.slice(0, 7) !== TODAY.slice(0, 7)) + modeSeg() + filterBar();
   h += '<div class="mcal"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
     var l = onDay(d, L), w = P(d).getDay(), hl = hol(d), max = 4;
@@ -732,7 +735,7 @@ function renderMonth() {
 // WEEK: 하루씩 카드
 function renderWeek() {
   var ws = S.ws, we = addD(ws, 6), L = vis();
-  var h = navBar(ws.slice(0, 4) + '년 ' + (+ws.slice(5, 7)) + '월', rng(ws, we), 'nP', 'nN', ws !== sunOf(TODAY)) + filterBar();
+  var h = navBar('주간 일정', rng(ws, we), 'nP', 'nN', ws !== sunOf(TODAY)) + filterBar();
   for (var d = ws; d <= we; d = addD(d, 1)) h += dayCard(d, onDay(d, L));
   $('#main').innerHTML = h; bindFilter(); bindItems(); bindAdd(); bindRepLine();
   $('#nP').onclick = function () { S.ws = addD(S.ws, -7); render(); };
@@ -814,7 +817,7 @@ function openProj(id) {
 function openDay(d) {
   S.sel = d;
   var l = onDay(d), hl = hol(d);
-  $('#dyT').textContent = mdw(d) + (hl ? ' · ' + hl : '');
+  $('#dyT').innerHTML = mdw(d) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : '');
   var rr = repOf(function (r) { return r.d === d; });
   $('#dyB').innerHTML = (l.length ? l.map(function (e) { return itemHtml(e); }).join('') : '<div class="empty2">일정이 없어요</div>') +
     (rr.length ? '<div class="sec" style="margin:20px 2px 6px">업무보고<small>' + rr.length + '건</small></div>' + repBlock(rr) : '');
@@ -840,7 +843,7 @@ function drawEdit() {
   var ks = kindsOf(ED.f); if (ks.indexOf(ED.k) < 0) ED.k = ks[0];
   $('#edK').innerHTML = ks.map(function (k) { return '<button data-k="' + k + '" class="' + (ED.k === k ? 'on' : '') + '"><i style="background:' + KIND[k] + '"></i>' + k + '</button>'; }).join('');
   var f = S.D.FM[ED.f];
-  $('#edI').textContent = f ? (f.type === 'work' ? '업무일지 시트의 그 날짜 칸에 써요. (업무는 비어 있는 줄에, 대휴·휴가는 7행에)' : f.name + ' 시트에 써요 · ' + (f.from ? md(f.from) + ' – ' + md(f.to) + ' 사이 날짜만 가능' : '')) : '';
+  $('#edI').textContent = f ? (f.type === 'work' ? '업무일지 시트의 그 날짜 칸에 써요. (업무는 비어 있는 줄에, 대휴·휴가는 7행에)' : f.name + ' 시트에 써요 · ' + (f.from ? dot(f.from) + ' – ' + dot(f.to) + ' 사이 날짜만 가능' : '')) : '';
   $$('#edF button').forEach(function (b) { b.onclick = function () { ED.f = b.dataset.f; drawEdit(); }; });
   $$('#edK button').forEach(function (b) { b.onclick = function () { ED.k = b.dataset.k; drawEdit(); }; });
 }
@@ -848,7 +851,7 @@ $('#edS').onclick = function () {
   var t = $('#edX').value.trim(), d = $('#edD').value;
   if (!d) return toast('날짜를 선택해 주세요');
   if (!t) return toast('내용을 적어 주세요');
-  var f = S.D.FM[ED.f]; if (f.type === 'proj' && f.from && (d < f.from || d > f.to)) return toast('이 일정표에 없는 날짜예요 (' + md(f.from) + ' – ' + md(f.to) + ')');
+  var f = S.D.FM[ED.f]; if (f.type === 'proj' && f.from && (d < f.from || d > f.to)) return toast('이 일정표에 없는 날짜예요 (' + dot(f.from) + ' – ' + dot(f.to) + ')');
   var btn = $('#edS'); btn.classList.add('busy'); ED.lastF = ED.f;
   var e = ED.e, kSlot = function (k) { return k === '리터칭' ? '디자인' : k; };
   var p = e ? call('appEdit', S.pin, { id: e.id, old: e.t, f: ED.f, d: d, k: ED.k, t: t, moved: e.f !== ED.f || e.d !== d || kSlot(e.k) !== kSlot(ED.k) })
@@ -867,7 +870,7 @@ $('#fab').onclick = function () {
 };
 $('#setBtn').onclick = function () {
   $('#stB').innerHTML = S.D ? S.D.files.map(function (f) {
-    return '<a class="it" style="text-decoration:none;color:inherit" href="' + esc(f.url) + '" target="_blank"><span class="bar" style="background:' + f.color + '"></span><span class="m"><div>' + esc(f.type === 'work' ? '@4팀_업무일지' : f.name) + '</div><small>' + (f.type === 'work' ? '업무 일정' : '제작일정 · ' + (f.from ? md(f.from) + ' – ' + md(f.to) : '')) + ' · ' + S.D.events.filter(function (e) { return e.f === f.id; }).length + '건</small></span></a>';
+    return '<a class="it" style="text-decoration:none;color:inherit" href="' + esc(f.url) + '" target="_blank"><span class="bar" style="background:' + f.color + '"></span><span class="m"><div>' + esc(f.type === 'work' ? '@4팀_업무일지' : f.name) + '</div><small>' + (f.type === 'work' ? '업무 일정' : '제작일정 · ' + (f.from ? dot(f.from) + ' – ' + dot(f.to) : '')) + ' · ' + S.D.events.filter(function (e) { return e.f === f.id; }).length + '건</small></span></a>';
   }).join('') + (S.D.repUrl ? '<a class="it" style="text-decoration:none;color:inherit" href="' + esc(S.D.repUrl) + '" target="_blank"><span class="bar" style="background:' + RCOL + '"></span><span class="m"><div>@4팀_업무보고</div><small>업무보고 · ' + (S.D.rep || []).length + '건</small></span></a>' : '') : '';
   openBs('#st');
 };
@@ -1013,7 +1016,7 @@ function drawPaste() {
   var h = '', lastKey = '', n = 0;
   RP.rows.forEach(function (r, i) {
     var key = r.d + '|' + r.p;
-    if (key !== lastKey) { h += (lastKey ? '</div>' : '') + '<div class="rpv"><div class="rpvh"><b>' + esc(r.p) + '</b><small>' + esc(mdw(r.d)) + '</small></div>'; lastKey = key; r._pj = null; }
+    if (key !== lastKey) { h += (lastKey ? '</div>' : '') + '<div class="rpv"><div class="rpvh"><b>' + esc(r.p) + '</b><small>' + dw(r.d) + '</small></div>'; lastKey = key; r._pj = null; }
     var prev = RP.rows[i - 1];
     if (!prev || prev.raw !== r.raw || prev.d + prev.p !== r.d + r.p) {
       h += '<div class="rpvp"><select data-raw="' + esc(r.raw) + '">' + names.map(function (nm) { return '<option' + (nm === RP.map[r.raw] ? ' selected' : '') + '>' + esc(nm) + '</option>'; }).join('') +
