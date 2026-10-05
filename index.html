@@ -545,7 +545,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="team">TO DO</button><button data-v="spec">SPEC</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="spec">SPEC</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -630,8 +630,8 @@ var PROJ_K = ['디자인', '리터칭', '소속사', '데드라인', '공식'], 
 var PCOL = ['#6f9fe8', '#e08aa6', '#6dba8f', '#e2aa5e', '#a092e0', '#5fb4d4', '#e48f80', '#6cbcb2', '#c08fd8', '#e7a173'];
 var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TODAY.slice(0, 4), m: +TODAY.slice(5, 7), ws: sunOf(TODAY),
   off: JSON.parse(ls.get('d4:off') || '{}'), D: null, sel: null };
-if (S.view === 'designer') S.view = 'team';
-if (['home', 'month', 'project', 'team', 'spec'].indexOf(S.view) < 0) S.view = 'home';
+if (S.view === 'designer' || S.view === 'team') S.view = 'project';
+if (['home', 'month', 'project', 'spec'].indexOf(S.view) < 0) S.view = 'home';
 
 S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || ''; S.fold = !!ls.get('d4:fold'); S.lp = ls.get('d4:lp') || 'a'; S.ld = TODAY; S.tl = ls.get('d4:tl') || 'date';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
@@ -647,7 +647,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005u5';
+var APP_VER = '20261005u6';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1095,11 +1095,11 @@ function renderProject() {
   var tm = S.pm === 'team', lp = S.lp || 'a', lrg = dRange(lp, S.ld || TODAY); S.lrg = lp === 'a' ? null : lrg;
   var lcur = TODAY >= lrg[0] && TODAY <= lrg[1];
   var top = perHead('lSeg', lp, lrg, S.ld || TODAY);
-  var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
+  var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(tm ? [{ allw: 1, name: '__allw' }] : []).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
   var idx = Math.max(0, ps.findIndex(function (p) { return (p ? p.name : '') === (S.pj || ''); }));
   var h = top + '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
-    '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? (p.allp ? '전체(프로젝트별)' : esc(p.name)) : '전체(날짜별)') + '</button>'; }).join('') + '</div>' +
-    '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? (p && p.allp ? pjTeamProj() : p ? pjTeam(p) : pjTeamDate()) : p && p.allp ? pjListProj() : pjList(p)) + '</section>'; }).join('') + '</div>';
+    '<div class="tabs2" id="pjc">' + ps.map(function (p, i) { return '<button data-i="' + i + '">' + (p ? (p.allp ? '전체(프로젝트별)' : p.allw ? '전체(디자이너별)' : esc(p.name)) : '전체(날짜별)') + '</button>'; }).join('') + '</div>' +
+    '<div class="pjs" id="pjs">' + ps.map(function (p) { return '<section>' + (tm ? (p && p.allp ? pjTeamProj() : p && p.allw ? pjTeam(null) : p ? pjTeam(p) : pjTeamDate()) : p && p.allp ? pjListProj() : pjList(p)) + '</section>'; }).join('') + '</div>';
   $('#main').innerHTML = h; bindItems(); bindRep();
   $$('#lSeg button').forEach(function (b) { b.onclick = function () { S.lp = b.dataset.p; ls.set('d4:lp', S.lp); render(); }; });
   if ($('#lSegD')) $('#lSegD').onchange = function () { if (this.value) { S.ld = this.value; render(); } };
