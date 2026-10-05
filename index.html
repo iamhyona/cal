@@ -514,6 +514,8 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .hm2 .arw .tod { width:auto; height:30px; padding:0 9px; font-size:12px; }
 .mfold { display:flex; justify-content:flex-end; margin:-4px 0 8px; }
 .mfold .tod { border:0; background:#fff; border-radius:999px; padding:6px 11px; font-size:12px; font-weight:700; color:var(--sub); }
+.mcal .grid > button { min-height:118px; }
+.tmv .mcal .grid > button { min-height:72px; }
 </style>
 </head>
 <body>
@@ -636,7 +638,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005t8';
+var APP_VER = '20261005t9';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -942,7 +944,7 @@ function renderMonthTeam() {
     '<div class="tabs2" id="pfl"><button data-p="" class="' + (pf ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-p="' + esc(n) + '" class="' + (pf === n ? 'on' : '') + '"><i style="background:' + dcol(n) + '"></i>' + esc(n) + '</button>'; }).join('') + '</div>';
   h += '<div class="mcal' + (S.fold ? ' fold' : '') + '"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
-    var l = rows.filter(function (r) { return r.d === d; }), w = P(d).getDay(), hl = hol(d), max = 4, bars = [];
+    var l = rows.filter(function (r) { return r.d === d; }), w = P(d).getDay(), hl = hol(d), max = 6, bars = [];
     if (pf) { var gj = {}; l.forEach(function (r) { if (!gj[r.j]) { gj[r.j] = { n: 0, k: 0 }; bars.push(r.j); } gj[r.j].n++; if (r.s === '완료') gj[r.j].k++; });
       bars = bars.map(function (j) { return '<span class="ev' + (gj[j].k === gj[j].n ? ' fin' : '') + '"><i style="background:' + pinfo(j).color + '"></i>' + esc(j.split(/\s+/)[0]) + '</span>'; }); }
     else { var gp = {}; l.forEach(function (r) { if (!gp[r.p]) { gp[r.p] = { n: 0, k: 0 }; } gp[r.p].n++; if (r.s === '완료') gp[r.p].k++; });
@@ -972,7 +974,7 @@ function renderMonth() {
   var h = calHead(y, m) + filterBar();
   h += '<div class="mcal' + (S.fold ? ' fold' : '') + '"><div class="wd">' + W.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
-    var l = onDay(d, L), w = P(d).getDay(), hl = hol(d), max = 4;
+    var l = onDay(d, L), w = P(d).getDay(), hl = hol(d), max = 6;
     h += '<button data-d="' + d + '" class="' + (d.slice(0, 7) !== first.slice(0, 7) ? 'out ' : '') + (d === TODAY ? 'td ' : '') + (hl ? 'hol ' : '') + (w === 0 ? 'sun ' : w === 6 ? 'sat ' : '') + (l.length ? 'has ' : '') + (S.sel === d ? 'sel' : '') + '">' +
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
       l.slice(0, l.length > max ? max - 1 : max).map(function (e) { return '<span class="ev' + (e.k === '데드라인' || e.k === '공식' ? ' dl' : '') + (e.k === '소속사' ? ' ag' : '') + '"><i style="background:' + e.file.color + '"></i>' + esc(e.t) + '</span>'; }).join('') +
