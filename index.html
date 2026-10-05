@@ -647,7 +647,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005u3';
+var APP_VER = '20261005u4';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -993,7 +993,7 @@ function renderMonth() {
     h += '<button data-d="' + d + '" class="' + (d.slice(0, 7) !== first.slice(0, 7) ? 'out ' : '') + (d === TODAY ? 'td ' : '') + (hl ? 'hol ' : '') + (w === 0 ? 'sun ' : w === 6 ? 'sat ' : '') + (l.length ? 'has ' : '') + (S.sel === d ? 'sel' : '') + '">' +
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
       l.slice(0, l.length > max ? max - 1 : max).map(function (e) { return '<span class="ev' + (e.k === '데드라인' || e.k === '공식' ? ' dl' : '') + (e.k === '소속사' ? ' ag' : '') + '"><i style="background:' + e.file.color + '"></i>' + esc(e.t) + '</span>'; }).join('') +
-      (l.length > max ? '<span class="evm">+' + (l.length - max + 1) + '</span>' : '') + (repOf(function (r) { return r.d === d; }).length ? '<span class="rpm"></span>' : '') + '</button>';
+      (l.length > max ? '<span class="evm">+' + (l.length - max + 1) + '</span>' : '') + '</button>';
   }
   h += '</div></div>';
   var mo2 = first.slice(0, 7), me = L.filter(function (e) { return e.d.slice(0, 7) === mo2; }).slice().sort(function (a, b) { return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; }), md2 = [];
