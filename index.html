@@ -647,7 +647,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261005u4';
+var APP_VER = '20261005u5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -941,7 +941,7 @@ function dcol(n) { var i = team().indexOf(n); return DCOL[(i < 0 ? 0 : i) % DCOL
 function dshort(n) { return n.length === 3 ? n.slice(1) : n; }
 // 날짜별 접는 카드: 오늘만 기본으로 열림, 연 상태는 기억
 function foldDay(d, sub, body) {
-  var op = S.dop && d in S.dop ? S.dop[d] : d === TODAY;
+  var op = S.dop && d in S.dop ? S.dop[d] : d >= TODAY;
   return '<details class="day fday' + (d === TODAY ? ' td' : '') + '" data-fd="' + d + '"' + (op ? ' open' : '') + '><summary class="dh"><b>' + mdw(d) + (hol(d) ? '<em class="hwd">' + esc(hol(d)) + '</em>' : '') + (sub ? '<small>' + sub + '</small>' : '') + '</b><i class="chev"></i></summary>' + body + '</details>';
 }
 function bindFoldDay() { S.dop = S.dop || {}; $$('details.fday').forEach(function (x) { x.ontoggle = function () { S.dop[x.dataset.fd] = x.open; }; }); }
