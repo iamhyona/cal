@@ -543,6 +543,19 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .ckw > .it { border-top:0 !important; }
 .list .ckw:first-child, .pjnow + .ckw { border-top:0; }
 .hm2a .aseg button { padding-left:8px; padding-right:8px; }
+.cpre { margin:0 0 12px; } .cpre button small { margin-left:5px; font-size:11px; opacity:.6; }
+.cres .ct span { display:flex; align-items:center; gap:6px; } .cbest { font-style:normal; font-size:11px; font-weight:800; color:#fff; background:var(--acc); border-radius:999px; padding:2px 7px; }
+.cres.best { box-shadow:inset 0 0 0 2px var(--acc); }
+.cst { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:0 0 12px; } .cst > div { background:var(--chip); border-radius:14px; padding:12px 12px 10px; min-width:0; }
+.cst small { display:block; font-size:11px; color:var(--mute); font-weight:600; } .cst b { display:block; font-size:22px; font-weight:800; letter-spacing:-0.02em; margin-top:4px; white-space:nowrap; } .cst b i { font-style:normal; font-size:12px; color:var(--sub); margin:0 1px; font-weight:700; }
+.cst em { display:block; font-style:normal; font-size:11px; color:var(--mute); margin-top:2px; } .cst.sm { margin:12px 0 0; } .cst.sm b { font-size:18px; }
+.csv { display:block; width:100%; height:auto; margin:2px 0 6px; } .cds { font-size:12px; color:var(--mute); }
+.cwarn, .cok { margin-top:10px; font-size:13px; border-radius:12px; padding:10px 12px; line-height:1.5; } .cwarn { background:#fff4e5; color:#b45309; } .cok { background:#e8f7ee; color:#1f9d55; }
+.cpy { margin-top:12px; width:100%; border:0; border-radius:12px; background:var(--txt); color:#fff; font-weight:700; font-size:14px; padding:12px 0; }
+.cfit { margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; } .cfit small { width:100%; font-size:12px; color:var(--mute); font-weight:600; } .cfit button { border:0; background:var(--chip); border-radius:999px; padding:7px 12px; font-size:13px; font-weight:600; color:var(--sub); }
+.cset summary { list-style:none; cursor:pointer; margin:0; } .cset summary::-webkit-details-marker { display:none; }
+#cP button { font-size:13px; }
+.cst.c2 { grid-template-columns:1.6fr 1fr; }
 @media (max-width:520px) { .hm2a { gap:6px; } .hm2a .arw .tod { display:none; } .hm2a .aseg button { padding-left:5px; padding-right:5px; } .hm2a .arw button { width:26px; height:26px; } }
 .hm2 .arw .fbtn { font-size:18px; font-weight:500; line-height:1; }
 .phd b, .hm2 .hmt { font-size:18px !important; font-weight:800; letter-spacing:-0.02em; }
@@ -569,7 +582,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="spec">SPEC</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="spec">SPEC</button><button data-v="calc">CALC</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -671,7 +684,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261006v10';
+var APP_VER = '20261006v11';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -866,6 +879,167 @@ function chipVis(bar, smooth) {
   else if (r.right > b.right - pad) to = bar.scrollLeft + (r.right - (b.right - pad));
   if (to !== null) bar.scrollTo({ left: Math.max(0, to), behavior: smooth ? 'smooth' : 'auto' });
 }
+/* ───── CALC: 국전·46전 절수 · 판걸이 · 로스 계산 (2026.10.06) ─────
+   전지: 46전 788×1091 · 국전 636×939 (mm)
+   여유 기본값: 도련 사방 3mm · 물림 10mm(긴 변 쪽) · 나머지 여백 5mm — 인쇄소마다 달라서 고칠 수 있게 */
+var PAPERS = [{ k: '46', n: '46전', s: 788, l: 1091 }, { k: 'kuk', n: '국전', s: 636, l: 939 }];
+var PRESETS = [['국판', 148, 210], ['신국판', 152, 225], ['46판', 128, 188], ['크라운판', 176, 248], ['46배판', 188, 257], ['국배판(A4)', 210, 297],
+  ['B5', 182, 257], ['A3', 297, 420], ['엽서', 100, 148], ['포토카드', 55, 85], ['스티커 A6', 105, 148]];
+var CUTS = [2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64];
+function cq() {
+  var d = { t: 'book', m: 'size', w: 148, h: 210, p: 64, q: 500, sp: 8, fl: 0, cw: 148, ch: 210, bl: 3, gr: 10, sd: 5, ex: 5, paper: '46', cut: 16 };
+  try { var o = JSON.parse(ls.get('d4:calc') || 'null'); if (o) for (var k in o) d[k] = o[k]; } catch (e) {}
+  return d;
+}
+function cqSave(c) { try { ls.set('d4:calc', JSON.stringify(c)); } catch (e) {} }
+function pow2(n) { var p = 1; while (p * 2 <= n) p *= 2; return n >= 1 ? p : 0; }
+// 전지 한 장에 몇 개: 그대로 · 돌려서 · 섞어서(남는 띠에 돌려 넣기). 책자는 접지 때문에 가로·세로 2의 거듭제곱 격자만
+function fitSheet(P, iw, ih, c, book) {
+  var uL = P.l - 2 * c.sd, uS = P.s - c.gr - c.sd, best = { n: 0 };
+  if (iw <= 0 || ih <= 0 || uL <= 0 || uS <= 0) return best;
+  var put = function (n, rects, desc) { if (n > best.n) best = { n: n, rects: rects, desc: desc }; };
+  [[iw, ih], [ih, iw]].forEach(function (o, r) {
+    var a = o[0], b = o[1], cols = Math.floor(uL / a), rows = Math.floor(uS / b);
+    if (book) { cols = pow2(cols); rows = pow2(rows); }
+    var rects = []; for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) rects.push([i * a, j * b, a, b, r]);
+    put(cols * rows, rects, cols + '×' + rows + (r ? ' (돌려서)' : ''));
+    if (book) return;
+    // 아래쪽 남는 띠에 돌려서 더 넣기
+    for (var k = 0; k <= Math.floor(uS / b); k++) {
+      var rem = uS - k * b, c1 = Math.floor(uL / a), c2 = Math.floor(uL / b), r2 = Math.floor(rem / a), n = k * c1 + c2 * r2;
+      if (n > best.n && r2 > 0 && k > 0) {
+        var rs = []; for (i = 0; i < c1; i++) for (j = 0; j < k; j++) rs.push([i * a, j * b, a, b, r]);
+        for (i = 0; i < c2; i++) for (j = 0; j < r2; j++) rs.push([i * b, k * b + j * a, b, a, 1 - r]);
+        put(n, rs, c1 + '×' + k + ' + ' + c2 + '×' + r2 + ' 섞어서');
+      }
+    }
+    // 오른쪽 남는 띠에 돌려서 더 넣기
+    for (k = 0; k <= Math.floor(uL / a); k++) {
+      var remL = uL - k * a, r1 = Math.floor(uS / b), c3 = Math.floor(remL / b), r3 = Math.floor(uS / a), n2 = k * r1 + c3 * r3;
+      if (n2 > best.n && c3 > 0 && k > 0) {
+        var rs2 = []; for (i = 0; i < k; i++) for (j = 0; j < r1; j++) rs2.push([i * a, j * b, a, b, r]);
+        for (i = 0; i < c3; i++) for (j = 0; j < r3; j++) rs2.push([k * a + i * b, j * a, b, a, 1 - r]);
+        put(n2, rs2, k + '×' + r1 + ' + ' + c3 + '×' + r3 + ' 섞어서');
+      }
+    }
+  });
+  best.uL = uL; best.uS = uS;
+  return best;
+}
+// 표준 절 칸 크기 (긴 변부터 반씩, 3·6·12…절은 긴 변 3등분 후 반씩)
+function cutCell(P, n) {
+  var L = P.l, Sx = P.s, k = n;
+  if (n % 3 === 0) { L = L / 3; k = n / 3; if (L < Sx) { var t0 = L; L = Sx; Sx = t0; } }
+  while (k > 1) { L = L / 2; k /= 2; if (L < Sx) { var t = L; L = Sx; Sx = t; } }
+  return [Math.floor(Sx), Math.floor(L)];
+}
+function cutName(P, n) { return P.n + ' ' + n + '절'; }
+// 결과 그림: 전지 · 여백(물림) · 배치
+function sheetSvg(P, f, c) {
+  var W = P.l, H = P.s, sc = 300 / W, h = H * sc, s = '';
+  s += '<rect x="0" y="0" width="' + (W * sc).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="#f2f4f6"/>';
+  s += '<rect x="0" y="' + ((H - c.gr) * sc).toFixed(1) + '" width="' + (W * sc).toFixed(1) + '" height="' + (c.gr * sc).toFixed(1) + '" fill="#fde2e2"/>';
+  (f.rects || []).forEach(function (r) {
+    s += '<rect x="' + ((c.sd + r[0]) * sc).toFixed(1) + '" y="' + ((c.sd + r[1]) * sc).toFixed(1) + '" width="' + (r[2] * sc - 0.8).toFixed(1) + '" height="' + (r[3] * sc - 0.8).toFixed(1) + '" rx="1.5" fill="' + (r[4] ? '#a5c8fb' : '#3182f6') + '" fill-opacity=".85"/>';
+  });
+  return '<svg class="csv" viewBox="0 0 300 ' + h.toFixed(1) + '">' + s + '</svg>';
+}
+function fmtN(v, d) { return (+v).toLocaleString(undefined, { maximumFractionDigits: d || 0 }); }
+function yeon(sheets) { return fmtN(sheets / 500, 2) + '연'; }
+// 한 품목(크기 → 전지별 결과) 계산
+function calcItem(fw, fh, c, book) {
+  // 책자는 접어서 붙어 있는 쪽끼리 도련을 나눠 쓰므로 쪽마다 도련 한 번, 낱장·전개도는 사방 도련
+  var bb = book ? +c.bl : 2 * c.bl, iw = fw + bb, ih = fh + bb;
+  return PAPERS.map(function (P) {
+    var f = fitSheet(P, iw, ih, c, book), use = f.n ? f.n * fw * fh / (P.s * P.l) : 0;
+    return { P: P, f: f, n: f.n, use: use, loss: 1 - use };
+  }).sort(function (a, b) { return (b.n ? 1 : 0) - (a.n ? 1 : 0) || a.loss - b.loss; });
+}
+function resCard(r, i, extra, spec) {
+  if (!r.n) return '<div class="card cres"><div class="ct">' + r.P.n + '<small>' + r.P.s + '×' + r.P.l + '</small></div><div class="empty2">이 크기는 ' + r.P.n + '에 안 들어가요</div></div>';
+  return '<div class="card cres' + (i === 0 ? ' best' : '') + '"><div class="ct"><span>' + r.P.n + (i === 0 ? '<em class="cbest">추천</em>' : '') + '</span><small>' + r.P.s + '×' + r.P.l + 'mm</small></div>' +
+    '<div class="cst"><div><small>전지 1장에</small><b>' + r.n + '<i>개</i></b></div><div><small>사용률</small><b>' + Math.round(r.use * 100) + '<i>%</i></b></div><div><small>로스</small><b class="' + (r.loss > .35 ? 'dn' : '') + '">' + Math.round(r.loss * 100) + '<i>%</i></b></div></div>' +
+    sheetSvg(r.P, r.f, CQ) + '<div class="cds">배치 ' + esc(r.f.desc) + ' · 빨간 띠 = 물림</div>' + (extra || '') +
+    (spec ? '<button class="cpy" data-cpy="' + esc(spec) + '">사양서용 복사</button>' : '') + '</div>';
+}
+var CQ = null;
+function renderCalc() {
+  var c = CQ = cq(), h = '';
+  h += '<div class="seg" id="cT">' + [['book', '책자'], ['sheet', '낱장'], ['pack', '전개도']].map(function (o) { return '<button data-t="' + o[0] + '" class="' + (c.t === o[0] ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  h += '<div class="seg" id="cM">' + [['size', '사이즈 → 추천'], ['cut', '절수 → 판형']].map(function (o) { return '<button data-m="' + o[0] + '" class="' + (c.m === o[0] ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  var num = function (k, lb, unit, step) { return '<div class="f"><label>' + lb + (unit ? ' (' + unit + ')' : '') + '</label><input type="number" inputmode="decimal" data-k="' + k + '" value="' + c[k] + '"' + (step ? ' step="' + step + '"' : '') + '></div>'; };
+  if (c.m === 'size') {
+    h += '<div class="card"><div class="ct">' + (c.t === 'pack' ? '펼친 크기 (전개도)' : '완성 크기') + '<small>재단 후</small></div>';
+    if (c.t !== 'pack') h += '<div class="chips cpre">' + PRESETS.map(function (p) { return '<button data-pw="' + p[1] + '" data-ph="' + p[2] + '" class="' + (+c.w === p[1] && +c.h === p[2] ? 'on' : '') + '">' + p[0] + '<small>' + p[1] + '×' + p[2] + '</small></button>'; }).join('') + '</div>';
+    h += '<div class="frow">' + num(c.t === 'pack' ? 'cw' : 'w', '가로', 'mm') + num(c.t === 'pack' ? 'ch' : 'h', '세로', 'mm') + '</div>';
+    if (c.t === 'book') h += '<div class="frow">' + num('p', '본문', '쪽') + num('q', '부수', '부') + '</div><div class="frow">' + num('sp', '책등', 'mm', '0.5') + num('fl', '날개', 'mm') + '</div>';
+    else h += '<div class="frow">' + num('q', '수량', '개') + num('ex', '여분', '%') + '</div>';
+    h += '</div>';
+  } else {
+    h += '<div class="card"><div class="ct">전지 · 절수</div><div class="seg" id="cP">' + PAPERS.map(function (P) { return '<button data-pp="' + P.k + '" class="' + (c.paper === P.k ? 'on' : '') + '">' + P.n + ' ' + P.s + '×' + P.l + '</button>'; }).join('') + '</div>' +
+      '<div class="chips">' + CUTS.map(function (n) { return '<button data-cut="' + n + '" class="' + (+c.cut === n ? 'on' : '') + '">' + n + '절</button>'; }).join('') + '</div></div>';
+  }
+  h += '<details class="card cset"><summary class="ct">여유 설정<small>도련 ' + c.bl + ' · 물림 ' + c.gr + ' · 여백 ' + c.sd + 'mm</small></summary><div class="frow" style="margin-top:12px">' + num('bl', '도련(사방)', 'mm') + num('gr', '물림', 'mm') + num('sd', '여백', 'mm') + '</div>' +
+    (c.t === 'book' ? '<div class="frow">' + num('ex', '여분', '%') + '</div>' : '') + '<div class="legend" style="justify-content:flex-start">인쇄소마다 물림·여백이 달라요 · 결(종목/횡목) 방향은 인쇄소와 확인</div></details>';
+  h += '<div id="cRes">' + calcOut(c) + '</div>';
+  $('#main').innerHTML = h; bindCalc();
+}
+function calcOut(c) {
+  var w = +c.w, hh = +c.h, q = Math.max(0, +c.q || 0), ex = 1 + (+c.ex || 0) / 100, out = '';
+  if (c.m === 'cut') {
+    var P = PAPERS.filter(function (x) { return x.k === c.paper; })[0] || PAPERS[0], n = +c.cut;
+    var uS = P.s - c.gr - c.sd, uL = P.l - 2 * c.sd, P2 = { n: P.n, s: uS, l: uL }, cell = cutCell(P2, n), raw = cutCell(P, n);
+    var bb = c.t === 'book' ? +c.bl : 2 * c.bl, mw = cell[0] - bb, mh = cell[1] - bb;
+    var fits = PRESETS.filter(function (p) { return (p[1] <= mw && p[2] <= mh); }).sort(function (a, b) { return b[1] * b[2] - a[1] * a[2]; }).slice(0, 4);
+    out += '<div class="card cres best"><div class="ct"><span>' + cutName(P, n) + '</span><small>칸 ' + raw[0] + '×' + raw[1] + 'mm</small></div>' +
+      '<div class="cst c2"><div><small>최대 완성 크기</small><b>' + Math.floor(mw) + '<i>×</i>' + Math.floor(mh) + '<i>mm</i></b></div><div><small>' + (c.t === 'book' ? '전지 1장(앞뒤)' : '전지 1장에') + '</small><b>' + (c.t === 'book' ? n * 2 + '<i>쪽</i>' : n + '<i>개</i>') + '</b></div></div>' +
+      '<div class="cds">물림·여백·도련을 빼고 계산한 값이에요</div>' +
+      (fits.length ? '<div class="cfit"><small>이 안에 들어가는 판형</small>' + fits.map(function (p) { return '<button data-pw="' + p[1] + '" data-ph="' + p[2] + '">' + p[0] + ' ' + p[1] + '×' + p[2] + '</button>'; }).join('') + '</div>' : '') + '</div>';
+    return out;
+  }
+  if (c.t === 'book') {
+    var pages = Math.max(0, +c.p || 0), R = calcItem(w, hh, c, true);
+    out += '<div class="sec">본문<small>' + w + '×' + hh + ' · ' + pages + '쪽 · ' + fmtN(q) + '부</small></div>';
+    R.forEach(function (r, i) {
+      if (!r.n) { out += resCard(r, i); return; }
+      var per = r.n * 2, dae = Math.floor(pages / 16), rest = pages % 16, sheets = Math.ceil(pages / per * q * ex);
+      var tip = pages % per ? '<div class="cwarn">' + per + '쪽 단위가 아니라 ' + (per - pages % per) + '쪽이 남아요 · ' + (Math.floor(pages / per) * per || per) + '쪽 또는 ' + Math.ceil(pages / per) * per + '쪽이면 딱 맞아요</div>' : '<div class="cok">' + per + '쪽 단위로 딱 맞아요</div>';
+      var ex2 = '<div class="cst sm"><div><small>전지 1장(앞뒤)</small><b>' + per + '<i>쪽</i></b></div><div><small>대수 (16쪽)</small><b>' + dae + '<i>대</i>' + (rest ? ' +' + rest + '<i>쪽</i>' : '') + '</b></div><div><small>필요 전지</small><b>' + fmtN(sheets) + '<i>장</i></b><em>' + yeon(sheets) + '</em></div></div>' + tip;
+      out += resCard(r, i, ex2, '본문 ' + w + '×' + hh + 'mm · ' + pages + 'p · ' + r.P.n + ' ' + r.n + '판걸이(1장 ' + per + 'p) · ' + fmtN(q) + '부 · 전지 ' + fmtN(sheets) + '장(' + yeon(sheets) + ', 여분 ' + c.ex + '% 포함)');
+    });
+    var cw = 2 * w + (+c.sp || 0) + 2 * (+c.fl || 0), Rc = calcItem(cw, hh, c, false);
+    out += '<div class="sec">표지<small>펼친 크기 ' + fmtN(cw, 1) + '×' + hh + ' (앞뒤 + 책등 ' + (+c.sp || 0) + (+c.fl ? ' + 날개 ' + c.fl + '×2' : '') + ')</small></div>';
+    Rc.forEach(function (r, i) {
+      if (!r.n) { out += resCard(r, i); return; }
+      var sh = Math.ceil(q / r.n * ex);
+      out += resCard(r, i, '<div class="cst sm"><div><small>필요 전지</small><b>' + fmtN(sh) + '<i>장</i></b><em>' + yeon(sh) + '</em></div></div>', '표지 ' + fmtN(cw, 1) + '×' + hh + 'mm · ' + r.P.n + ' ' + r.n + '개 걸이 · 전지 ' + fmtN(sh) + '장(' + yeon(sh) + ')');
+    });
+    return out;
+  }
+  var pw = c.t === 'pack' ? +c.cw : w, ph = c.t === 'pack' ? +c.ch : hh, R2 = calcItem(pw, ph, c, false);
+  out += '<div class="sec">' + (c.t === 'pack' ? '전개도' : '낱장') + '<small>' + pw + '×' + ph + ' · ' + fmtN(q) + '개</small></div>';
+  R2.forEach(function (r, i) {
+    if (!r.n) { out += resCard(r, i); return; }
+    var sh = Math.ceil(q / r.n * ex);
+    out += resCard(r, i, '<div class="cst sm"><div><small>필요 전지</small><b>' + fmtN(sh) + '<i>장</i></b><em>' + yeon(sh) + ' · 여분 ' + c.ex + '%</em></div></div>',
+      (c.t === 'pack' ? '전개도 ' : '') + pw + '×' + ph + 'mm · ' + r.P.n + ' ' + r.n + '개 걸이 · ' + fmtN(q) + '개 · 전지 ' + fmtN(sh) + '장(' + yeon(sh) + ')');
+  });
+  return out;
+}
+function bindCalc() {
+  var c = CQ, upd = function (keepInputs) { cqSave(c); if (keepInputs) { $('#cRes').innerHTML = calcOut(c); bindRes(); } else { var y0 = window.scrollY; renderCalc(); window.scrollTo(0, y0); } };
+  $$('#cT button').forEach(function (b) { b.onclick = function () { c.t = b.dataset.t; upd(); }; });
+  $$('#cM button').forEach(function (b) { b.onclick = function () { c.m = b.dataset.m; upd(); }; });
+  $$('#cP button').forEach(function (b) { b.onclick = function () { c.paper = b.dataset.pp; upd(); }; });
+  $$('[data-cut]').forEach(function (b) { b.onclick = function () { c.cut = +b.dataset.cut; upd(); }; });
+  $$('.cpre [data-pw]').forEach(function (b) { b.onclick = function () { c.w = +b.dataset.pw; c.h = +b.dataset.ph; upd(); }; });
+  $$('[data-k]').forEach(function (i) { i.oninput = function () { c[i.dataset.k] = i.value === '' ? '' : +i.value; upd(true); }; });
+  bindRes();
+  function bindRes() {
+    $$('.cfit [data-pw]').forEach(function (b) { b.onclick = function () { c.w = +b.dataset.pw; c.h = +b.dataset.ph; c.m = 'size'; upd(); }; });
+    $$('[data-cpy]').forEach(function (b) { b.onclick = function () { var t = b.dataset.cpy; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('복사했어요 · 사양서에 붙여넣기'); }, function () { prompt('복사해서 쓰세요', t); }); }; });
+  }
+}
 function render() {
   if (!S.D) return;
   var keep = {}; $$('.tabs2[id]').forEach(function (t) { keep[t.id] = t.scrollLeft; });
@@ -876,8 +1050,8 @@ function render() {
 }
 function renderView() {
   $$('#nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.view); });
-  $('#fab').style.display = S.view === 'spec' ? 'none' : '';
-  ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, designer: renderDesigner, team: renderTeam, spec: renderSpec })[S.view]();
+  $('#fab').style.display = S.view === 'spec' || S.view === 'calc' ? 'none' : '';
+  ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, designer: renderDesigner, team: renderTeam, spec: renderSpec, calc: renderCalc })[S.view]();
 }
 $$('#nav button').forEach(function (b) { b.onclick = function () { S.view = b.dataset.v; ls.set('d4:view', S.view); window.scrollTo(0, 0); render(); }; });
 $('#brand').onclick = function () { S.view = 'home'; ls.set('d4:view', 'home'); window.scrollTo(0, 0); render(); };
