@@ -685,7 +685,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261007v2';
+var APP_VER = '20261007v3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1132,7 +1132,7 @@ function renderHome() {
   var te = L.filter(function (e) { return e.d === H; }), tr = R0.filter(function (r) { return r.d === H; });
   h += '<div class="bd"><div class="bdh"><div><b>' + (isT ? 'TODAY' : 'DAY') + '</b></div><button class="add" data-add="' + H + '">+ 일정</button></div>' +
     bds('제작일정') + (te.length ? te.map(function (e) { return itemHtml(e, true); }).join('') : '<div class="empty2">' + (isT ? '오늘' : '이날') + ' 일정이 없어요</div>') +
-    (tr.length ? bds('팀 업무') + repBlock(tr, { byPerson: true }) : '') + '</div>';
+    '</div>';   // TODAY에는 제작일정만 (팀 업무 뺌 — 2026.10.07)
   // WEEK
   var wl = L.filter(function (e) { return e.d > H && e.d <= we; });
   var carry = latestOpen(R0.filter(function (r) { return r.d >= ws && r.d < H && r.s !== '완료'; }))
