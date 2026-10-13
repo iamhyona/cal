@@ -589,7 +589,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">LIST</button><button data-v="tl">TIMELINE</button><button data-v="spec">SPEC</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">TODO</button><button data-v="tl">TIMELINE</button><button data-v="spec">SPEC</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -1711,7 +1711,7 @@ function parseRep(txt) {
     if (/^[가-힣]{2,4}$/.test(s) && (team().indexOf(s) >= 0 || pname(s) !== s)) return;
     if (/^(수정됨|오전|오후|\d{1,2}:\d{2}|\d)$/.test(s) || /^(오전|오후)\s*\d{1,2}:\d{2}$/.test(s)) return;
     s = s.replace(/^\[[^\]]*\]\s*(\[[^\]]*\]\s*)?/, '');
-    var pm = s.match(/^\d{1,2}\s*[.)]\s*(.+)$/);
+    var pm = s.match(/^\d{1,2}\s*[.)]\s*(.+)$/) || s.match(/^[#＃]\s*(.+)$/);
     if (pm) { pj = { raw: pm[1].trim(), n: 0 }; out.push({ d: cur.d, p: cur.p, raw: pj.raw, t: '', head: 1 }); return; }
     var t = s.replace(/^[-·•*ㄴ→>]+\s*/, '').trim(); if (!t || !pj) return;
     var hd = out[out.length - 1]; if (hd && hd.head && hd.raw === pj.raw && !hd.t) { hd.t = t; delete hd.head; }
