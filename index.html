@@ -1395,7 +1395,7 @@ function renderSheetList() {
     '<div class="sps"><select id="gA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.ga === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
   h += '<div class="bd spl">' + (F.length ? F.map(function (o) {
     var f = o.f, per = f.from ? dot(f.from) + ' – ' + dot(f.to || f.from) : '';
-    return '<div class="spi gsi"><button class="m" data-gp="' + f.id + '"><small><i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:' + f.color + '"></i>' + esc(o.artist || '—') + (per ? ' · ' + per : '') + '</small><div>' + esc(o.title) + '</div>' +
+    return '<div class="spi gsi"><button class="m" data-gp="' + f.id + '"><small><i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:' + f.color + '"></i>' + esc([o.artist, per].filter(String).join(' · ')) + '</small><div>' + esc(o.title) + '</div>' +
       (o.next ? '<small style="margin:3px 0 0;font-weight:500">다음 · ' + dot(o.next.d) + ' ' + esc(o.next.t) + '</small>' : '<small style="margin:3px 0 0;font-weight:500">남은 일정 없음</small>') + '</button>' +
       '<a class="gsl" href="' + esc(f.url) + '" target="_blank" rel="noopener" title="구글시트에서 열기">' + SH + '</a></div>';
   }).join('') : '<div class="empty2">찾는 제작일정이 없어요</div>') + '</div>';
