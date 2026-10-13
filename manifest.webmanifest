@@ -1,6 +1,6 @@
 {
-  "name": "SCHEDULE",
-  "short_name": "SCHEDULE",
+  "name": "CUE",
+  "short_name": "CUE",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
