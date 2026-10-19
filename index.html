@@ -609,6 +609,16 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .qkq input { flex:1; min-width:0; border:0; outline:0; font-size:16px; background:none; color:var(--txt); }
 .qkq svg { width:18px; height:18px; color:var(--mute); flex:none; }
 .qkc { background:#fff; border-radius:18px; padding:16px 16px 8px; margin-bottom:10px; }
+.qkh { display:block; width:100%; padding:0 0 8px; position:relative; cursor:pointer; }
+.qkc:not(.open) .qkh { padding-bottom:6px; }
+.qkh h4 { align-items:center; }
+.qkt { min-width:0; }
+.qki { flex:none; width:28px; height:28px; border:0; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; padding:0; }
+.qki svg { width:15px; height:15px; }
+.qkh h4 em + .qki, .qkt + .qki { margin-left:4px; }
+.qkh::after { content:''; position:absolute; right:2px; top:6px; width:7px; height:7px; border-right:2px solid var(--mute); border-bottom:2px solid var(--mute); transform:rotate(45deg); transition:transform .15s; }
+.qkc.open .qkh::after { transform:rotate(-135deg); top:10px; }
+.qkn { margin-left:auto; margin-right:22px; font-size:12px; font-weight:600; color:var(--mute); }
 .qkc h4 { margin:0; display:flex; align-items:baseline; gap:8px; font-size:16px; font-weight:800; }
 .qkc h4 em { font-style:normal; font-size:11px; font-weight:700; color:var(--mute); background:var(--chip); border-radius:6px; padding:2px 6px; }
 .qkc .ad { font-size:12px; color:var(--mute); margin-top:4px; line-height:1.45; }
@@ -617,25 +627,27 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .qkp .nm { flex:1; min-width:0; font-size:14px; }
 .qkp .nm b { font-weight:700; } .qkp .nm a { color:var(--sub); text-decoration:none; margin-left:6px; font-size:13px; }
 .qkp .nm small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
-.qkp button { flex:none; border:0; border-radius:999px; font-size:12px; font-weight:700; padding:7px 11px; background:var(--chip); color:var(--sub); }
-.qkp button.pr { background:var(--txt); color:#fff; }
+.qkp .nm { cursor:pointer; } .qkp .nm .tl { color:var(--sub); margin-left:6px; font-size:13px; }
+.qkpr { flex:none; width:38px; height:38px; border:0; border-radius:50%; background:var(--txt); color:#fff; display:inline-flex; align-items:center; justify-content:center; padding:0; }
+.qkpr svg { width:18px; height:18px; }
 .qkto { background:var(--chip); border-radius:14px; padding:12px 14px; font-size:14px; line-height:1.5; }
 .qkto b { font-size:16px; }
 #qkLabel { display:none; }
+.qklb { background:#fff; box-shadow:inset 0 0 0 1px var(--line); border-radius:12px; aspect-ratio:297/210; display:flex; flex-direction:column; justify-content:center; padding:7%; word-break:keep-all; }
+.qklb .ad { font-size:20px; font-weight:800; line-height:1.35; color:#000; }
+.qklb .co { font-size:15px; font-weight:700; line-height:1.4; color:#000; margin-top:10px; }
+.qklb .ct { font-size:15px; font-weight:500; line-height:1.4; color:#000; }
 @media print {
-  @page { margin:0; }
+  @page { size:A4 portrait; margin:0; }
   body > *:not(#qkLabel) { display:none !important; }
-  html, body { background:#fff !important; }
+  html, body { background:#fff !important; margin:0 !important; padding:0 !important; }
   #qkLabel { display:block !important; }
-  .lb { box-sizing:border-box; padding:14mm; font-family:inherit; color:#000; page-break-after:always; display:flex; flex-direction:column; }
-  .lb.a4 { width:210mm; height:296mm; } .lb.a5 { width:210mm; height:148mm; padding:10mm 14mm; } .lb.sm { width:100mm; height:150mm; padding:6mm; }
-  .lb .tg { font-size:13pt; font-weight:800; letter-spacing:.2em; border-bottom:2pt solid #000; padding-bottom:2mm; margin-bottom:4mm; }
-  .lb .co { font-size:34pt; font-weight:800; line-height:1.15; word-break:keep-all; }
-  .lb .ps { font-size:24pt; font-weight:700; margin-top:3mm; }
-  .lb .ad { font-size:17pt; line-height:1.4; margin-top:5mm; word-break:keep-all; }
-  .lb .bx { margin-top:auto; border-top:1pt solid #000; padding-top:4mm; font-size:13pt; line-height:1.6; }
-  .lb.a5 .co { font-size:28pt; } .lb.a5 .ps { font-size:20pt; } .lb.a5 .ad { font-size:14pt; margin-top:3mm; } .lb.a5 .bx { font-size:11pt; }
-  .lb.sm .co { font-size:20pt; } .lb.sm .ps { font-size:15pt; } .lb.sm .ad { font-size:11pt; } .lb.sm .tg, .lb.sm .bx { font-size:9pt; }
+  .lbp { width:210mm; height:296mm; position:relative; overflow:hidden; }
+  .lbh { position:absolute; left:0; right:0; top:0; height:148mm; box-sizing:border-box; padding:0 20mm; display:flex; flex-direction:column; justify-content:center; color:#000; word-break:keep-all; }
+  .lbh .ad { font-size:32pt; font-weight:800; line-height:1.35; }
+  .lbh .co { font-size:24pt; font-weight:700; line-height:1.4; margin-top:6mm; }
+  .lbh .ct { font-size:24pt; font-weight:500; line-height:1.4; }
+  .lbcut { position:absolute; left:0; right:0; top:148mm; border-top:0.4mm dashed #888; }
 }
 .wlcal .grid > button { min-height:70px; }
 .wlxpic { display:block; margin-top:10px; text-align:center; background:#fff; box-shadow:inset 0 0 0 1px var(--line); border-radius:14px; padding:13px; font-size:14px; font-weight:700; color:var(--sub); cursor:pointer; }
@@ -778,18 +790,16 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow" style="margin-top:12px"><div class="f"><label>업체 / 소속</label><input id="qeC" maxlength="60" placeholder="예) 아이엠프린팅"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>도로명 주소</label><input id="qeA" maxlength="160"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>지번 주소</label><input id="qeA2" maxlength="160" placeholder="비워 둬도 돼요"></div></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>담당자</label><input id="qeP" maxlength="40"></div><div class="f"><label>연락처</label><input id="qeH" maxlength="40" inputmode="tel"></div></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>비고</label><input id="qeM" maxlength="120" placeholder="비워 둬도 돼요"></div></div>
+  <div class="frow qeper" style="margin-top:12px"><div class="f"><label>담당자</label><input id="qeP" maxlength="40"></div><div class="f"><label>연락처</label><input id="qeH" maxlength="40" inputmode="tel"></div></div>
+  <div class="frow qeper" style="margin-top:12px"><div class="f"><label>비고</label><input id="qeM" maxlength="120" placeholder="비워 둬도 돼요"></div></div>
   <div class="acts"><button class="del" id="qeDel">삭제</button><button class="save" id="qeS">저장</button></div>
 </div>
 <div class="bs" id="qp">
   <h3>라벨 인쇄</h3>
-  <div id="qpTo"></div>
-  <div class="fl">주소</div><div class="chips" id="qpA"></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>내용물</label><input id="qpX" maxlength="60" placeholder="예) 시즌그리팅 샘플 2부"></div></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>보내는 분</label><input id="qpF" maxlength="40" placeholder="예) 사운드컨텐츠 4팀 박현아"></div><div class="f"><label>보내는 분 연락처</label><input id="qpFH" maxlength="40" inputmode="tel"></div></div>
-  <div class="fl">크기</div><div class="chips" id="qpZ"></div>
+  <div class="fl" style="margin-top:0">주소</div><div class="chips" id="qpA"></div>
+  <div class="fl">미리보기 · A4 반 장</div><div id="qpTo"></div>
   <div class="acts"><button class="save" id="qpGo">인쇄하기</button></div>
+</div>
 </div>
 <div class="bs" id="wlx">
   <h3>WORK LOG 빠른 입력</h3>
@@ -849,7 +859,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019qk3';
+var APP_VER = '20261019qk7';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2379,7 +2389,7 @@ if (S.pin) { var c0 = cached(); if (c0) { setData(c0); render(); } load(); } els
 
 /* ───── QUICK (2026-10-19): 퀵 연락처 시트 '연락처' 탭 · 쇼핑백 라벨 인쇄 ───── */
 var QKK = ['소속사', '거래처', '인쇄소', '장소'];
-S.qk = null;
+S.qk = null; S.qkOpen = {};
 function qkLoad(force) {
   if (S.qk && !force) return Promise.resolve(S.qk);
   if (!S.qk) { try { S.qk = JSON.parse(ls.get('d4:qk') || 'null'); } catch (e) {} }
@@ -2408,28 +2418,38 @@ function qkList() {
     if (!G[key]) { G[key] = []; order.push(key); }
     G[key].push(r);
   });
+  S.qkG = G;
   $('#qkL').innerHTML = order.length ? order.map(function (key) {
     var L = G[key], f = L[0], ad = L.map(function (r) { return r.a; }).filter(String)[0] || L.map(function (r) { return r.a2; }).filter(String)[0] || '';
-    return '<div class="qkc"><h4>' + esc(f.c || '(업체 없음)') + (f.k ? '<em>' + esc(f.k) + '</em>' : '') + '</h4>' + (ad ? '<div class="ad">' + esc(ad) + '</div>' : '') +
-      L.map(function (r) {
-        return '<div class="qkp"><div class="nm"><b>' + esc(r.p || '담당자 없음') + '</b>' + (r.t ? '<a href="tel:' + esc(r.t.replace(/[^\d+]/g, '')) + '">' + esc(r.t) + '</a>' : '') + (r.m ? '<small>' + esc(r.m) + '</small>' : '') + '</div>' +
-          '<button data-qe="' + r.r + '">수정</button><button class="pr" data-qp="' + r.r + '">인쇄</button></div>';
-      }).join('') + '</div>';
+    var open = !!q || !!S.qkOpen[key];
+    return '<div class="qkc' + (open ? ' open' : '') + '"><div class="qkh" role="button" data-qo="' + esc(key) + '"><h4><span class="qkt">' + esc(f.c || '(업체 없음)') + '</span>' + (f.k ? '<em>' + esc(f.k) + '</em>' : '') +
+      '<button class="qki" data-qce="' + esc(key) + '" aria-label="업체 수정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button><button class="qki" data-qca="' + esc(key) + '" aria-label="담당자 추가"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>' +
+      '<span class="qkn">' + L.length + '명</span></h4>' + (ad ? '<div class="ad">' + esc(ad) + '</div>' : '') + '</div>' +
+      (!open ? '' : L.map(function (r) {
+        return '<div class="qkp"><div class="nm" role="button" data-qe="' + r.r + '"><b>' + esc(r.p || '담당자 없음') + '</b>' + (r.t ? '<span class="tl">' + esc(r.t) + '</span>' : '') + (r.m ? '<small>' + esc(r.m) + '</small>' : '') + '</div>' +
+          '<button class="qkpr" data-qp="' + r.r + '" aria-label="라벨 인쇄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg></button></div>';
+      }).join('')) + '</div>';
   }).join('') : '<div class="ld">' + (q || k ? '찾는 연락처가 없어요' : '연락처가 없어요. ＋로 추가해 주세요') + '</div>';
+  $$('[data-qo]').forEach(function (b) { b.onclick = function () { var k = b.dataset.qo; S.qkOpen[k] = S.qkq ? true : !S.qkOpen[k]; qkList(); }; });
+  $$('[data-qce]').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); openQe(null, S.qkG[b.dataset.qce]); }; });
+  $$('[data-qca]').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); var f = S.qkG[b.dataset.qca][0]; openQe({ k: f.k, c: f.c, a: f.a, a2: f.a2, p: '', t: '', m: '', isNew: true }); }; });
   $$('[data-qe]').forEach(function (b) { b.onclick = function () { openQe(qkRow(b.dataset.qe)); }; });
   $$('[data-qp]').forEach(function (b) { b.onclick = function () { openQp(qkRow(b.dataset.qp)); }; });
 }
 function qkRow(r) { return (S.qk.rows || []).filter(function (x) { return String(x.r) === String(r); })[0]; }
 
 var QE = null;
-function openQe(r) {
-  QE = { r: r || null, k: r ? r.k : (ls.get('d4:qkk') || '거래처') };
-  $('#qeT').textContent = r ? '연락처 고치기' : '연락처 추가';
-  $('#qeC').value = r ? r.c : ''; $('#qeA').value = r ? r.a : ''; $('#qeA2').value = r ? r.a2 : '';
-  $('#qeP').value = r ? r.p : ''; $('#qeH').value = r ? r.t : ''; $('#qeM').value = r ? r.m : '';
-  $('#qeDel').style.display = r ? '' : 'none'; unsure($('#qeDel'));
+// r: 담당자 한 줄 (r.isNew면 업체 정보만 채운 새 담당자) · co: 업체 전체 줄(업체 정보 수정)
+function openQe(r, co) {
+  var src = co ? co[0] : r, isRow = !!(r && !r.isNew);
+  QE = { r: isRow ? r : null, co: co || null, k: src ? src.k : (ls.get('d4:qkk') || '거래처') };
+  $('#qeT').textContent = co ? '업체 정보 고치기' : isRow ? '담당자 고치기' : r ? '담당자 추가' : '연락처 추가';
+  $('#qeC').value = src ? src.c : ''; $('#qeA').value = src ? src.a : ''; $('#qeA2').value = src ? src.a2 : '';
+  $('#qeP').value = isRow ? r.p : ''; $('#qeH').value = isRow ? r.t : ''; $('#qeM').value = isRow ? r.m : '';
+  $$('#qe .qeper').forEach(function (x) { x.style.display = co ? 'none' : ''; });
+  $('#qeDel').style.display = isRow || co ? '' : 'none'; unsure($('#qeDel'));
   qeDraw();
-  var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#qe'); }, was ? 230 : 0);
+  var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#qe'); if (r && r.isNew) $('#qeP').focus(); }, was ? 230 : 0);
 }
 function qeDraw() {
   $('#qeK').innerHTML = QKK.map(function (x) { return '<button data-k="' + x + '" class="' + (QE.k === x ? 'on' : '') + '">' + x + '</button>'; }).join('');
@@ -2440,41 +2460,51 @@ function qkSave(o, btn, msg) {
   return call('appQuickSet', S.pin, o).then(function (res) { S.qk = res; ls.set('d4:qk', JSON.stringify(res)); closeBs(); toast(msg); render(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { btn.classList.remove('busy'); });
 }
+function qkSeq(list, btn, msg) {
+  btn.classList.add('busy'); var res = null;
+  return list.reduce(function (p, o) { return p.then(function () { return call('appQuickSet', S.pin, o).then(function (r) { res = r; }); }); }, Promise.resolve())
+    .then(function () { if (res) { S.qk = res; ls.set('d4:qk', JSON.stringify(res)); } closeBs(); toast(msg); render(); })
+    .catch(function (e) { if (res) { S.qk = res; ls.set('d4:qk', JSON.stringify(res)); render(); } toast(errMsg(e)); }).then(function () { btn.classList.remove('busy'); });
+}
 $('#qeS').onclick = function () {
-  var o = { k: QE.k, c: $('#qeC').value.trim(), a: $('#qeA').value.trim(), a2: $('#qeA2').value.trim(), p: $('#qeP').value.trim(), t: $('#qeH').value.trim(), m: $('#qeM').value.trim() };
+  var c = { k: QE.k, c: $('#qeC').value.trim(), a: $('#qeA').value.trim(), a2: $('#qeA2').value.trim() };
+  if (QE.co) {
+    if (!c.c) return toast('업체 이름을 적어 주세요');
+    return qkSeq(QE.co.map(function (r) { return Object.assign({ r: r.r, old: { c: r.c, p: r.p, t: r.t }, p: r.p, t: r.t, m: r.m }, c); }), $('#qeS'), '업체 정보를 고쳤어요');
+  }
+  var o = Object.assign(c, { p: $('#qeP').value.trim(), t: $('#qeH').value.trim(), m: $('#qeM').value.trim() });
   if (!o.c && !o.p) return toast('업체나 담당자를 적어 주세요');
   if (QE.r) { o.r = QE.r.r; o.old = { c: QE.r.c, p: QE.r.p, t: QE.r.t }; }
   qkSave(o, $('#qeS'), '저장했어요');
 };
 sure($('#qeDel'), function () {
+  if (QE.co) {
+    // 아래 줄부터 지워야 위 줄 번호가 안 밀림
+    return qkSeq(QE.co.slice().sort(function (a, b) { return b.r - a.r; }).map(function (r) { return { r: r.r, old: { c: r.c, p: r.p, t: r.t }, del: true }; }), $('#qeDel'), '업체를 삭제했어요');
+  }
   if (!QE.r) return;
   qkSave({ r: QE.r.r, old: { c: QE.r.c, p: QE.r.p, t: QE.r.t }, del: true }, $('#qeDel'), '삭제했어요');
 });
 
-/* 라벨 인쇄 */
-var QP = null, QPZ = [['a4', 'A4 한 장'], ['a5', 'A4 반 장'], ['sm', '100×150 라벨']];
+/* 라벨 인쇄: A4 세로, 위쪽 반 장에 주소 · 업체 · 담당자 연락처, 가운데 절취선 */
+var QP = null;
+function qpWho(r) { var p = String(r.p || '').trim(); if (p && !/님$/.test(p)) p += '님'; return [p, r.t].filter(String).join(' '); }
+function qpHtml(r) {
+  return '<div class="ad">' + esc(r[QP.a] || r.a || r.a2 || '') + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '');
+}
 function openQp(r) {
-  QP = { r: r, a: r.a ? 'a' : 'a2', z: ls.get('d4:qpz') || 'a4' };
-  $('#qpX').value = ''; $('#qpF').value = ls.get('d4:qpf') || '사운드컨텐츠 4팀'; $('#qpFH').value = ls.get('d4:qpfh') || '';
+  QP = { r: r, a: r.a ? 'a' : 'a2' };
   qpDraw();
   var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#qp'); }, was ? 230 : 0);
 }
 function qpDraw() {
-  var r = QP.r;
-  $('#qpTo').innerHTML = '<div class="qkto"><b>' + esc(r.c) + '</b>' + (r.p ? ' · ' + esc(r.p) : '') + (r.t ? '<br>' + esc(r.t) : '') + '<br>' + esc(r[QP.a] || '주소 없음') + '</div>';
-  var A = [['a', '도로명'], ['a2', '지번']].filter(function (x) { return r[x[0]]; });
+  var r = QP.r, A = [['a', '도로명'], ['a2', '지번']].filter(function (x) { return r[x[0]]; });
   $('#qpA').innerHTML = A.length ? A.map(function (x) { return '<button data-a="' + x[0] + '" class="' + (QP.a === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') : '<span class="srcinfo">시트에 주소가 없어요</span>';
   $$('#qpA button').forEach(function (b) { b.onclick = function () { QP.a = b.dataset.a; qpDraw(); }; });
-  $('#qpZ').innerHTML = QPZ.map(function (x) { return '<button data-z="' + x[0] + '" class="' + (QP.z === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('');
-  $$('#qpZ button').forEach(function (b) { b.onclick = function () { QP.z = b.dataset.z; ls.set('d4:qpz', QP.z); qpDraw(); }; });
+  $('#qpTo').innerHTML = '<div class="qklb">' + qpHtml(r) + '</div>';
 }
 $('#qpGo').onclick = function () {
-  var r = QP.r, x = $('#qpX').value.trim(), f = $('#qpF').value.trim(), fh = $('#qpFH').value.trim();
-  ls.set('d4:qpf', f); ls.set('d4:qpfh', fh);
-  $('#qkLabel').innerHTML = '<div class="lb ' + QP.z + '"><div class="tg">받는 분 · TO</div>' +
-    '<div class="co">' + esc(r.c) + '</div>' + (r.p || r.t ? '<div class="ps">' + esc([r.p, r.t].filter(String).join('  ')) + '</div>' : '') +
-    '<div class="ad">' + esc(r[QP.a] || '') + '</div>' +
-    '<div class="bx">' + (x ? '<div><b>내용물</b>  ' + esc(x) + '</div>' : '') + (f || fh ? '<div><b>보내는 분</b>  ' + esc([f, fh].filter(String).join('  ')) + '</div>' : '') + '<div>' + esc(TODAY.replace(/-/g, '.')) + '</div></div></div>';
+  $('#qkLabel').innerHTML = '<div class="lbp"><div class="lbh">' + qpHtml(QP.r) + '</div><div class="lbcut"></div></div>';
   closeBs();
   setTimeout(function () { window.print(); }, 260);
 };
