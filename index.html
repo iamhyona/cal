@@ -681,7 +681,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 }
 .wlcal .grid > button { min-height:70px; }
 .wlbars { display:flex; flex-wrap:wrap; gap:3px; padding:4px 3px 0; }
-.wlbars i { width:14px; height:6px; border-radius:3px; display:block; }
+.wlbars i { width:7px; height:7px; border-radius:50%; display:block; }
 .wl1pv { margin-top:10px; min-height:20px; font-size:13px; color:var(--sub); line-height:1.6; }
 .wl1pv b { color:var(--txt); }
 #wl1More { background:var(--chip); color:var(--sub); }
@@ -691,6 +691,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .wlsum:first-of-type { border-top:0; }
 .wlsum b { font-size:14px; min-width:48px; }
 .wlo { display:flex; gap:10px; align-items:baseline; width:100%; border:0; background:var(--chip); border-radius:12px; padding:10px 12px; margin-top:6px; text-align:left; font-size:13px; color:var(--sub); }
+.wlrs { display:block; margin-top:3px; font-size:12px; color:var(--mute); white-space:pre-line; }
 .wlo.on { box-shadow:inset 0 0 0 1.5px var(--txt); }
 .wlo b { white-space:nowrap; flex:none; }
 .tdrg { flex-wrap:wrap; gap:8px; }
@@ -812,6 +813,8 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="fl" style="margin-top:0">디자이너를 선택하세요</div><div class="chips" id="wlP2"></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>날짜</label><input id="wlD" type="date"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>출근</label><input id="wlI" type="time"></div><div class="f"><label>퇴근</label><input id="wlO" type="time"></div></div>
+  <div class="fl">저녁식사 시간 <small style="font-weight:500;color:var(--mute)">· 실 근무시간에서 빠져요</small></div><div class="chips" id="wlDn"></div>
+  <div class="frow" style="margin-top:12px"><div class="f"><label>야근 사유 <small style="font-weight:500">· 근무표 날짜 칸 댓글과 연동</small></label><textarea id="wlRs" rows="3" maxlength="500" style="width:100%;border:0;background:var(--chip);border-radius:12px;padding:12px;font-size:15px;line-height:1.5;outline:0;resize:none" placeholder="예) 크래비티 2027 SG 아웃박스 키비주얼 시안"></textarea></div></div>
   <div class="fl">체크</div><div class="chips" id="wlK"></div>
   <div class="frow wlex" style="margin-top:12px;display:none"><div class="f"><label>외근 내용</label><input id="wlEx" maxlength="80" placeholder="예) 인쇄 감리 · 파주"></div></div>
   <div class="frow wltx" style="margin-top:12px"><div class="f"><label>야근택시비</label><input id="wlFare" inputmode="numeric" placeholder="예) 23400"></div></div>
@@ -852,7 +855,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <h3>WORK LOG 한 줄 쓰기</h3>
   <div class="chips" id="wl1P"></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>날짜</label><input id="wl1D" type="date"></div></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>한 줄로 적기</label><input id="wl1T" maxlength="120" placeholder="예) 출근 · 퇴근 · 야식 혜선 이시 · 택시 23400" autocomplete="off"></div></div>
+  <div class="frow" style="margin-top:12px"><div class="f"><label>한 줄로 적기</label><input id="wl1T" maxlength="120" placeholder="예) 09:00/21:00 (저녁 30분) 사유 크래비티 시안" autocomplete="off"></div></div>
   <div id="wl1Pv" class="wl1pv"></div>
   <p class="srcinfo">출근·퇴근은 4팀 근무표(디자인본부근무현황)와 같이 저장돼요.</p>
   <div class="acts"><button class="del" id="wl1More">자세히</button><button class="save" id="wl1S">저장</button></div>
@@ -906,7 +909,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlt';
+var APP_VER = '20261019wlu';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2373,7 +2376,7 @@ sure($('#teDel'), function () {
 /* ───── WORK LOG (2026-10-19): 출근·퇴근·야근·야근식사·외근·야근택시 — 시트 @4팀_TODO_연도 'WORK LOG' 탭 ───── */
 var WLK = [['tx', '야근택시']], WLT = [['fd', '야근식사'], ['tx', '야근택시']];
 // 9시 출근·18시 퇴근 그대로인 날은 달력에 안 보이게 (야식·택시가 있으면 보임)
-function wlOdd(r) { var i = String(r.i || ''), o = String(r.o || ''); if (r.fd || r.tx) return true; if (!i && !o) return false; return !(/^0?9:00$/.test(i) && /^18:00$/.test(o)); }
+function wlOdd(r) { var i = String(r.i || ''), o = String(r.o || ''); if (r.fd || r.tx || r.dn || r.rs) return true; if (!i && !o) return false; return !(/^0?9:00$/.test(i) && /^18:00$/.test(o)); }
 function wlRows(fn) { return (S.D.wl || []).filter(fn); }
 function wlTags(r) { return WLT.filter(function (k) { return r[k[0]]; }).map(function (k) { return k[1]; }); }
 function won(n) { return (+n || 0).toLocaleString('ko-KR'); }
@@ -2417,7 +2420,7 @@ function openWl(d, p) {
 function wlLoad() {
   var r = WLS.p ? wlRows(function (x) { return x.d === WLS.d && x.p === WLS.p; })[0] : null;
   WLS.r = r || null; WLS.k = {}; WLK.forEach(function (k) { WLS.k[k[0]] = !!(r && r[k[0]]); });
-  $('#wlD').value = WLS.d; $('#wlI').value = r ? r.i : ''; $('#wlO').value = r ? r.o : ''; $('#wlEx').value = r ? r.exn : ''; $('#wlFare').value = r && r.fare ? r.fare : ''; $('#wlM').value = r ? r.m : '';
+  $('#wlD').value = WLS.d; $('#wlI').value = r ? r.i : ''; $('#wlO').value = r ? r.o : ''; $('#wlEx').value = r ? r.exn : ''; $('#wlFare').value = r && r.fare ? r.fare : ''; $('#wlM').value = r ? r.m : ''; WLS.dn = r ? +r.dn || 0 : 0; $('#wlRs').value = r ? r.rs || '' : '';
   $('#wlDel').style.display = r ? '' : 'none';
   wlDraw();
 }
@@ -2426,11 +2429,13 @@ function wlDraw() {
   $$('#wlP2 button').forEach(function (b) { b.onclick = function () { WLS.p = b.dataset.n; WLS.d = $('#wlD').value || WLS.d; wlLoad(); }; });
   $('#wlK').innerHTML = WLK.map(function (k) { return '<button data-k="' + k[0] + '" class="' + (WLS.k[k[0]] ? 'on' : '') + '">' + k[1] + '</button>'; }).join('');
   $$('#wlK button').forEach(function (b) { b.onclick = function () { WLS.k[b.dataset.k] = !WLS.k[b.dataset.k]; wlDraw(); }; });
+  $('#wlDn').innerHTML = [[0, '없음'], [30, '30분'], [60, '1시간']].map(function (x) { return '<button data-dn="' + x[0] + '" class="' + (+WLS.dn === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('');
+  $$('#wlDn button').forEach(function (b) { b.onclick = function () { WLS.dn = +b.dataset.dn; wlDraw(); }; });
   $('#wl .wlex').style.display = WLS.k.ex ? '' : 'none';
   $('#wl .wltx').style.display = WLS.k.tx ? '' : 'none';
   var others = wlRows(function (x) { return x.d === WLS.d; }).sort(function (a, b) { return team().indexOf(a.p) - team().indexOf(b.p); });
   $('#wlDay').innerHTML = others.length ? '<div class="fl">' + dw(WLS.d) + ' 기록</div>' + others.map(function (x) {
-    return '<button class="wlo' + (x.p === WLS.p ? ' on' : '') + '" data-wo="' + esc(x.p) + '"><b style="color:' + dcol(x.p) + '">' + esc(x.p) + '</b><span>' + esc([x.i && x.o ? x.i + '–' + x.o : x.i || x.o].concat(wlTags(x)).filter(String).join(' · ')) + '</span></button>';
+    return '<button class="wlo' + (x.p === WLS.p ? ' on' : '') + '" data-wo="' + esc(x.p) + '"><b style="color:' + dcol(x.p) + '">' + esc(x.p) + '</b><span>' + esc([x.i && x.o ? x.i + '–' + x.o : x.i || x.o, x.dn ? '저녁 ' + x.dn + '분' : ''].concat(wlTags(x).filter(function (t) { return t !== '야근식사' || !x.dn; })).filter(String).join(' · ')) + (x.rs ? '<small class="wlrs">' + esc(x.rs) + '</small>' : '') + '</span></button>';
   }).join('') : '';
   $$('[data-wo]').forEach(function (b) { b.onclick = function () { WLS.p = b.dataset.wo; wlLoad(); }; });
 }
@@ -2438,7 +2443,7 @@ $('#wlD').onchange = function () { if (this.value) { WLS.d = this.value; wlLoad(
 $('#wlS').onclick = function () {
   if (!WLS.p) return toast('디자이너를 골라 주세요');
   var d = $('#wlD').value; if (!d) return toast('날짜를 골라 주세요');
-  var o = { d: d, p: WLS.p, i: $('#wlI').value, o: $('#wlO').value, ot: false, fd: !!$('#wlM').value.trim(), ex: WLS.k.ex, exn: WLS.k.ex ? $('#wlEx').value.trim() : '', tx: WLS.k.tx, fare: WLS.k.tx ? +String($('#wlFare').value).replace(/[^\d]/g, '') || 0 : 0, m: $('#wlM').value.trim() };
+  var o = { d: d, p: WLS.p, i: $('#wlI').value, o: $('#wlO').value, ot: false, fd: !!$('#wlM').value.trim() || !!WLS.dn, dn: +WLS.dn || 0, rs: $('#wlRs').value.trim(), ex: WLS.k.ex, exn: WLS.k.ex ? $('#wlEx').value.trim() : '', tx: WLS.k.tx, fare: WLS.k.tx ? +String($('#wlFare').value).replace(/[^\d]/g, '') || 0 : 0, m: $('#wlM').value.trim() };
   var b = $('#wlS'); b.classList.add('busy');
   call('appWlSet', S.pin, o).then(function (res) { S.D.wl = res.wl || S.D.wl; saveCache(); closeBs(); toast('저장했어요'); render(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
@@ -2645,7 +2650,7 @@ function wlParse(txt, baseD, baseP, one) {
     var line = raw.replace(/\s+/g, ' ').trim(); if (!line) return;
     var d = wlDate(line, cur.d); if (d) { if (d !== cur.d) free = null; cur.d = d; }
     var who = one ? '' : wlWho(line); if (who) { if (who !== cur.p) { free = null; pend = ''; } cur.p = who; }
-    var T = wlTimes(line.replace(/(20\d\d)\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}일?/, '').replace(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/, '').replace(/\[[^\]]*(오전|오후)[^\]]*\]/, function (q) { return q; })), r = rec(); if (!r) return;
+    var T = wlTimes(line.replace(/(?:야근\s*)?사유.*$/, '').replace(/\(?\s*(?:저녁|석식|식사|휴게)[^)]*\)?/, ' ').replace(/(20\d\d)\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}일?/, '').replace(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/, '').replace(/\[[^\]]*(오전|오후)[^\]]*\]/, function (q) { return q; })), r = rec(); if (!r) return;
     var k0 = kw(line);
     if (T.length) {
       var pre = k0 && line.search(/출근|도착|퇴근|귀가/) < T[0].i; // '출근 9:50' 형 vs '9:50 출근' 형
@@ -2660,6 +2665,9 @@ function wlParse(txt, baseD, baseP, one) {
     } else if (k0) {
       if (free) { setT(r, k0, free); free = null; } else pend = k0;
     }
+    var dnm = line.match(/(?:저녁|석식|식사|휴게)\s*(?:시간)?\s*[:：]?\s*(\d{1,3})\s*분/) || line.match(/(?:저녁|석식|식사|휴게)\s*(?:시간)?\s*[:：]?\s*(\d(?:\.\d)?)\s*시간/);
+    if (dnm) { put(r, 'dn', /시간/.test(dnm[0].replace(/^[^\d]*/, '')) ? Math.round(+dnm[1] * 60) : +dnm[1]); put(r, 'fd', true); }
+    var rsm = line.match(/(?:야근\s*)?사유\s*[:：]?\s*(.+)$/); if (rsm) put(r, 'rs', rsm[1].trim());
     var fm0 = line.match(/(야식|야근\s*식사|저녁\s*식사|저녁밥|식대)\s*[:：]?\s*(.*)/);
     if (fm0) {
       put(r, 'fd', true);
@@ -2677,8 +2685,8 @@ function wlParse(txt, baseD, baseP, one) {
 }
 function wlMergeOld(r) {
   var o = (S.D.wl || []).filter(function (x) { return x.d === r.d && x.p === r.p; })[0] || {};
-  var out = { d: r.d, p: r.p }, F = ['i', 'o', 'ot', 'fd', 'ex', 'exn', 'tx', 'fare', 'm'];
-  F.forEach(function (f) { out[f] = r.set[f] ? r[f] : (o[f] != null ? o[f] : (f === 'fare' ? 0 : /^(ot|fd|ex|tx)$/.test(f) ? false : '')); });
+  var out = { d: r.d, p: r.p }, F = ['i', 'o', 'ot', 'fd', 'ex', 'exn', 'tx', 'fare', 'm', 'dn', 'rs'];
+  F.forEach(function (f) { out[f] = r.set[f] ? r[f] : (o[f] != null ? o[f] : (f === 'fare' || f === 'dn' ? 0 : /^(ot|fd|ex|tx)$/.test(f) ? false : '')); });
   out.old = !!o.p; return out;
 }
 var WLX = [];
@@ -2746,7 +2754,7 @@ function openWl1(d, p) {
   wl1Draw();
   var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#wl1'); }, was ? 230 : 0);
 }
-function wl1Text(o) { return [o.i, o.o].filter(String).join(' ') + (o.fd ? ' 야식' + (o.m ? ' ' + o.m : '') : '') + (o.tx ? ' 택시' + (o.fare ? ' ' + o.fare : '') : ''); }
+function wl1Text(o) { return [o.i, o.o].filter(String).join('/') + (o.dn ? ' (저녁 ' + o.dn + '분)' : '') + (o.fd && o.m ? ' 야식 ' + o.m : '') + (o.tx ? ' 택시' + (o.fare ? ' ' + o.fare : '') : ''); }
 function nowHM() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 function wl1Parse() {
   var t = $('#wl1T').value.trim(); if (!t || !WL1.p) return null;
@@ -2762,7 +2770,7 @@ function wl1Draw() {
   $$('#wl1P button').forEach(function (b) { b.onclick = function () { WL1.p = b.dataset.n; ls.set('d4:wl1p', WL1.p); var o = (S.D.wl || []).filter(function (x) { return x.d === ($('#wl1D').value || WL1.d) && x.p === WL1.p; })[0]; if (o && !$('#wl1T').value.trim()) $('#wl1T').value = wl1Text(o); wl1Draw(); }; });
   var x = wl1Parse();
   $('#wl1Pv').innerHTML = !WL1.p ? '디자이너를 골라 주세요' : !x ? '"출근"만 적으면 지금 시각으로 기록해요 · 예) 출근 / 퇴근 / 9:50 23:10 야식 혜선 이시 택시 23400' :
-    '<b>' + esc(x.p) + '</b> · ' + esc(dw(x.d)) + ' · ' + esc([x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '') + (x.fd && x.m ? ' · 야식: ' + x.m : '')) + (x.old ? ' · 덮어쓰기' : '');
+    '<b>' + esc(x.p) + '</b> · ' + esc(dw(x.d)) + ' · ' + esc([x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '') + (x.dn ? ' · 저녁 ' + x.dn + '분' : '') + (x.fd && x.m ? ' · 야식: ' + x.m : '') + (x.rs ? ' · 사유: ' + x.rs : '')) + (x.old ? ' · 덮어쓰기' : '');
 }
 $('#wl1T').oninput = wl1Draw;
 $('#wl1D').onchange = function () { WL1.d = this.value || WL1.d; wl1Draw(); };
