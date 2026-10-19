@@ -735,11 +735,16 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .tdex svg { width:15px; height:15px; display:block; } .tdex:not(.sure) { display:inline-flex; align-items:center; justify-content:center; }
 #exPicT { display:inline-flex; align-items:center; } #exPicT .ip { width:15px; height:15px; }
 /* 동그라미 아이콘 단추: 아이콘을 가로·세로 정가운데로 (iOS 기본 여백·글줄 높이 제거) */
-.ib, .pjb, .spgo2, .qki, .tded:not(.on), .tdshi, .arw button:not(.tod), #spBack, .tdex:not(.sure), .tdstar, .gsl { display:inline-flex !important; align-items:center; justify-content:center; padding:0 !important; line-height:0; -webkit-appearance:none; appearance:none; }
+.ib:not([style*="none"]), .pjb, .spgo2, .qki, .tded:not(.on), .tdshi, .arw button:not(.tod), #spBack, .tdex:not(.sure), .tdstar, .gsl { display:inline-flex !important; align-items:center; justify-content:center; padding:0 !important; line-height:0; -webkit-appearance:none; appearance:none; }
 .ib svg, .pjb svg, .spgo2 svg, .qki svg, .tded svg, .tdshi svg, .arw button svg, #spBack svg, .tdex svg, .tdstar svg, .gsl svg { display:block; flex:none; }
 .qeco { margin-top:4px; } .qepr { background:var(--bg,#f6f7f9); border-radius:14px; padding:10px 10px 2px; margin-bottom:8px; } .qepr .frow { margin-bottom:8px; align-items:center; } .qepr input { background:#fff !important; }
 .qerm { flex:none; width:34px; height:34px; border:0; border-radius:50%; background:none; color:var(--mute); display:inline-flex; align-items:center; justify-content:center; padding:0; } .qerm svg { width:15px; height:15px; }
 .qeadd { width:100%; border:1.5px dashed var(--line); background:none; border-radius:12px; padding:11px; font-size:14px; font-weight:600; color:var(--sub); display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:6px; }
+.rgrow { display:flex; align-items:center; gap:6px; margin:-6px 4px 14px; } .rgrow > i { font-style:normal; color:var(--mute); font-size:13px; flex:none; }
+.rgdw { position:relative; flex:1; min-width:0; height:38px; border-radius:999px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:14px; font-weight:600; color:var(--txt); cursor:pointer; }
+.rgdw.e span { color:var(--mute); } .rgdw svg { width:16px; height:16px; color:var(--mute); flex:none; }
+.rgdw input { position:absolute; inset:0; width:100%; height:100%; opacity:0; border:0; margin:0; padding:0; -webkit-appearance:none; appearance:none; cursor:pointer; }
+.rgdw input::-webkit-calendar-picker-indicator { position:absolute; inset:0; width:100%; height:100%; opacity:0; }
 .exbox { background:#fff; border-radius:18px; padding:16px 14px 6px; }
 .exsel { width:100%; height:46px; border:0; border-radius:12px; background:var(--chip); padding:0 12px; font-size:16px; color:var(--txt); -webkit-appearance:none; appearance:none; }
 .expic { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:96px; border:1.5px dashed var(--line); border-radius:14px; color:var(--sub); font-size:15px; font-weight:600; padding:12px; cursor:pointer; }
@@ -996,7 +1001,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020ic3';
+var APP_VER = '20261020rg1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1219,6 +1224,10 @@ var IC_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 var IC_PS = '<svg class="ip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
 var IC_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 var IC_STAR = '<svg class="is" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6.1L12 16.8 6.6 19.8l1.2-6.1-4.5-4.2 6.1-.7z"/></svg>';
+// 기간 날짜칸: 날짜 글자 + 달력 아이콘 (PITCH와 같은 모양) (2026-10-20)
+var IC_CALS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+function rgDw(id, v, ph) { return '<label class="rgdw' + (v ? '' : ' e') + '"><span>' + (v ? v.replace(/-/g, '.') + '(' + W[P(v).getDay()] + ')' : ph) + '</span>' + IC_CALS + '<input type="date" id="' + id + '" value="' + (v || '') + '" onclick="try{this.showPicker()}catch(e){}"></label>'; }
+function rgTitle(a, b) { var md = function (x) { return x.slice(5).replace('-', '.'); }; return a.slice(0, 4) === b.slice(0, 4) ? md(a) + '–' + md(b) : a.slice(2).replace(/-/g, '.') + '–' + b.slice(2).replace(/-/g, '.'); }
 var IC_MINUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>';
 function foldBtn() { return '<button id="mFold" class="fbtn" aria-label="' + (S.fold ? '주말 펼치기' : '주말 접기') + '">' + (S.fold ? IC_PLUS : IC_MINUS) + '</button>'; }
 function bindFold() { var b = $('#mFold'); if (b) b.onclick = function () { S.fold = !S.fold; ls.set('d4:fold', S.fold ? '1' : ''); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; }
@@ -1707,7 +1716,7 @@ function renderProject() {
   var LPER = [['d', '일'], ['w', '주'], ['m', '월'], ['r', '기간']];
   var lseg = '<div class="aseg" id="lSeg">' + LPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === lp ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
   var top = lp === 'r'
-    ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="lF" value="' + lrg[0] + '"><span>–</span><input type="date" id="lT" value="' + lrg[1] + '"></div>' + lseg + '</div>'
+    ? '<div class="hm2 hm2a"><label class="hmt">' + rgTitle(lrg[0], lrg[1]) + '</label>' + lseg + '</div><div class="rgrow">' + rgDw('lF', lrg[0], '시작일') + '<i>~</i>' + rgDw('lT', lrg[1], '종료일') + '</div>'
     : (function () { var cur = TODAY >= lrg[0] && TODAY <= lrg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(lp, lrg) + '<input type="date" class="dpk" id="lSegD" value="' + (S.ld || TODAY) + '"></label>' + lseg +
       '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="lP" aria-label="이전">' + IC_L + '</button><button id="lN" aria-label="다음">' + IC_R + '</button></div></div>'; })();
   var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(tm ? [{ allw: 1, name: '__allw' }] : []).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
@@ -2379,7 +2388,7 @@ function renderTodo() {
   var segH = '<div class="aseg" id="tdSeg">' + TPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') +
     (S.D.tdUrl ? '<a class="tdshi" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener" aria-label="TODO 시트 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></a>' : '') + '</div>';
   var h = p === 'r'
-    ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="tdF" value="' + rg[0] + '"><span>–</span><input type="date" id="tdT" value="' + rg[1] + '"></div>' + segH + '</div>'
+    ? '<div class="hm2 hm2a"><label class="hmt">' + rgTitle(rg[0], rg[1]) + '</label>' + segH + '</div><div class="rgrow">' + rgDw('tdF', rg[0], '시작일') + '<i>~</i>' + rgDw('tdT', rg[1], '종료일') + '</div>'
     : (function () { var cur = TODAY >= rg[0] && TODAY <= rg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(p, rg) + '<input type="date" class="dpk" id="tdSegD" value="' + S.tdd + '"></label>' + segH +
       '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="tdmP" aria-label="이전">' + IC_L + '</button><button id="tdmN" aria-label="다음">' + IC_R + '</button></div></div>'; })();
   h += '<div class="tabs2" id="tdW"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
