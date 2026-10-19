@@ -738,7 +738,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td1';
+var APP_VER = '20261019td2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1823,12 +1823,12 @@ $('#reSave').onclick = function () {
   var o = { r: RE.x.r, old: { d: RE.x.d, p: RE.x.p, t: RE.x.t }, d: $('#reD').value, p: $('#reP').value.trim(), j: $('#reJ').value, t: $('#reT').value.trim(), s: RE.s };
   if (!o.d || !o.p || !o.t) return toast('날짜·이름·내용을 채워 주세요');
   var b = $('#reSave'); b.classList.add('busy');
-  call('appRepEdit', S.pin, o).then(function () { closeBs(); toast('저장했어요'); return load(); })
+  call('appRepEdit', S.pin, o).then(function (res) { closeBs(); toast('저장했어요'); if (!tdMerge(res)) return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 };
 sure($('#reDel'), function () {
   var b = $('#reDel'); b.classList.add('busy');
-  call('appRepEdit', S.pin, { r: RE.x.r, old: { d: RE.x.d, p: RE.x.p, t: RE.x.t }, del: true }).then(function () { closeBs(); toast('삭제했어요'); return load(); })
+  call('appRepEdit', S.pin, { r: RE.x.r, old: { d: RE.x.d, p: RE.x.p, t: RE.x.t }, del: true }).then(function (res) { closeBs(); toast('삭제했어요'); if (!tdMerge(res)) return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 });
 
@@ -2034,10 +2034,19 @@ function bindTd(root) {
     inp.onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } };
   });
 }
+// 서버가 돌려준 그 달 탭의 최신 목록으로 바로 바꿈 (전체 새로고침 없이)
+function tdMerge(res) {
+  if (!res || !res.months) return false;
+  Object.keys(res.months).forEach(function (k) { S.D.todo = S.D.todo.filter(function (x) { return String(x.id).split('|')[0] !== k; }).concat(res.months[k]); });
+  S.D.todo = S.D.todo.filter(function (x) { return !x.tmp; });
+  S.D.rep = S.D.todo.filter(function (x) { return x.k === '데일리'; }).map(function (x) { return { r: x.id, d: x.d, p: x.p, j: x.j, t: x.t, s: x.c ? '완료' : (tdWait(x) ? '대기' : '진행') }; })
+    .sort(function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? -1 : 1); });
+  saveCache(); render(); return true;
+}
 function tdAdd(o) {
   var tmp = Object.assign({ id: 'tmp|' + Date.now(), tmp: 1 }, o);
   S.D.todo.push(tmp); S.tdFocus = o.k + '|' + o.d + '|' + o.p; render(); tdRefocus();
-  call('appTodoAdd', S.pin, [o]).then(function () { return load(); }).then(tdRefocus)
+  call('appTodoAdd', S.pin, [o]).then(function (res) { if (!tdMerge(res)) return load(); }).then(tdRefocus)
     .catch(function (e) { S.D.todo = S.D.todo.filter(function (x) { return x !== tmp; }); render(); toast(errMsg(e)); });
 }
 function tdRefocus() {
@@ -2052,7 +2061,7 @@ function tdToggle(id) {
   var paint = function () { $$('[data-tdrow="' + id + '"]').forEach(function (el) { el.classList.toggle('done', x.c); }); var r = (S.D.rep || []).filter(function (y) { return y.r === id; })[0]; if (r) r.s = x.c ? '완료' : (tdWait(x) ? '대기' : '진행'); };
   paint();
   call('appTodoEdit', S.pin, { id: x.id, old: { d: x.d, p: x.p, t: x.t }, c: x.c })
-    .then(function () { saveCache(); })
+    .then(function (res) { if (!tdMerge(res)) saveCache(); })
     .catch(function (e) { x.c = !x.c; paint(); toast(errMsg(e)); })
     .then(function () { delete x.busy; if (S.view === 'todo' || S.view === 'home') render(); });
 }
@@ -2092,12 +2101,12 @@ $('#teS').onclick = function () {
   var memo = /메모$/.test(TE.k);
   var o = { id: x.id, old: { d: x.d, p: x.p, t: x.t }, d: d, k: TE.k, p: memo ? x.p : $('#teP').value, j: memo ? x.j : $('#teJ').value, t: t, m: m };
   var b = $('#teS'); b.classList.add('busy');
-  call('appTodoEdit', S.pin, o).then(function () { closeBs(); toast('저장했어요'); return load(); })
+  call('appTodoEdit', S.pin, o).then(function (res) { closeBs(); toast('저장했어요'); if (!tdMerge(res)) return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 };
 sure($('#teDel'), function () {
   var x = TE.x, b = $('#teDel'); b.classList.add('busy');
-  call('appTodoEdit', S.pin, { id: x.id, old: { d: x.d, p: x.p, t: x.t }, del: true }).then(function () { closeBs(); toast('삭제했어요'); return load(); })
+  call('appTodoEdit', S.pin, { id: x.id, old: { d: x.d, p: x.p, t: x.t }, del: true }).then(function (res) { closeBs(); toast('삭제했어요'); if (!tdMerge(res)) return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
 });
 
