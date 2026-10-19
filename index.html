@@ -730,6 +730,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .ntno { color:var(--mute); font-size:13px; margin:4px 0 4px; }
 .wkf { display:block; width:100%; border:0; background:var(--chip); color:var(--sub); border-radius:10px; padding:8px; font-size:13px; font-weight:700; margin:6px 0; }
 .wkf { display:flex !important; align-items:center; justify-content:center; } .wkf .chev { display:inline-block; width:8px; height:8px; border-right:2px solid var(--faint); border-bottom:2px solid var(--faint); transform:rotate(45deg); margin:0 0 4px 8px; } .wkf .chev.up { transform:rotate(-135deg); margin-bottom:-2px; }
+.arw button, #spBack { display:inline-flex; align-items:center; justify-content:center; padding:0; } .arw button svg, #spBack svg { width:16px; height:16px; } .arw .tod { padding:0 12px; }
 .exbox { background:#fff; border-radius:18px; padding:16px 14px 6px; }
 .exsel { width:100%; height:46px; border:0; border-radius:12px; background:var(--chip); padding:0 12px; font-size:16px; color:var(--txt); -webkit-appearance:none; appearance:none; }
 .expic { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:96px; border:1.5px dashed var(--line); border-radius:14px; color:var(--sub); font-size:15px; font-weight:600; padding:12px; cursor:pointer; }
@@ -985,7 +986,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020td7';
+var APP_VER = '20261020ic1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1140,7 +1141,7 @@ function renderSpecOne() {
   var M = $('#main'), o = specList().filter(function (x) { return x.id === S.sp; })[0] || { id: S.sp, title: '사양서', artist: '', url: '' };
   var key = S.sp + '|' + (S.st || ''), d = S.SC[key];
   var link = function (gid) { return o.url ? o.url.replace(/[?#].*$/, '') + (gid != null ? '#gid=' + gid : '') : ''; };
-  var right = '<button id="spBack" aria-label="목록">‹</button>';
+  var right = '<button id="spBack" aria-label="목록">' + IC_L + '</button>';
   var h = phd(esc(o.artist), esc(o.title), right).replace('class="phd"', 'class="phd spph"');
   if (!d) {
     M.innerHTML = h + '<div class="ld">사양서를 불러오는 중…</div>';
@@ -1200,9 +1201,13 @@ function perHead(id, p, rg, anchor, arw) {
   var cur = TODAY >= rg[0] && TODAY <= rg[1];
   return '<div class="hm2' + (arw && p !== 'a' ? ' hm2a' : '') + '"><label class="hmt">' + perTitle(p, rg) + (p !== 'a' ? '<input type="date" class="dpk" id="' + id + 'D" value="' + anchor + '">' : '') + '</label>' +
     '<div class="aseg" id="' + id + '">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>' +
-    (arw && p !== 'a' ? '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="' + arw + 'P" aria-label="이전">‹</button><button id="' + arw + 'N" aria-label="다음">›</button></div>' : '') + '</div>';
+    (arw && p !== 'a' ? '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="' + arw + 'P" aria-label="이전">' + IC_L + '</button><button id="' + arw + 'N" aria-label="다음">' + IC_R + '</button></div>' : '') + '</div>';
 }
-function foldBtn() { return '<button id="mFold" class="fbtn" aria-label="' + (S.fold ? '주말 펼치기' : '주말 접기') + '">' + (S.fold ? '+' : '−') + '</button>'; }
+var IC_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+var IC_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+var IC_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+var IC_MINUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>';
+function foldBtn() { return '<button id="mFold" class="fbtn" aria-label="' + (S.fold ? '주말 펼치기' : '주말 접기') + '">' + (S.fold ? IC_PLUS : IC_MINUS) + '</button>'; }
 function bindFold() { var b = $('#mFold'); if (b) b.onclick = function () { S.fold = !S.fold; ls.set('d4:fold', S.fold ? '1' : ''); var y0 = window.scrollY; render(); window.scrollTo(0, y0); }; }
 function chipVis(bar, smooth) {
   if (!bar) return; var c = bar.querySelector('button.on'); if (!c) return;
@@ -1417,7 +1422,7 @@ function legend() {
 // 모든 탭 공통 머리: 작은 글씨(위) + 큰 제목(아래) + 오른쪽 이동 버튼
 function phd(sub, title, right) { return '<div class="phd"><div class="pt">' + (sub ? '<small>' + sub + '</small>' : '') + '<b>' + title + '</b></div>' + (right ? '<div class="arw">' + right + '</div>' : '') + '</div>'; }
 function navBar(sub, title, prevId, nextId, todayBtn, extra) {
-  return phd(sub, title, (extra || '') + (todayBtn ? '<button class="tod" id="nT">오늘</button>' : '') + '<button id="' + prevId + '">‹</button><button id="' + nextId + '">›</button>');
+  return phd(sub, title, (extra || '') + (todayBtn ? '<button class="tod" id="nT">오늘</button>' : '') + '<button id="' + prevId + '">' + IC_L + '</button><button id="' + nextId + '">' + IC_R + '</button>');
 }
 function rng(a, b) { return dot(a) + ' – ' + b.slice(5).replace('-', '.'); }
 function itemHtml(e, showDate, noFile, dday) {
@@ -1459,7 +1464,7 @@ function renderHome() {
   var L = S.D.events, R0 = S.D.rep || [], ws = sunOf(H), we = addD(ws, 6), mo = H.slice(0, 7), hl = hol(H);
   var isDl = function (e) { return e.k === '데드라인' || e.k === '공식'; };
   var h = '<div class="hm2"><label class="hmt">' + mdw(H) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : '') + '<input type="date" class="dpk" id="hD" value="' + H + '"></label>' +
-    '<div class="arw">' + (isT ? '' : '<button class="tod" id="hT">오늘</button>') + '<button id="hP" aria-label="전날">‹</button><button id="hN" aria-label="다음날">›</button></div></div>';
+    '<div class="arw">' + (isT ? '' : '<button class="tod" id="hT">오늘</button>') + '<button id="hP" aria-label="전날">' + IC_L + '</button><button id="hN" aria-label="다음날">' + IC_R + '</button></div></div>';
   h += homeMemo(H);   // HOME = 내 메모 TODAY · WEEK만 (제작일정·MONTH 카드는 뺌 2026-10-19)
   $('#main').innerHTML = h; bindItems(); bindAdd(); bindRep(); bindTd();
   if ($('#hPaste')) $('#hPaste').onclick = openPaste;
@@ -1520,7 +1525,7 @@ function foldDay(d, sub, body) {
 function bindFoldDay() { S.dop = S.dop || {}; $$('details.fday').forEach(function (x) { x.ontoggle = function () { S.dop[x.dataset.fd] = x.open; }; }); }
 function calHead(y, m) {
   return '<div class="hm2"><label class="hmt" id="cT">' + y + '.' + pad(m) + '<input type="month" class="dpk" id="cTD" value="' + y + '-' + pad(m) + '"></label>' +
-    '<div class="arw">' + foldBtn() + '<button id="nP">‹</button><button id="nN">›</button></div></div>';
+    '<div class="arw">' + foldBtn() + '<button id="nP">' + IC_L + '</button><button id="nN">' + IC_R + '</button></div></div>';
 }
 function modeSeg() { return '<div class="seg" id="mSeg"><button data-m="sched" class="' + (S.mm !== 'team' ? 'on' : '') + '">제작일정</button><button data-m="team" class="' + (S.mm === 'team' ? 'on' : '') + '">팀 업무</button></div>'; }
 function bindSeg() { $$('#mSeg button').forEach(function (b) { b.onclick = function () { S.mm = b.dataset.m; ls.set('d4:mm', S.mm); render(); }; }); if ($('#cTD')) $('#cTD').onchange = function () { var v = String(this.value || ''); if (/^\d{4}-\d\d/.test(v)) { S.y = +v.slice(0, 4); S.m = +v.slice(5, 7); render(); } }; }
@@ -1691,7 +1696,7 @@ function renderProject() {
   var top = lp === 'r'
     ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="lF" value="' + lrg[0] + '"><span>–</span><input type="date" id="lT" value="' + lrg[1] + '"></div>' + lseg + '</div>'
     : (function () { var cur = TODAY >= lrg[0] && TODAY <= lrg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(lp, lrg) + '<input type="date" class="dpk" id="lSegD" value="' + (S.ld || TODAY) + '"></label>' + lseg +
-      '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="lP" aria-label="이전">‹</button><button id="lN" aria-label="다음">›</button></div></div>'; })();
+      '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="lP" aria-label="이전">' + IC_L + '</button><button id="lN" aria-label="다음">' + IC_R + '</button></div></div>'; })();
   var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(tm ? [{ allw: 1, name: '__allw' }] : []).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
   var idx = Math.max(0, ps.findIndex(function (p) { return (p ? p.name : '') === (S.pj || ''); }));
   var h = top + '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
@@ -2363,7 +2368,7 @@ function renderTodo() {
   var h = p === 'r'
     ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="tdF" value="' + rg[0] + '"><span>–</span><input type="date" id="tdT" value="' + rg[1] + '"></div>' + segH + '</div>'
     : (function () { var cur = TODAY >= rg[0] && TODAY <= rg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(p, rg) + '<input type="date" class="dpk" id="tdSegD" value="' + S.tdd + '"></label>' + segH +
-      '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="tdmP" aria-label="이전">‹</button><button id="tdmN" aria-label="다음">›</button></div></div>'; })();
+      '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="tdmP" aria-label="이전">' + IC_L + '</button><button id="tdmN" aria-label="다음">' + IC_R + '</button></div></div>'; })();
   h += '<div class="tabs2" id="tdW"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
   var done = R.filter(function (x) { return x.c; }).length;
   var dates = function (L) { return L.map(function (x) { return x.d; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(); };
@@ -2712,7 +2717,7 @@ function renderWl() {
   var wp = ls.get('d4:wlp') || ''; if (wp && T.indexOf(wp) < 0) wp = '';
   var isCur = TODAY.slice(0, 7) === first.slice(0, 7);
   var h = '<div class="hm2"><label class="hmt">' + y + '.' + pad(m) + '<input type="month" class="dpk" id="wlMo" value="' + y + '-' + pad(m) + '"></label>' +
-    '<div class="arw"><button class="tod" id="wlQ">빠른 입력</button>' + (isCur ? '' : '<button class="tod" id="wlT">이번 달</button>') + '<button id="wlPv">‹</button><button id="wlNx">›</button></div></div>';
+    '<div class="arw"><button class="tod" id="wlQ">빠른 입력</button>' + (isCur ? '' : '<button class="tod" id="wlT">이번 달</button>') + '<button id="wlPv">' + IC_L + '</button><button id="wlNx">' + IC_R + '</button></div></div>';
   h += '<div class="tabs2" id="wlP"><button data-n="" class="' + (wp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (wp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
   h += '<div class="mcal wlcal"><div class="wd">' + WEN.map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div class="grid">';
   for (var d = start; d <= end; d = addD(d, 1)) {
