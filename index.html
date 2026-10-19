@@ -740,6 +740,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .exi em { font-style:normal; width:22px; height:22px; border-radius:50%; background:var(--chip); font-size:12px; font-weight:700; color:var(--sub); display:flex; align-items:center; justify-content:center; flex:none; }
 .exi div { flex:1; min-width:0; } .exi b { display:block; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .exi small { color:var(--mute); font-size:12px; }
 .exi span { font-weight:700; font-size:15px; }
+.exxl { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:10px; border-radius:14px; background:var(--txt); color:#fff; padding:14px; font-size:14px; font-weight:700; text-decoration:none; box-sizing:border-box; } .exxl svg { width:16px; height:16px; }
 .extidy { width:100%; margin-top:10px; border:0; border-radius:14px; background:var(--chip); color:var(--sub); padding:14px; font-size:14px; font-weight:600; }
 .wlform { margin-top:16px; border:1px solid var(--line); border-radius:18px; padding:16px 14px 14px; background:#fff; }
 .wlform .acts { margin-top:18px; }
@@ -982,7 +983,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020pl5';
+var APP_VER = '20261020ex2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2627,6 +2628,8 @@ function exList() {
   var L = r.items || [], tot = L.reduce(function (s, x) { return s + (+x.a || 0); }, 0);
   var h = '<div class="exhd"><b>' + esc(X.p) + ' · ' + (+X.ym.slice(5, 7)) + '월</b><span>' + L.length + '건 · ₩' + won(tot) + '</span>' + (r.url ? '<a class="spgo2" href="' + esc(r.url) + '" target="_blank" rel="noopener" aria-label="시트 열기">' + SHIC + '</a>' : '') + '</div>';
   h += L.length ? '<div class="exls">' + L.map(function (x, i) { return '<div class="exi"><em>' + (i + 1) + '</em><div><b>' + esc(x.u || '-') + '</b><small>' + esc(x.d ? dw(x.d) : '') + (x.v ? ' · ' + esc(x.v) : '') + '</small></div><span>₩' + won(x.a) + '</span></div>'; }).join('') + '</div>' : '<p class="srcinfo">아직 올린 영수증이 없어요. 첫 건을 올리면 지출결의서 폴더에 파일이 만들어져요.</p>';
+  // 엑셀 다운로드: 구글 시트 그대로(지출결의서·영수증증빙 탭 2개, 영수증 사진 포함) .xlsx 로 내려받기
+  if (L.length && r.url) { var xid = (r.url.match(/\/d\/([\w-]+)/) || [])[1]; if (xid) h += '<a class="exxl" href="https://docs.google.com/spreadsheets/d/' + xid + '/export?format=xlsx" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>엑셀 다운로드</a>'; }
   if (L.length) h += '<button class="extidy" id="exT">제출 전 정리 · 빈 칸 지우기</button>';
   el.innerHTML = h;
   if ($('#exT')) $('#exT').onclick = function () {
