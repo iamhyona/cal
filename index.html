@@ -996,7 +996,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020qk1';
+var APP_VER = '20261020ic3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2392,7 +2392,7 @@ function renderTodo() {
     var L = R.filter(function (x) { return x.p === n; });
     h += '<div class="bd tdd tdcard"><div class="bdh"><div>' + '<div class="tdnm">' + (tp ? '<b>' + esc(n) + '</b>' : '<button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button>') +
       (tdCount(L) ? '<span class="tdcn">' + tdCount(L) + ' 완료</span>' : '') + '</div></div>' +
-      (L.length ? (S.tdEdit === n ? '<button class="tded on" data-ted="' + esc(n) + '">저장</button>' : '<button class="tded" data-ted="' + esc(n) + '" aria-label="편집"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>') : '') + '</div>' +
+      (L.length ? (S.tdEdit === n ? '<button class="tded on" data-ted="' + esc(n) + '">저장</button>' : '<button class="tded" data-ted="' + esc(n) + '" aria-label="편집"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>') : '') + '</div>' +
       (S.tdEdit === n ? tdEditList(L) : '<div class="tdl">' + (one ? list(L) : byDate(L)) + '</div>' + (one ? tdAddRow('데일리', S.tdd, n) : '')) + '</div>';
   });
   var y0 = window.scrollY;
@@ -2862,7 +2862,7 @@ function qkList() {
     var L = G[key], f = L[0], ad = L.map(function (r) { return r.a; }).filter(String)[0] || L.map(function (r) { return r.a2; }).filter(String)[0] || '';
     var open = !!q || !!S.qkOpen[key];
     return '<div class="qkc' + (open ? ' open' : '') + '"><div class="qkh" role="button" data-qo="' + esc(key) + '"><h4><span class="qkt">' + esc(f.c || '(업체 없음)') + '</span>' + (f.k ? '<em>' + esc(f.k) + '</em>' : '') +
-      '<button class="qki" data-qce="' + esc(key) + '" aria-label="업체 수정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button><button class="qki" data-qca="' + esc(key) + '" aria-label="담당자 추가"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>' +
+      '<button class="qki" data-qce="' + esc(key) + '" aria-label="업체 수정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="qki" data-qca="' + esc(key) + '" aria-label="담당자 추가"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>' +
       '<span class="qkn">' + L.length + '명</span></h4>' + (ad ? '<div class="ad">' + esc(ad) + '</div>' : '') + '</div>' +
       (!open ? '' : L.map(function (r) {
         return '<div class="qkp"><div class="nm" role="button" data-qe="' + r.r + '"><b>' + esc(r.p || '담당자 없음') + '</b>' + (r.j ? ' <span class="jt">' + esc(r.j) + '</span>' : '') + (r.t ? '<span class="tl">' + esc(r.t) + '</span>' : '') + (r.m ? '<small>' + esc(r.m) + '</small>' : '') + '</div>' +
