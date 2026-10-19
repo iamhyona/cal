@@ -157,6 +157,7 @@ main { max-width:560px; margin:0 auto; padding:14px 16px calc(110px + env(safe-a
 
 
 /* 플로팅 버튼 */
+a.ib { display:inline-flex; align-items:center; justify-content:center; color:inherit; text-decoration:none; }
 .fab { position:fixed; right:20px; bottom:calc(24px + env(safe-area-inset-bottom)); width:60px; height:60px; border-radius:50%;
   border:0; background:var(--txt); color:#fff; box-shadow:0 8px 20px rgba(25,31,40,.25); z-index:15; display:flex; align-items:center; justify-content:center; }
 .fab::before, .fab::after { content:''; position:absolute; width:22px; height:2.5px; background:#fff; border-radius:2px; }
@@ -674,6 +675,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   .lbh .ct { font-size:24pt; font-weight:500; line-height:1.4; margin-top:7mm; }
   .lbh .fr { font-size:10pt; font-weight:600; letter-spacing:.18em; margin-top:12mm; color:#555; }
   .lbh .fra { font-size:9pt; font-weight:500; margin-top:1.5mm; color:#555; }
+  .lbh2 { top:148mm; }
   .lbcut { position:absolute; left:0; right:0; top:148mm; border-top:0.4mm dashed #888; }
 }
 .wlcal .grid > button { min-height:70px; }
@@ -712,6 +714,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     <div class="hr">
       <button class="ib" style="display:none" id="rpBtn" aria-label="업무보고"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></button>
       <button class="ib" id="rfBtn" aria-label="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg></button>
+      <a class="ib" id="drvBtn" href="https://drive.google.com/drive/folders/1RFQjMoSTOQQNA4mJD9DfVgCkU5caYj-p" target="_blank" rel="noopener" aria-label="구글 드라이브 폴더"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
       <button class="ib" style="display:none" id="setBtn" aria-label="시트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
     </div>
   </div>
@@ -827,7 +830,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 <div class="bs" id="qp">
   <h3>라벨 인쇄</h3>
   <div class="fl" style="margin-top:0">주소</div><div class="chips" id="qpA"></div>
-  <div class="fl">미리보기 · A4 반 장</div><div id="qpTo"></div>
+  <div class="fl">미리보기 · A4 한 장에 2개 (위·아래 같은 라벨)</div><div id="qpTo"></div>
   <div class="acts"><button class="save" id="qpGo">인쇄하기</button></div>
 </div>
 </div>
@@ -897,7 +900,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlp';
+var APP_VER = '20261019wlr';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2592,7 +2595,7 @@ function qpDraw() {
   $('#qpTo').innerHTML = '<div class="qklb">' + qpHtml(r) + '</div>';
 }
 $('#qpGo').onclick = function () {
-  $('#qkLabel').innerHTML = '<div class="lbp"><div class="lbh">' + qpHtml(QP.r) + '</div><div class="lbcut"></div></div>';
+  $('#qkLabel').innerHTML = '<div class="lbp"><div class="lbh">' + qpHtml(QP.r) + '</div><div class="lbcut"></div><div class="lbh lbh2">' + qpHtml(QP.r) + '</div></div>';
   closeBs();
   setTimeout(function () { window.print(); }, 260);
 };
