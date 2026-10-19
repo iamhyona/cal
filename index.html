@@ -594,6 +594,10 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .tddh:first-child { margin-top:6px; padding-top:0; border-top:0; }
 .tddh small { color:var(--faint); font-size:12px; font-weight:700; margin-left:auto; }
 .rpvt em.ow { flex:none; font-style:normal; font-size:11px; font-weight:800; color:var(--acc); background:#e8f1ff; border-radius:6px; padding:1px 6px; }
+.tdpj { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:var(--txt); margin:10px 0 2px; }
+.tdpj:first-child { margin-top:4px; }
+.tdpj i { width:7px; height:7px; border-radius:2px; flex:none; }
+.tdl .tdpj ~ .rpi { padding-left:4px; }
 .tdday em { font-style:normal; color:var(--acc); font-weight:800; }
 .tmsum .tdsh { color:var(--sub); font-size:12px; font-weight:700; text-decoration:none; border-radius:999px; padding:7px 10px; background:var(--chip); }
 .tmsum .tdsh + button { margin-left:6px; }
@@ -744,7 +748,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td7';
+var APP_VER = '20261019td8';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1975,6 +1979,16 @@ function homeMemo(H) {
 }
 
 // TO DO LIST: 전체 / 디자이너별 — 이번 주 할 일은 위에 고정, 아래로 데일리
+// 프로젝트명은 한 번만 쓰고 그 아래로 할 일 (2026-10-19)
+function tdGroup(L) {
+  var h = '', cur = null, many = L.some(function (x) { return x.j; });
+  L.sort(tdSort).forEach(function (x) {
+    var j = x.j || '';
+    if (j !== cur) { cur = j; if (j || many) h += '<div class="tdpj"><i style="background:' + (j ? pinfo(j).color : RCOL) + '"></i>' + esc(j || '기타') + '</div>'; }
+    h += tdItem(x, { noPj: 1 });
+  });
+  return h;
+}
 function renderTodo() {
   // 상단: 날짜(기본 오늘) + 기간(일·주·월·반년·한해·전체) + 이동 버튼 (2026-10-19)
   var p = S.tdp || ls.get('d4:tdp') || 'd'; S.tdp = p; S.tdd = S.tdd || TODAY;
@@ -1985,7 +1999,7 @@ function renderTodo() {
   h += '<div class="tabs2" id="tdW"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
   var done = R.filter(function (x) { return x.c; }).length;
   var dates = function (L) { return L.map(function (x) { return x.d; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(); };
-  var list = function (L) { return L.length ? L.sort(tdSort).map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">' + (one ? '아직 없어요' : '이 기간에 없어요') + '</div>'; };
+  var list = function (L) { return L.length ? tdGroup(L) : '<div class="empty2">' + (one ? '아직 없어요' : '이 기간에 없어요') + '</div>'; };
   var byDate = function (L) { return dates(L).map(function (d) { var c = tdCount(L.filter(function (x) { return x.d === d; })); return '<div class="tddh">' + mdw(d) + (d === TODAY ? ' · 오늘' : '') + (c ? '<small>' + c + '</small>' : '') + '</div>' + list(L.filter(function (x) { return x.d === d; })); }).join('') || '<div class="empty2">이 기간에 없어요</div>'; };
   if (!tp) h += '<div class="tmsum"><span>' + (one ? (S.tdd === TODAY ? '오늘' : '이날') : '기간') + ' <b class="ok">' + done + '</b>/' + R.length + ' 완료</span>' +
     (S.D.tdUrl ? '<a class="tdsh" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener">시트</a>' : '') + '<button id="tdPaste">+ 업무보고</button></div>';
