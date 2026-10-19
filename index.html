@@ -637,6 +637,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .qklb .ad { font-size:20px; font-weight:800; line-height:1.35; color:#000; }
 .qklb .co { font-size:15px; font-weight:700; line-height:1.4; color:#000; margin-top:10px; }
 .qklb .fr { font-size:9px; font-weight:600; letter-spacing:.18em; margin-top:16px; color:#666; }
+.qklb .fra { font-size:9px; font-weight:500; margin-top:3px; color:#666; }
 .qklb .ct { font-size:15px; font-weight:500; line-height:1.4; color:#000; }
 @media print {
   @page { size:A4 portrait; margin:0; }
@@ -649,6 +650,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   .lbh .co { font-size:24pt; font-weight:700; line-height:1.4; margin-top:6mm; }
   .lbh .ct { font-size:24pt; font-weight:500; line-height:1.4; }
   .lbh .fr { font-size:10pt; font-weight:600; letter-spacing:.18em; margin-top:12mm; color:#555; }
+  .lbh .fra { font-size:9pt; font-weight:500; margin-top:1.5mm; color:#555; }
   .lbcut { position:absolute; left:0; right:0; top:148mm; border-top:0.4mm dashed #888; }
 }
 .wlcal .grid > button { min-height:70px; }
@@ -872,7 +874,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wl7';
+var APP_VER = '20261019wl8';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2503,7 +2505,7 @@ sure($('#qeDel'), function () {
 var QP = null;
 function qpWho(r) { var p = String(r.p || '').trim(); if (p && !/님$/.test(p)) p += '님'; return [p, r.t].filter(String).join(' '); }
 function qpHtml(r) {
-  return '<div class="ad">' + esc(r[QP.a] || r.a || r.a2 || '') + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '') + '<div class="fr">FROM SOUND CONTENTS</div>';
+  return '<div class="ad">' + esc(r[QP.a] || r.a || r.a2 || '') + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '') + '<div class="fr">FROM SOUND CONTENTS</div><div class="fra">서울특별시 마포구 독막로3길 24 3층</div>';
 }
 function openQp(r) {
   QP = { r: r, a: r.a ? 'a' : 'a2' };
