@@ -1001,7 +1001,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020rg1';
+var APP_VER = '20261020td8';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1520,7 +1520,8 @@ var PJ_MERGE = [
   [/^지디 팬키트$/, 'GD 2027 팬키트'],
   [/^GD (캐릭터 팝업|팝업 온라인)$/i, 'GD 팝업'],
   [/^QWER (비딩|콘서트 비딩|VR Concert( Bidding)?)$/i, 'QWER VR Concert'],
-  [/^보이넥스트도어 (팬키트( 비딩)?|멤버(십|쉽) ?키트)$/, '보이넥스트도어 멤버십 키트']
+  [/^보이넥스트도어 (팬키트( 비딩)?|멤버(십|쉽) ?키트)$/, '보이넥스트도어 멤버십 키트'],
+  [/^\(번외\)\s*지결\s*\/\s*야근\s*기안\s*올리기!*$/, '기안작성']
 ];
 function sgFix(n) { n = sgFix0(n); PJ_MERGE.forEach(function (x) { n = n.replace(x[0], x[1]); }); return n; }
 function sgFix0(n) {
@@ -2494,7 +2495,7 @@ function tdNext(d, k) { if (/주간/.test(k)) return addD(d, 7); var n = addD(d,
 function drawTe() {
   var memo = /메모$/.test(TE.k), ks = memo ? [['오늘메모', 'TODAY'], ['주간메모', 'WEEK']] : [];
   $('#teK').innerHTML = ks.map(function (k) { return '<button data-k="' + k[0] + '" class="' + (TE.k === k[0] ? 'on' : '') + '">' + k[1] + '</button>'; }).join('') +
-    '<button data-f="imp" class="' + (TE.imp ? 'on' : '') + '">' + IC_STAR + '중요</button>' + (memo ? '' : '<button data-f="wait" class="' + (TE.wait ? 'on' : '') + '">대기</button><button data-f="push" class="' + (TE.push ? 'on' : '') + '">미루기' + (TE.push ? ' → ' + esc(dw(TE.push)) : '') + '</button>');
+    '<button data-f="imp" class="' + (TE.imp ? 'on' : '') + '">' + IC_STAR + '중요</button>' + (memo ? '' : '<button data-f="push" class="' + (TE.push ? 'on' : '') + '">미루기' + (TE.push ? ' → ' + esc(dw(TE.push)) : '') + '</button>');
   $$('#teK button').forEach(function (b) { b.onclick = function () {
     if (b.dataset.k) TE.k = b.dataset.k;
     else if (b.dataset.f === 'push') { if (TE.push) { $('#teD').value = TE.d0; TE.push = ''; } else { TE.d0 = $('#teD').value || TE.x.d; TE.push = tdNext(TE.d0, TE.k); $('#teD').value = TE.push; } }
