@@ -809,11 +809,11 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 </div>
 <!-- WORK LOG: 출퇴근·야근·야근식사·외근·야근택시 -->
 <div class="bs" id="wl">
-  <h3>WORK LOG</h3>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><h3 style="flex:1;margin:0">WORK LOG</h3><button class="tod" id="wlTo1" style="border:0;background:var(--chip);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--sub)">한 줄로 쓰기</button></div>
   <div class="fl" style="margin-top:0">디자이너를 선택하세요</div><div class="chips" id="wlP2"></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>날짜</label><input id="wlD" type="date"></div></div>
-  <div class="frow" style="margin-top:12px"><div class="f"><label>출근</label><input id="wlI" type="time"></div><div class="f"><label>퇴근</label><input id="wlO" type="time"></div></div>
-  <div class="fl">저녁식사 시간 <small style="font-weight:500;color:var(--mute)">· 실 근무시간에서 빠져요</small></div><div class="chips" id="wlDn"></div>
+  <div class="frow" style="margin-top:12px"><div class="f"><label>출근</label><input id="wlI" type="time"></div><div class="f"><label>퇴근</label><input id="wlO" type="time"></div><div class="f"><label>저녁식사</label><select id="wlDn" style="width:100%;height:46px;border:0;border-radius:12px;background:var(--chip);padding:0 10px;font-size:16px;-webkit-appearance:none;appearance:none"><option value="0">없음</option><option value="30">30분</option><option value="60">1시간</option><option value="90">1시간 30분</option></select></div></div>
+  <p class="srcinfo" style="margin-top:6px">저녁식사 시간은 근무표 실 근무시간에서 빠져요.</p>
   <div class="frow" style="margin-top:12px"><div class="f"><label>야근 사유 <small style="font-weight:500">· 근무표 날짜 칸 댓글과 연동</small></label><textarea id="wlRs" rows="3" maxlength="500" style="width:100%;border:0;background:var(--chip);border-radius:12px;padding:12px;font-size:15px;line-height:1.5;outline:0;resize:none" placeholder="예) 크래비티 2027 SG 아웃박스 키비주얼 시안"></textarea></div></div>
   <div class="fl">체크</div><div class="chips" id="wlK"></div>
   <div class="frow wlex" style="margin-top:12px;display:none"><div class="f"><label>외근 내용</label><input id="wlEx" maxlength="80" placeholder="예) 인쇄 감리 · 파주"></div></div>
@@ -909,7 +909,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlu';
+var APP_VER = '20261019wlv';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1706,7 +1706,7 @@ sure($('#edDel'), function () {
 });
 $('#fab').onclick = function () {
   if (S.view === 'todo') return openCompose();
-  if (S.view === 'wl') return openWl1(TODAY);
+  if (S.view === 'wl') return openWl(TODAY);
   if (S.view === 'qk') return openQe(null);
   if (S.view === 'home') { var i = $('.tdadd .tdi'); if (i) i.focus(); return; }
   var d = S.view === 'month' ? (S.sel && S.sel.slice(0, 7) === S.y + '-' + pad(S.m) ? S.sel : (TODAY.slice(0, 7) === S.y + '-' + pad(S.m) ? TODAY : S.y + '-' + pad(S.m) + '-01')) : S.view === 'week' ? (TODAY >= S.ws && TODAY <= addD(S.ws, 6) ? TODAY : S.ws) : TODAY;
@@ -2409,7 +2409,7 @@ function renderWl() {
   if ($('#wlT')) $('#wlT').onclick = function () { S.wy = +TODAY.slice(0, 4); S.wm = +TODAY.slice(5, 7); render(); };
   $('#wlMo').onchange = function () { var v = String(this.value || ''); if (/^\d{4}-\d\d/.test(v)) { S.wy = +v.slice(0, 4); S.wm = +v.slice(5, 7); render(); } };
   $$('#wlP button').forEach(function (b) { b.onclick = function () { ls.set('d4:wlp', b.dataset.n); render(); }; });
-  $$('[data-wd]').forEach(function (b) { b.onclick = function () { openWl1(b.dataset.wd); }; });
+  $$('[data-wd]').forEach(function (b) { b.onclick = function () { openWl(b.dataset.wd); }; });
 }
 var WLS = null;
 function openWl(d, p) {
@@ -2429,8 +2429,7 @@ function wlDraw() {
   $$('#wlP2 button').forEach(function (b) { b.onclick = function () { WLS.p = b.dataset.n; WLS.d = $('#wlD').value || WLS.d; wlLoad(); }; });
   $('#wlK').innerHTML = WLK.map(function (k) { return '<button data-k="' + k[0] + '" class="' + (WLS.k[k[0]] ? 'on' : '') + '">' + k[1] + '</button>'; }).join('');
   $$('#wlK button').forEach(function (b) { b.onclick = function () { WLS.k[b.dataset.k] = !WLS.k[b.dataset.k]; wlDraw(); }; });
-  $('#wlDn').innerHTML = [[0, '없음'], [30, '30분'], [60, '1시간']].map(function (x) { return '<button data-dn="' + x[0] + '" class="' + (+WLS.dn === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('');
-  $$('#wlDn button').forEach(function (b) { b.onclick = function () { WLS.dn = +b.dataset.dn; wlDraw(); }; });
+  $('#wlDn').value = String(+WLS.dn || 0); if ($('#wlDn').value === '') { $('#wlDn').insertAdjacentHTML('beforeend', '<option value="' + WLS.dn + '">' + WLS.dn + '분</option>'); $('#wlDn').value = String(WLS.dn); }
   $('#wl .wlex').style.display = WLS.k.ex ? '' : 'none';
   $('#wl .wltx').style.display = WLS.k.tx ? '' : 'none';
   var others = wlRows(function (x) { return x.d === WLS.d; }).sort(function (a, b) { return team().indexOf(a.p) - team().indexOf(b.p); });
@@ -2439,6 +2438,8 @@ function wlDraw() {
   }).join('') : '';
   $$('[data-wo]').forEach(function (b) { b.onclick = function () { WLS.p = b.dataset.wo; wlLoad(); }; });
 }
+$('#wlDn').onchange = function () { WLS.dn = +this.value || 0; };
+$('#wlTo1').onclick = function () { openWl1($('#wlD').value || WLS.d, WLS.p); };
 $('#wlD').onchange = function () { if (this.value) { WLS.d = this.value; wlLoad(); } };
 $('#wlS').onclick = function () {
   if (!WLS.p) return toast('디자이너를 골라 주세요');
