@@ -247,6 +247,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .legend2 span { display:flex; align-items:center; gap:4px; } .legend2 i { width:8px; height:8px; border-radius:2px; display:block; }
 /* 월 달력 */
 .mcal { background:#fff; border-radius:20px; padding:12px 6px 8px; margin-bottom:12px; }
+.mcal { padding:18px 16px 14px !important; }
 .mcal .wd, .mcal .grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
 .mcal .wd div { text-align:right; padding-right:4px; font-size:10px; letter-spacing:.04em; color:var(--mute); padding-bottom:6px; font-weight:600; }
 .mcal .wd div:first-child, .mcal .wd div:last-child { color:var(--red); }
@@ -879,7 +880,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wli';
+var APP_VER = '20261019wlj';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
