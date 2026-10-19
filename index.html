@@ -887,7 +887,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wll';
+var APP_VER = '20261019wlm';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -970,7 +970,7 @@ function renderSpecList() {
   var h = phd('', '사양서');
   h += '<div class="spf"><input id="spQ" type="search" placeholder="아티스트, 프로젝트명 검색" value="' + esc(S.sq) + '">' +
     '<div class="sps"><select id="spY"><option value="">연도 전체</option>' + ys.map(function (y) { return '<option' + (S.sy === y ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select>' +
-    '<select id="spA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.sa === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
+    '<select id="spA" style="display:none"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.sa === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
   if (!S.SL) h += '<div class="ld">불러오는 중…</div>';
   else h += '<div class="bd spl">' + (F.length ? F.map(function (o) {
     return '<button class="spi" data-sp="' + o.id + '"><span class="m gsi">' + artHtml(o) + '</span><span class="d">' + dot(o.at) + '</span></button>';
@@ -1602,7 +1602,7 @@ function renderSheetList() {
   var SH = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
   var h = phd('', '제작일정 시트');
   h += '<div class="spf"><input id="gQ" type="search" placeholder="아티스트, 프로젝트명 검색" value="' + esc(S.gq) + '">' +
-    '<div class="sps"><select id="gA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.ga === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
+    '<div class="sps" style="display:none"><select id="gA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.ga === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
   h += '<div class="bd spl">' + (F.length ? F.map(function (o) {
     var f = o.f, per = f.from ? dot(f.from) + ' – ' + dot(f.to || f.from) : '';
     return '<div class="spi gsi"><button class="m" data-gp="' + f.id + '">' + artHtml(o) + '' +
