@@ -574,11 +574,12 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .cset summary { list-style:none; cursor:pointer; margin:0; } .cset summary::-webkit-details-marker { display:none; }
 #cP button { font-size:13px; }
 .cst.c2 { grid-template-columns:1.6fr 1fr; }
-#tdSeg { gap:4px; }
-#tdSeg .tdshi { width:32px; height:32px; border-radius:50%; background:#fff; color:var(--sub); display:inline-flex; align-items:center; justify-content:center; flex:none; }
+#tdSeg { gap:2px; }
+.hm2a { gap:6px; } .hm2a .arw { gap:4px; } .hm2a .hmt { flex:none; min-width:84px; } .hm2a #tdSeg { margin-left:auto; }
+#tdSeg .tdshi { width:30px; height:30px; border-radius:50%; background:#fff; color:var(--sub); display:inline-flex; align-items:center; justify-content:center; flex:none; }
 #tdSeg .tdshi svg { width:16px; height:16px; }
 
-#tdSeg button { width:32px; height:32px; padding:0 !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:-0.04em; flex:none; }
+#tdSeg button { width:30px; height:30px; padding:0 !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:-0.04em; flex:none; }
 @media (max-width:520px) { .hm2a { gap:6px; } .hm2a .arw .tod { display:none; } .hm2a .aseg button { padding-left:5px; padding-right:5px; } }
 .hm2 .arw .fbtn { font-size:18px; font-weight:500; line-height:1; }
 .phd b, .hm2 .hmt { font-size:18px !important; font-weight:800; letter-spacing:-0.02em; }
@@ -981,7 +982,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020pl4';
+var APP_VER = '20261020pl5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
