@@ -486,6 +486,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .gsl { flex:none; width:36px; height:36px; border-radius:50%; background:var(--chip); color:var(--txt2,#4e5968); display:flex; align-items:center; justify-content:center; }
 .spi .m small.sub { margin:2px 0 0; font-weight:500; }
 .spi .d { flex:none; font-size:12px; color:var(--faint); }
+.spinfo .spsep { grid-column:1 / -1; width:100%; border:0; border-top:1px solid #f2f4f6; margin:6px 0; }
 .spinfo .spt { display:block; font-size:16px; font-weight:800; margin-bottom:10px; }
 .bd dl { display:grid; grid-template-columns:auto 1fr; gap:6px 12px; margin:0; font-size:13px; }
 .bd dt { color:var(--mute); font-weight:600; white-space:nowrap; }
@@ -687,9 +688,9 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="hd">
     <button class="brand" id="brand">SOUND CONTENTS</button>
     <div class="hr">
-      <button class="ib" id="rpBtn" aria-label="업무보고"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></button>
+      <button class="ib" style="display:none" id="rpBtn" aria-label="업무보고"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></button>
       <button class="ib" id="rfBtn" aria-label="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg></button>
-      <button class="ib" id="setBtn" aria-label="시트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
+      <button class="ib" style="display:none" id="setBtn" aria-label="시트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
     </div>
   </div>
   <nav id="nav">
@@ -784,7 +785,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow" style="margin-top:12px"><div class="f"><label>날짜</label><input id="wlD" type="date"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>출근</label><input id="wlI" type="time"></div><div class="f"><label>퇴근</label><input id="wlO" type="time"></div></div>
   <div class="fl">체크</div><div class="chips" id="wlK"></div>
-  <div class="frow wlex" style="margin-top:12px"><div class="f"><label>외근 내용</label><input id="wlEx" maxlength="80" placeholder="예) 인쇄 감리 · 파주"></div></div>
+  <div class="frow wlex" style="margin-top:12px;display:none"><div class="f"><label>외근 내용</label><input id="wlEx" maxlength="80" placeholder="예) 인쇄 감리 · 파주"></div></div>
   <div class="frow wltx" style="margin-top:12px"><div class="f"><label>야근택시비</label><input id="wlFare" inputmode="numeric" placeholder="예) 23400"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>야근식사 · 같이 먹은 사람</label><input id="wlM" maxlength="120" placeholder="예) 혜선, 이시 · 안 먹었으면 비워 두기"></div></div>
   <div id="wlDay"></div>
@@ -811,10 +812,10 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 <div class="bs" id="wlx">
   <h3>WORK LOG 빠른 입력</h3>
   <div class="frow" style="margin-top:0"><div class="f"><label>기본 날짜 (글에 날짜가 없을 때)</label><input id="wlxD" type="date"></div></div>
-  <textarea class="dx" id="wlxT" style="margin-top:12px;min-height:160px" placeholder="대충 적어도 돼요. 카톡 내용 붙여넣기도 OK&#10;&#10;혜선 9:50 출근 23시 퇴근 야식 이시 희원 택시 23400&#10;주영 10시 출근 7시 퇴근&#10;희원 외근 파주 감리"></textarea>
+  <textarea class="dx" id="wlxT" style="margin-top:12px;min-height:160px" placeholder="대충 적어도 돼요. 카톡 내용 붙여넣기도 OK&#10;&#10;혜선 9:50 출근 23시 퇴근 야식 이시 희원 택시 23400&#10;주영 10시 출근 7시 퇴근"></textarea>
   <label class="wlxpic"><input type="file" id="wlxImg" accept="image/*" multiple hidden><span id="wlxPic">카톡 캡처 올리기</span></label>
   <div id="wlxPv"></div>
-  <p class="srcinfo">이름(혜선·이시·희원·주영·현아), 날짜(10/19·어제), 시각(9:50·오후 11시·23시), 야식(같이 먹은 사람)·외근·택시+금액을 알아서 읽어요. 이미 있는 기록은 적힌 항목만 덮어써요.</p>
+  <p class="srcinfo">이름(혜선·이시·희원·주영·현아), 날짜(10/19·어제), 시각(9:50·오후 11시·23시), 야식(같이 먹은 사람)·택시+금액을 알아서 읽어요. 이미 있는 기록은 적힌 항목만 덮어써요.</p>
   <div class="acts"><button class="save" id="wlxGo">읽기</button><button class="save hide" id="wlxS">모두 저장</button></div>
 </div>
 <div class="bs" id="wl1">
@@ -874,7 +875,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlb';
+var APP_VER = '20261019wld';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -973,6 +974,33 @@ function renderSpecList() {
   if (!S.SL || !S.slAt) loadSpecs().then(function () { if (S.view === 'spec' && !S.sp) renderSpecList(); }).catch(function (e) { if (!S.SL) M.innerHTML = h.replace('<div class="ld">불러오는 중…</div>', '<div class="empty2">' + esc(errMsg(e)) + '</div>'); });
 }
 function specInfo(info) {
+  // 열 짝 방식(라벨 열 + 바로 옆 값 열이 여러 묶음)인 머리글: 묶음별로 위→아래 순서로 정리
+  var pi = specPairs(info); if (pi) return pi;
+  return specInfo0(info);
+}
+function specPairs(info) {
+  if (!info.length) return null;
+  var title = '', first = info[0][0];
+  if (first && first.c <= 2 && first.t.length > 6) title = first.t;
+  var cells = [];
+  info.forEach(function (r, ri) { r.forEach(function (c) { if (!(ri === 0 && c === first && title)) cells.push({ r: ri, c: c.c, t: c.t }); }); });
+  var cols = {}; cells.forEach(function (x) { cols[x.c] = 1; });
+  var cs = Object.keys(cols).map(Number).sort(function (a, b) { return a - b; }), pairs = [];
+  for (var i = 0; i < cs.length; i++) if (cs[i] > 2 && cols[cs[i] + 1]) { pairs.push(cs[i]); i++; }
+  if (pairs.length < 2) return null;
+  var out = [];
+  pairs.forEach(function (L, n) {
+    if (n) out.push(['\u0000']);
+    info.forEach(function (r, ri) {
+      var lab = cells.filter(function (x) { return x.r === ri && x.c === L; })[0], val = cells.filter(function (x) { return x.r === ri && x.c === L + 1; })[0];
+      if (lab || val) out.push([lab ? lab.t : '', val ? val.t : '']);
+    });
+  });
+  // 짝에 안 들어간 칸(3열 이상)은 맨 끝에
+  cells.forEach(function (x) { if (x.c > 2 && pairs.indexOf(x.c) < 0 && pairs.indexOf(x.c - 1) < 0) out.push(['', x.t]); });
+  return { title: title, kv: out };
+}
+function specInfo0(info) {
   // 머리글 위 칸들: [라벨행 + 값행] 짝, 또는 한 줄 안의 '라벨 값' 짝
   var out = [], title = '';
   var lab = /^(제작수량|입고일|발주 ?수량|수량|납기|프로젝트명|구분|수신처|발신처|프로젝트 매니저|담당|담당자|입고처|발주일|사양|비고)$/;
@@ -1013,7 +1041,7 @@ function renderSpecOne() {
   if (d.tabs.length > 1) h += '<div class="tabs2" id="spT">' + d.tabs.map(function (t) { return '<button data-t="' + esc(t.n) + '" class="' + (t.n === d.tab ? 'on' : '') + '">' + esc(t.n) + '</button>'; }).join('') + '</div>';
   var inf = specInfo(d.info || []);
   h += '<div class="bd spinfo">' + (inf.title ? '<b class="spt">' + esc(inf.title) + '</b>' : '') +
-    (inf.kv.length ? '<dl>' + inf.kv.map(function (p) { return p[0] ? '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>' : '<dd class="w">' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' : '') +
+    (inf.kv.length ? '<dl>' + inf.kv.map(function (p) { if (p[0] === '\u0000') return '<hr class="spsep">'; return p[0] ? '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>' : '<dd class="w">' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' : '') +
     '<a class="spgo" href="' + esc(link(d.gid)) + '" target="_blank" rel="noopener">구글 시트로 이동</a></div>';
   if (!d.head.length) { M.innerHTML = h + '<div class="empty2">표 머리글(번호)을 찾지 못했어요. 시트에서 확인해 주세요</div>'; bindSpecOne(o, d); return; }
   var f = specFields(d), groups = [], cur = null;
@@ -2303,7 +2331,7 @@ sure($('#teDel'), function () {
 });
 
 /* ───── WORK LOG (2026-10-19): 출근·퇴근·야근·야근식사·외근·야근택시 — 시트 @4팀_TODO_연도 'WORK LOG' 탭 ───── */
-var WLK = [['ex', '외근'], ['tx', '야근택시']], WLT = [['fd', '야근식사'], ['ex', '외근'], ['tx', '야근택시']];
+var WLK = [['tx', '야근택시']], WLT = [['fd', '야근식사'], ['tx', '야근택시']];
 function wlRows(fn) { return (S.D.wl || []).filter(fn); }
 function wlTags(r) { return WLT.filter(function (k) { return r[k[0]]; }).map(function (k) { return k[1]; }); }
 function won(n) { return (+n || 0).toLocaleString('ko-KR'); }
@@ -2329,7 +2357,7 @@ function renderWl() {
   var M = wlRows(function (r) { return r.d >= first && r.d <= last && (!wp || r.p === wp); });
   h += '<div class="bd"><div class="bdh"><div><b>' + m + '월 합계</b></div></div>' + (wp ? [wp] : T).map(function (n) {
     var L = M.filter(function (r) { return r.p === n; }), c = function (k) { return L.filter(function (r) { return r[k]; }).length; }, fare = L.reduce(function (a, r) { return a + (+r.fare || 0); }, 0);
-    return '<div class="wlsum"><b style="color:' + dcol(n) + '">' + esc(n) + '</b><span>기록 ' + L.length + '일</span><span>야근식사 ' + c('fd') + '</span><span>외근 ' + c('ex') + '</span><span>야근택시 ' + c('tx') + (fare ? ' · ' + won(fare) + '원' : '') + '</span></div>';
+    return '<div class="wlsum"><b style="color:' + dcol(n) + '">' + esc(n) + '</b><span>야근식사 ' + c('fd') + '</span><span>야근택시 ' + c('tx') + (fare ? ' · ' + won(fare) + '원' : '') + '</span></div>';
   }).join('') + '</div>';
   $('#main').innerHTML = h;
   $('#wlPv').onclick = function () { S.wm--; if (S.wm < 1) { S.wm = 12; S.wy--; } render(); };
@@ -2585,8 +2613,6 @@ function wlParse(txt, baseD, baseP, one) {
       var rest = fm0[2].split(/외근|택시|출근|퇴근|\d{1,2}\s*[:시]/)[0].replace(/(이랑|랑|하고|와|과|같이|함께|먹음|먹었|먹고)/g, ' ').replace(/[,·/]+/g, ' ').trim();
       if (rest) put(r, 'm', rest.split(/\s+/).filter(String).join(', '));
     }
-    var ex = line.match(/(외근|감리|출장|미팅)\s*[:：\-]?\s*(.*)/);
-    if (ex) { put(r, 'ex', true); var exn = (ex[1] === '외근' ? '' : ex[1] + ' ') + ex[2].replace(/\d{1,2}\s*[:시]\s*\d{0,2}\s*분?|퇴근|출근|야근.*|택시.*/g, '').trim(); if (exn) put(r, 'exn', exn.slice(0, 80)); }
     if (/택시/.test(line)) {
       put(r, 'tx', true);
       var fm = line.slice(line.indexOf('택시')).match(/(\d{1,3}(?:,\d{3})+|\d{4,6})\s*원?|(\d+(?:\.\d+)?)\s*만\s*(\d{1,4})?\s*(천)?/);
@@ -2612,7 +2638,7 @@ function wlxRead() {
   WLX = L.map(wlMergeOld);
   if (!WLX.length) { $('#wlxPv').innerHTML = '<p class="srcinfo">읽은 기록이 없어요. 이름(혜선·이시·희원·주영·현아)과 시각을 함께 적어 주세요.</p>'; $('#wlxS').classList.add('hide'); return; }
   $('#wlxPv').innerHTML = '<div class="fl">' + WLX.length + '건 읽었어요 · 눌러서 빼기</div>' + WLX.map(function (x, n) {
-    var s = [x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '') + (x.exn ? ' (' + x.exn + ')' : '');
+    var s = [x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '');
     return '<button class="wlo on" data-wx="' + n + '"><b style="color:' + dcol(x.p) + '">' + esc(x.p) + '</b><span>' + esc(dw(x.d)) + ' · ' + esc(s || '-') + (x.old ? ' · 덮어쓰기' : '') + '</span></button>';
   }).join('');
   $$('[data-wx]').forEach(function (b) { b.onclick = function () { b.classList.toggle('on'); b.style.opacity = b.classList.contains('on') ? '' : '.35'; }; });
@@ -2666,7 +2692,7 @@ function openWl1(d, p) {
   wl1Draw();
   var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#wl1'); }, was ? 230 : 0);
 }
-function wl1Text(o) { return [o.i, o.o].filter(String).join(' ') + (o.fd ? ' 야식' + (o.m ? ' ' + o.m : '') : '') + (o.ex ? ' 외근' + (o.exn ? ' ' + o.exn : '') : '') + (o.tx ? ' 택시' + (o.fare ? ' ' + o.fare : '') : ''); }
+function wl1Text(o) { return [o.i, o.o].filter(String).join(' ') + (o.fd ? ' 야식' + (o.m ? ' ' + o.m : '') : '') + (o.tx ? ' 택시' + (o.fare ? ' ' + o.fare : '') : ''); }
 function nowHM() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 function wl1Parse() {
   var t = $('#wl1T').value.trim(); if (!t || !WL1.p) return null;
@@ -2682,7 +2708,7 @@ function wl1Draw() {
   $$('#wl1P button').forEach(function (b) { b.onclick = function () { WL1.p = b.dataset.n; ls.set('d4:wl1p', WL1.p); var o = (S.D.wl || []).filter(function (x) { return x.d === ($('#wl1D').value || WL1.d) && x.p === WL1.p; })[0]; if (o && !$('#wl1T').value.trim()) $('#wl1T').value = wl1Text(o); wl1Draw(); }; });
   var x = wl1Parse();
   $('#wl1Pv').innerHTML = !WL1.p ? '디자이너를 골라 주세요' : !x ? '"출근"만 적으면 지금 시각으로 기록해요 · 예) 출근 / 퇴근 / 9:50 23:10 야식 혜선 이시 택시 23400' :
-    '<b>' + esc(x.p) + '</b> · ' + esc(dw(x.d)) + ' · ' + esc([x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '') + (x.exn ? ' (' + x.exn + ')' : '') + (x.fd && x.m ? ' · 야식: ' + x.m : '')) + (x.old ? ' · 덮어쓰기' : '');
+    '<b>' + esc(x.p) + '</b> · ' + esc(dw(x.d)) + ' · ' + esc([x.i ? '출근 ' + x.i : '', x.o ? '퇴근 ' + x.o : ''].concat(wlTags(x)).filter(String).join(' · ') + (x.tx && x.fare ? ' ' + won(x.fare) + '원' : '') + (x.fd && x.m ? ' · 야식: ' + x.m : '')) + (x.old ? ' · 덮어쓰기' : '');
 }
 $('#wl1T').oninput = wl1Draw;
 $('#wl1D').onchange = function () { WL1.d = this.value || WL1.d; wl1Draw(); };
@@ -2690,7 +2716,7 @@ $('#wl1T').onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(
 $('#wl1More').onclick = function () { openWl($('#wl1D').value || WL1.d, WL1.p); };
 $('#wl1S').onclick = function () {
   if (!WL1.p) return toast('디자이너를 골라 주세요');
-  var x = wl1Parse(); if (!x) return toast('출근·퇴근이나 야식·외근·택시를 적어 주세요');
+  var x = wl1Parse(); if (!x) return toast('출근·퇴근이나 야식·택시를 적어 주세요');
   delete x.old; var b = $('#wl1S'); b.classList.add('busy');
   call('appWlSet', S.pin, x).then(function (res) { S.D.wl = res.wl || S.D.wl; saveCache(); closeBs(); toast('저장했어요'); render(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
