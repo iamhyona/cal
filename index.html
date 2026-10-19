@@ -493,6 +493,13 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .bd dt { color:var(--mute); font-weight:600; white-space:nowrap; }
 .bd dd { margin:0; color:var(--txt); white-space:pre-line; word-break:keep-all; overflow-wrap:anywhere; }
 .bd dd.w { grid-column:1 / -1; }
+.spih { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.spih .spt { flex:1; min-width:0; margin:0 !important; }
+.spgo2 { flex:none; width:34px; height:34px; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; }
+.spgo2 svg { width:17px; height:17px; }
+.spcv { flex:none; width:8px; height:8px; border-right:2px solid var(--mute); border-bottom:2px solid var(--mute); transform:rotate(45deg); margin:0 4px 4px; transition:transform .15s; }
+.spinfo.open .spcv { transform:rotate(-135deg); margin:4px 4px 0; }
+.spinfo.open dl { margin-top:12px; }
 .spgo { display:block; margin:14px 0 6px; text-align:center; background:var(--txt); color:#fff; border-radius:12px; padding:12px; font-size:14px; font-weight:700; text-decoration:none; }
 .spgh { display:flex; align-items:baseline; gap:8px; padding-bottom:10px; }
 .spgh .no { flex:none; font-size:13px; font-weight:800; color:var(--faint); }
@@ -880,7 +887,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlj';
+var APP_VER = '20261019wlk';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1045,9 +1052,11 @@ function renderSpecOne() {
   }
   if (d.tabs.length > 1) h += '<div class="tabs2" id="spT">' + d.tabs.map(function (t) { return '<button data-t="' + esc(t.n) + '" class="' + (t.n === d.tab ? 'on' : '') + '">' + esc(t.n) + '</button>'; }).join('') + '</div>';
   var inf = specInfo(d.info || []);
-  h += '<div class="bd spinfo">' + (inf.title ? '<b class="spt">' + esc(inf.title) + '</b>' : '') +
-    (inf.kv.length ? '<dl>' + inf.kv.map(function (p) { if (p[0] === '\u0000') return '<hr class="spsep">'; return p[0] ? '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>' : '<dd class="w">' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' : '') +
-    '<a class="spgo" href="' + esc(link(d.gid)) + '" target="_blank" rel="noopener">구글 시트로 이동</a></div>';
+  var SHIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
+  h += '<div class="bd spinfo' + (S.spOpen ? ' open' : '') + '"><div class="spih" id="spIh"><b class="spt">' + esc(inf.title || '기본 정보') + '</b>' +
+    '<a class="spgo2" href="' + esc(link(d.gid)) + '" target="_blank" rel="noopener" aria-label="구글 시트 열기">' + SHIC + '</a><i class="spcv"></i></div>' +
+    (S.spOpen && inf.kv.length ? '<dl>' + inf.kv.map(function (p) { if (p[0] === '\u0000') return '<hr class="spsep">'; return p[0] ? '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>' : '<dd class="w">' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' : '') +
+    '</div>';
   if (!d.head.length) { M.innerHTML = h + '<div class="empty2">표 머리글(번호)을 찾지 못했어요. 시트에서 확인해 주세요</div>'; bindSpecOne(o, d); return; }
   var f = specFields(d), groups = [], cur = null;
   d.rows.forEach(function (r) {
@@ -1072,6 +1081,7 @@ function renderSpecOne() {
   M.innerHTML = h; bindSpecOne(o, d);
 }
 function bindSpecOne(o, d) {
+  if ($('#spIh')) $('#spIh').onclick = function (e) { if (e.target.closest('.spgo2')) return; S.spOpen = !S.spOpen; renderSpecOne(); };
   $('#spBack').onclick = function () { S.sp = ''; ls.set('d4:sp', ''); window.scrollTo(0, 0); renderSpec(); };
   $$('#spT button').forEach(function (b) { b.onclick = function () { S.st = b.dataset.t; renderSpecOne(); }; });
 }
