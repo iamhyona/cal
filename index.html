@@ -983,7 +983,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020td3';
+var APP_VER = '20261020td4';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2357,8 +2357,7 @@ function renderTodo() {
   var dates = function (L) { return L.map(function (x) { return x.d; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(); };
   var list = function (L) { return L.length ? tdGroup(L) : '<div class="empty2">' + (one ? '아직 없어요' : '이 기간에 없어요') + '</div>'; };
   var byDate = function (L) { return dates(L).map(function (d) { var c = tdCount(L.filter(function (x) { return x.d === d; })); return '<div class="tddh">' + mdw(d) + (d === TODAY ? ' · 오늘' : '') + (c ? '<small>' + c + '</small>' : '') + '</div>' + list(L.filter(function (x) { return x.d === d; })); }).join('') || '<div class="empty2">이 기간에 없어요</div>'; };
-  if (!tp) h += '<div class="tmsum"><span>' + (one ? (S.tdd === TODAY ? '오늘' : '이날') : '기간') + ' <b class="ok">' + done + '</b>/' + R.length + ' 완료</span>' +
-    '</div>';
+  // '오늘 N/M 완료' 줄은 없앰 (2026-10-20)
   (tp ? [tp] : T).forEach(function (n) {
     var L = R.filter(function (x) { return x.p === n; });
     h += '<div class="bd tdd tdcard"><div class="bdh"><div>' + '<div class="tdnm">' + (tp ? '<b>' + esc(n) + '</b>' : '<button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button>') +
