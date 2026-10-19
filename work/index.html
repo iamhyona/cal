@@ -122,7 +122,7 @@ var S = { pin: ls.get('wt:pin') || '', me: null, team: ls.get('wt:team') || '', 
 /* 로그인 */
 function showLogin(msg) {
   $('#app').innerHTML = '<div class="login"><h1>근무표</h1><p>' + esc(msg || '디자인본부 근무 현황 · 비밀번호를 입력해 주세요') + '</p>' +
-    '<input id="pw" type="password" inputmode="numeric" autocomplete="current-password" maxlength="20"><button id="go">들어가기</button></div>';
+    '<input id="pw" type="password" autocomplete="current-password" maxlength="30"><button id="go">들어가기</button></div>';
   var go = function () { var v = $('#pw').value.trim(); if (!v) return; $('#go').classList.add('busy'); login(v); };
   $('#go').onclick = go; $('#pw').onkeydown = function (e) { if (e.key === 'Enter') go(); }; $('#pw').focus();
 }
