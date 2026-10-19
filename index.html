@@ -740,6 +740,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .exi em { font-style:normal; width:22px; height:22px; border-radius:50%; background:var(--chip); font-size:12px; font-weight:700; color:var(--sub); display:flex; align-items:center; justify-content:center; flex:none; }
 .exi div { flex:1; min-width:0; } .exi b { display:block; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .exi small { color:var(--mute); font-size:12px; }
 .exi span { font-weight:700; font-size:15px; }
+.tdea { display:flex; align-items:center; gap:6px; margin-top:6px; } .tdea input { flex:1; min-width:0; height:38px; border:1.5px dashed var(--line); background:none; border-radius:10px; padding:0 11px; font-size:15px; outline:0; color:var(--txt); box-sizing:border-box; } .tdea input:focus { border-style:solid; border-color:var(--sub); } .tdea.busy { opacity:.5; } .tdea::after { content:''; flex:none; width:34px; }
 .exxl { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:10px; border-radius:14px; background:var(--txt); color:#fff; padding:14px; font-size:14px; font-weight:700; text-decoration:none; box-sizing:border-box; } .exxl svg { width:16px; height:16px; }
 .extidy { width:100%; margin-top:10px; border:0; border-radius:14px; background:var(--chip); color:var(--sub); padding:14px; font-size:14px; font-weight:600; }
 .wlform { margin-top:16px; border:1px solid var(--line); border-radius:18px; padding:16px 14px 14px; background:#fff; }
@@ -983,7 +984,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020td4';
+var APP_VER = '20261020td5';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -3108,14 +3109,33 @@ $('#wl1S').onclick = function () {
 
 /* TO DO 카드 편집 모드 (2026-10-19): 할 일 글 바로 고치기 · 삭제 */
 function tdEditList(L) {
-  var cur = null;
-  return '<div class="tdel">' + L.slice().sort(function (a, b) { return a.d < b.d ? -1 : a.d > b.d ? 1 : String(a.j).localeCompare(String(b.j), 'ko'); }).map(function (x) {
-    var hd = '';
-    if (x.j !== cur) { cur = x.j; hd = '<div class="tdpj" style="color:' + (x.j ? dcol(x.p) : 'var(--mute)') + '">' + esc(x.j ? sgFix(x.j) : '기타') + '</div>'; }
-    return hd + '<div class="tdei" data-tei="' + esc(x.id) + '"><input value="' + esc(x.t) + '" maxlength="120"><button class="tdex" aria-label="삭제">×</button></div>';
+  // 수정 모드: 프로젝트(합친 이름)별로 묶고, 묶음마다 맨 아래 '할 일 추가' 칸 (2026-10-20)
+  var G = [], M = {};
+  L.slice().sort(function (a, b) { var aj = a.j ? sgFix(a.j) : '', bj = b.j ? sgFix(b.j) : ''; return a.d < b.d ? -1 : a.d > b.d ? 1 : (tdPjIdx(aj) - tdPjIdx(bj)) || aj.localeCompare(bj, 'ko') || (rid(a.id) - rid(b.id)); }).forEach(function (x) {
+    var j = x.j ? sgFix(x.j) : '', k = x.d + '|' + x.p + '|' + j;
+    if (!M[k]) { M[k] = { d: x.d, p: x.p, j: j, k: x.k, L: [] }; G.push(M[k]); }
+    M[k].L.push(x);
+  });
+  return '<div class="tdel">' + G.map(function (g) {
+    return '<div class="tdpj" style="color:' + (g.j ? dcol(g.p) : 'var(--mute)') + '">' + esc(g.j || '기타') + '</div>' +
+      g.L.map(function (x) { return '<div class="tdei" data-tei="' + esc(x.id) + '"><input value="' + esc(x.t) + '" maxlength="120"><button class="tdex" aria-label="삭제">×</button></div>'; }).join('') +
+      '<div class="tdea" data-d="' + esc(g.d) + '" data-p="' + esc(g.p) + '" data-j="' + esc(g.j) + '" data-k="' + esc(g.k) + '"><input placeholder="+ 할 일 추가" maxlength="120" enterkeyhint="done"></div>';
   }).join('') + '</div>';
 }
 function bindTdEdit() {
+  $$('.tdea').forEach(function (w) {
+    var inp = w.querySelector('input'), key = w.dataset.d + '|' + w.dataset.p + '|' + w.dataset.j;
+    if (S.teaFocus === key) { S.teaFocus = ''; setTimeout(function () { inp.focus(); }, 30); }
+    function add() {
+      var t = inp.value.trim(); if (!t || w.classList.contains('busy')) return;
+      w.classList.add('busy');
+      var o = { d: w.dataset.d, k: w.dataset.k === '주간' ? '주간' : '데일리', p: w.dataset.p, j: w.dataset.j, t: t, m: '', c: false };
+      call('appTodoAdd', S.pin, [o]).then(function (res) { S.teaFocus = key; toast('추가했어요'); if (!tdMerge(res)) return load(); })
+        .catch(function (e) { toast(errMsg(e)); w.classList.remove('busy'); });
+    }
+    inp.onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); } };
+    inp.onblur = function () { if (inp.value.trim()) add(); };
+  });
   $$('.tdei').forEach(function (w) {
     var id = w.dataset.tei, inp = w.querySelector('input'), del = w.querySelector('.tdex');
     function save() {
