@@ -680,8 +680,15 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   .lbcut { position:absolute; left:0; right:0; top:148mm; border-top:0.4mm dashed #888; }
 }
 .wlcal .grid > button { min-height:70px; }
-.wlbars { display:flex; flex-wrap:wrap; gap:3px; padding:4px 3px 0; }
-.wlbars i { width:7px; height:7px; border-radius:50%; display:block; }
+.wlbars { display:flex; flex-wrap:wrap; gap:4px; padding:5px 3px 0; }
+.wlbars i { width:12px; height:12px; border-radius:50%; display:block; position:relative; }
+.wlbars i.tx { border-radius:3px; }
+.wlbars i.fd::after { content:''; position:absolute; left:50%; top:50%; width:4px; height:4px; margin:-2px 0 0 -2px; border-radius:50%; background:#fff; }
+.wllg { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--mute); font-weight:600; margin:10px 4px 0; }
+.wllg span { display:inline-flex; align-items:center; gap:6px; }
+.wllg i { width:12px; height:12px; border-radius:50%; background:var(--faint); position:relative; display:inline-block; }
+.wllg i.tx { border-radius:3px; }
+.wllg i.fd::after { content:''; position:absolute; left:4px; top:4px; width:4px; height:4px; border-radius:50%; background:#fff; }
 .wl1pv { margin-top:10px; min-height:20px; font-size:13px; color:var(--sub); line-height:1.6; }
 .wl1pv b { color:var(--txt); }
 #wl1More { background:var(--chip); color:var(--sub); }
@@ -915,7 +922,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wly';
+var APP_VER = '20261019wlz';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1459,7 +1466,7 @@ function renderMonthTeam() {
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
       bars.slice(0, bars.length > max ? max - 1 : max).join('') + (bars.length > max ? '<span class="evm">+' + (bars.length - max + 1) + '</span>' : '') + '</button>';
   }
-  h += '</div></div>';
+  h += '</div><div class="wllg"><span><i></i>근무시간 다름</span><span><i class="fd"></i>야근식사</span><span><i class="tx"></i>야근택시</span><span><i class="fd tx"></i>둘 다</span></div></div>';
   var ml = rows.filter(function (r) { return r.d.slice(0, 7) === mo; }), ds = [];
   ml.forEach(function (r) { if (ds.indexOf(r.d) < 0) ds.push(r.d); }); ds.reverse();
   h += '<div class="sec">' + (pf ? esc(pf) + ' 업무' : '팀 업무') + '<small>완료 ' + ml.filter(function (r) { return r.s === '완료'; }).length + ' / ' + ml.length + '</small></div>';
@@ -2409,7 +2416,7 @@ function renderWl() {
     var L = wlRows(function (r) { return r.d === d && (!wp || r.p === wp) && wlOdd(r); }).sort(function (a, b) { return T.indexOf(a.p) - T.indexOf(b.p); }), w = P(d).getDay(), hl = hol(d);
     h += '<button data-wd="' + d + '" class="' + (d.slice(0, 7) !== first.slice(0, 7) ? 'out ' : '') + (d === TODAY ? 'td ' : '') + (hl ? 'hol ' : '') + (w === 0 ? 'sun ' : w === 6 ? 'sat ' : '') + '">' +
       '<span class="dn"><b>' + P(d).getDate() + '</b>' + (hl ? '<small>' + esc(hl) + '</small>' : '') + '</span>' +
-      (L.length ? '<span class="wlbars">' + L.map(function (r) { return '<i style="background:' + dcol(r.p) + '" title="' + esc(r.p) + '"></i>'; }).join('') + '</span>' : '') +
+      (L.length ? '<span class="wlbars">' + L.map(function (r) { return '<i class="' + (r.fd ? 'fd ' : '') + (r.tx ? 'tx' : '') + '" style="background:' + dcol(r.p) + '" title="' + esc(r.p) + '"></i>'; }).join('') + '</span>' : '') +
       ''      + '</button>';
   }
   h += '</div></div>';
