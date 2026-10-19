@@ -574,12 +574,12 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .cset summary { list-style:none; cursor:pointer; margin:0; } .cset summary::-webkit-details-marker { display:none; }
 #cP button { font-size:13px; }
 .cst.c2 { grid-template-columns:1.6fr 1fr; }
-#tdSeg { gap:2px; }
-.hm2a { gap:6px; } .hm2a .arw { gap:4px; } .hm2a .hmt { flex:none; min-width:84px; } .hm2a #tdSeg { margin-left:auto; }
+#tdSeg, #lSeg { gap:2px; }
+.hm2a { gap:6px; } .hm2a .arw { gap:4px; } .hm2a .hmt { flex:none; min-width:84px; } .hm2a #tdSeg, .hm2a #lSeg, .tdrg #lSeg { margin-left:auto; }
 #tdSeg .tdshi { width:30px; height:30px; border-radius:50%; background:#fff; color:var(--sub); display:inline-flex; align-items:center; justify-content:center; flex:none; }
 #tdSeg .tdshi svg { width:16px; height:16px; }
 
-#tdSeg button { width:30px; height:30px; padding:0 !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:-0.04em; flex:none; }
+#tdSeg button, #lSeg button { width:30px; height:30px; padding:0 !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:-0.04em; flex:none; }
 @media (max-width:520px) { .hm2a { gap:6px; } .hm2a .arw .tod { display:none; } .hm2a .aseg button { padding-left:5px; padding-right:5px; } }
 .hm2 .arw .fbtn { font-size:18px; font-weight:500; line-height:1; }
 .phd b, .hm2 .hmt { font-size:18px !important; font-weight:800; letter-spacing:-0.02em; }
@@ -985,7 +985,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020cl1';
+var APP_VER = '20261020cl2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1680,9 +1680,16 @@ function pjTeam(p) {
 }
 function renderProject() {
   if (S.pm === 'sheet') { S.pm = 'sched'; ls.set('d4:pm', S.pm); }
-  var tm = S.pm === 'team', lp = S.lp || 'a', lrg = dRange(lp, S.ld || TODAY); S.lrg = lp === 'a' ? null : lrg;
-  var lcur = TODAY >= lrg[0] && TODAY <= lrg[1];
-  var top = perHead('lSeg', lp, lrg, S.ld || TODAY, 'l');
+  // 기간: 일·주·월 + 기간(직접 고르기) — 동그라미 단추 (2026-10-20)
+  var tm = S.pm === 'team', lp = S.lp; if (['d', 'w', 'm', 'r'].indexOf(lp) < 0) lp = S.lp = 'm';
+  S.lf = S.lf || ls.get('d4:lf') || TODAY.slice(0, 7) + '-01'; S.lt = S.lt || ls.get('d4:lt') || F(new Date(+TODAY.slice(0, 4), +TODAY.slice(5, 7), 0));
+  var lrg = lp === 'r' ? [S.lf <= S.lt ? S.lf : S.lt, S.lf <= S.lt ? S.lt : S.lf] : dRange(lp, S.ld || TODAY); S.lrg = lrg;
+  var LPER = [['d', '일'], ['w', '주'], ['m', '월'], ['r', '기간']];
+  var lseg = '<div class="aseg" id="lSeg">' + LPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === lp ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  var top = lp === 'r'
+    ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="lF" value="' + lrg[0] + '"><span>–</span><input type="date" id="lT" value="' + lrg[1] + '"></div>' + lseg + '</div>'
+    : (function () { var cur = TODAY >= lrg[0] && TODAY <= lrg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(lp, lrg) + '<input type="date" class="dpk" id="lSegD" value="' + (S.ld || TODAY) + '"></label>' + lseg +
+      '<div class="arw">' + (cur ? '' : '<button class="tod" id="nT">오늘</button>') + '<button id="lP" aria-label="이전">‹</button><button id="lN" aria-label="다음">›</button></div></div>'; })();
   var ps = [null].concat([{ allp: 1, name: '__allp' }]).concat(tm ? [{ allw: 1, name: '__allw' }] : []).concat(projList().filter(function (p) { return tm ? repProj(p.name).length : p.f; }));
   var idx = Math.max(0, ps.findIndex(function (p) { return (p ? p.name : '') === (S.pj || ''); }));
   var h = top + '<div class="seg" id="pSeg"><button data-m="sched" class="' + (tm ? '' : 'on') + '">제작일정</button><button data-m="team" class="' + (tm ? 'on' : '') + '">팀 업무</button></div>' +
@@ -1691,6 +1698,7 @@ function renderProject() {
   $('#main').innerHTML = h; bindItems(); bindRep(); bindEvCk();
   $$('#lSeg button').forEach(function (b) { b.onclick = function () { S.lp = b.dataset.p; ls.set('d4:lp', S.lp); render(); }; });
   if ($('#lSegD')) $('#lSegD').onchange = function () { if (this.value) { S.ld = this.value; render(); } };
+  if ($('#lF')) { $('#lF').onchange = function () { if (this.value) { S.lf = this.value; ls.set('d4:lf', S.lf); render(); } }; $('#lT').onchange = function () { if (this.value) { S.lt = this.value; ls.set('d4:lt', S.lt); render(); } }; }
   if ($('#lP')) { $('#lP').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, -1); render(); }; $('#lN').onclick = function () { S.ld = dMove(lp, S.ld || TODAY, 1); render(); }; }
   if ($('#nT')) $('#nT').onclick = function () { S.ld = TODAY; render(); };
   $$('#pSeg button').forEach(function (b) { b.onclick = function () { S.pm = b.dataset.m; ls.set('d4:pm', S.pm); render(); }; });
