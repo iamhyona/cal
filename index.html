@@ -760,7 +760,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td12';
+var APP_VER = '20261019td13';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1235,7 +1235,7 @@ function sgFix(n) {
     .replace(/(^|\s)(20)?2[0-9]\s*(?=시즌그리팅)/g, '$1').replace(/(시즌그리팅)\s*(20)?2[0-9](?=\s|$)/g, '$1')
     .replace(/\s*시즌그리팅/, ' 2027 시즌그리팅').replace(/\s+/g, ' ').trim();
 }
-var PCOLOR = { '이혜선': '#ef4444', '유이시': '#3182f6', '허희원': '#ec4899', '박주영': '#f97316', '박현아': '#191f28' };
+var PCOLOR = { '이혜선': '#ef4444', '유이시': '#16a34a', '허희원': '#ec4899', '박주영': '#f97316', '박현아': '#191f28' };
 function dcol(n) { if (PCOLOR[n]) return PCOLOR[n]; var i = team().indexOf(n); return DCOL[(i < 0 ? 0 : i) % DCOL.length]; }
 function dshort(n) { return n.length === 3 ? n.slice(1) : n; }
 // 날짜별 접는 카드: 오늘만 기본으로 열림, 연 상태는 기억
