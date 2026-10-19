@@ -340,7 +340,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .mcal .ev.fin { opacity:.45; }
 .rpi .ck { flex:none; width:22px; height:22px; border-radius:50%; border:2px solid #d1d6db; background:#fff; padding:0; margin-top:2px; display:flex; align-items:center; justify-content:center; color:transparent; }
 .rpi .ck svg { width:13px; height:13px; }
-.rpi.done .ck { background:var(--acc); border-color:var(--acc); color:#fff; }
+.rpi.done .ck { background:var(--ckc,var(--acc)); border-color:var(--ckc,var(--acc)); color:#fff; }
 .rpi .rpt { flex:1; min-width:0; display:flex; gap:8px; align-items:baseline; border:0; background:none; text-align:left; padding:3px 0; font-size:14px; line-height:1.45; color:var(--txt); }
 .rpi.done .tx { text-decoration:line-through; color:var(--faint); }
 .rpi.done .wt { display:none; }
@@ -939,7 +939,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wm4';
+var APP_VER = '20261020td1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2229,7 +2229,7 @@ function tdItem(x, opt) {
   var pj = x.j && !opt.noPj ? '<small style="color:' + pinfo(x.j).color + '">' + esc(sgFix(x.j)) + '</small>' : '';
   var who = opt.who ? '<span class="who">' + esc(dshort(x.p || '')) + '</span>' : '';
   return '<div class="rpi' + (x.c ? ' done' : '') + (tdImp(x) ? ' imp' : '') + (x.tmp ? ' tmp' : '') + '" data-tdrow="' + esc(x.id) + '">' +
-    '<button class="ck" data-tdck="' + esc(x.id) + '" aria-label="완료">' + CKSVG + '</button>' +
+    '<button class="ck" data-tdck="' + esc(x.id) + '"' + (x.p ? ' style="--ckc:' + dcol(x.p) + '"' : '') + ' aria-label="완료">' + CKSVG + '</button>' +
     '<button class="rpt" data-tdx="' + esc(x.id) + '">' + who + '<span class="tx' + (pj ? ' tx2' : '') + '">' + pj + (tdImp(x) ? '<em class="star">★</em>' : '') + esc(x.t) + '</span>' +
     (tdWait(x) ? '<span class="wt">대기</span>' : '') + '</button></div>';
 }
