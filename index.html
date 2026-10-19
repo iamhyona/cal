@@ -737,6 +737,9 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 /* 동그라미 아이콘 단추: 아이콘을 가로·세로 정가운데로 (iOS 기본 여백·글줄 높이 제거) */
 .ib, .pjb, .spgo2, .qki, .tded:not(.on), .tdshi, .arw button:not(.tod), #spBack, .tdex:not(.sure), .tdstar, .gsl { display:inline-flex !important; align-items:center; justify-content:center; padding:0 !important; line-height:0; -webkit-appearance:none; appearance:none; }
 .ib svg, .pjb svg, .spgo2 svg, .qki svg, .tded svg, .tdshi svg, .arw button svg, #spBack svg, .tdex svg, .tdstar svg, .gsl svg { display:block; flex:none; }
+.qeco { margin-top:4px; } .qepr { background:var(--bg,#f6f7f9); border-radius:14px; padding:10px 10px 2px; margin-bottom:8px; } .qepr .frow { margin-bottom:8px; align-items:center; } .qepr input { background:#fff !important; }
+.qerm { flex:none; width:34px; height:34px; border:0; border-radius:50%; background:none; color:var(--mute); display:inline-flex; align-items:center; justify-content:center; padding:0; } .qerm svg { width:15px; height:15px; }
+.qeadd { width:100%; border:1.5px dashed var(--line); background:none; border-radius:12px; padding:11px; font-size:14px; font-weight:600; color:var(--sub); display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:6px; }
 .exbox { background:#fff; border-radius:18px; padding:16px 14px 6px; }
 .exsel { width:100%; height:46px; border:0; border-radius:12px; background:var(--chip); padding:0 12px; font-size:16px; color:var(--txt); -webkit-appearance:none; appearance:none; }
 .expic { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:96px; border:1.5px dashed var(--line); border-radius:14px; color:var(--sub); font-size:15px; font-weight:600; padding:12px; cursor:pointer; }
@@ -908,6 +911,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow" style="margin-top:12px"><div class="f"><label>업체 / 소속</label><input id="qeC" maxlength="60" placeholder="예) 아이엠프린팅"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>도로명 주소</label><input id="qeA" maxlength="160"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>지번 주소</label><input id="qeA2" maxlength="160" placeholder="비워 둬도 돼요"></div></div>
+  <div class="qeco" style="display:none"><div class="fl">담당자</div><div id="qePpl"></div><button class="qeadd" id="qeAddP" type="button"><svg class="ip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>담당자 추가</button></div>
   <div class="frow qeper" style="margin-top:12px"><div class="f"><label>이름</label><input id="qeP" maxlength="30"></div><div class="f"><label>직함</label><input id="qeJ" maxlength="20" placeholder="예) 팀장"></div></div>
   <div class="frow qeper" style="margin-top:12px"><div class="f"><label>연락처</label><input id="qeH" maxlength="40" inputmode="tel"></div></div>
   <div class="frow qeper" style="margin-top:12px"><div class="f"><label>비고</label><input id="qeM" maxlength="120" placeholder="비워 둬도 돼요"></div></div>
@@ -992,7 +996,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020ic2';
+var APP_VER = '20261020qk1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2882,10 +2886,27 @@ function openQe(r, co) {
   $('#qeC').value = src ? src.c : ''; $('#qeA').value = src ? src.a : ''; $('#qeA2').value = src ? src.a2 : '';
   $('#qeP').value = isRow ? r.p : ''; $('#qeJ').value = isRow ? (r.j || '') : ''; $('#qeH').value = isRow ? r.t : ''; $('#qeM').value = isRow ? r.m : '';
   $$('#qe .qeper').forEach(function (x) { x.style.display = co ? 'none' : ''; });
+  // 업체 고치기: 담당자도 같이 고치기·추가·빼기 (2026-10-20)
+  $('#qe .qeco').style.display = co ? '' : 'none';
+  QE.ppl = co ? co.map(function (r) { return { r: r, p: r.p || '', j: r.j || '', t: r.t || '', m: r.m || '' }; }) : [];
+  if (co) qePplDraw();
   $('#qeDel').style.display = isRow || co ? '' : 'none'; unsure($('#qeDel'));
   qeDraw();
   var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#qe'); if (r && r.isNew) $('#qeP').focus(); }, was ? 230 : 0);
 }
+function qePplDraw() {
+  $('#qePpl').innerHTML = QE.ppl.map(function (x, i) {
+    if (x.del) return '';
+    return '<div class="qepr" data-i="' + i + '"><div class="frow"><div class="f"><input data-f="p" value="' + esc(x.p) + '" placeholder="이름" maxlength="30"></div><div class="f" style="flex:0 0 30%"><input data-f="j" value="' + esc(x.j) + '" placeholder="직함" maxlength="20"></div>' +
+      '<button class="qerm" type="button" aria-label="담당자 빼기">' + IC_X + '</button></div><div class="frow"><div class="f"><input data-f="t" value="' + esc(x.t) + '" placeholder="연락처" inputmode="tel" maxlength="40"></div></div></div>';
+  }).join('') || '<p class="srcinfo" style="margin:0 2px 8px">담당자가 없어요</p>';
+  $$('#qePpl .qepr').forEach(function (w) {
+    var x = QE.ppl[+w.dataset.i];
+    w.querySelectorAll('input').forEach(function (inp) { inp.oninput = function () { x[inp.dataset.f] = inp.value; }; });
+    w.querySelector('.qerm').onclick = function () { if (x.r) x.del = true; else QE.ppl.splice(+w.dataset.i, 1); qePplDraw(); };
+  });
+}
+$('#qeAddP').onclick = function () { QE.ppl.push({ r: null, p: '', j: '', t: '', m: '' }); qePplDraw(); var L = $$('#qePpl .qepr input[data-f="p"]'); if (L.length) L[L.length - 1].focus(); };
 function qeDraw() {
   $('#qeK').innerHTML = QKK.map(function (x) { return '<button data-k="' + x + '" class="' + (QE.k === x ? 'on' : '') + '">' + x + '</button>'; }).join('');
   $$('#qeK button').forEach(function (b) { b.onclick = function () { QE.k = b.dataset.k; qeDraw(); }; });
@@ -2905,7 +2926,14 @@ $('#qeS').onclick = function () {
   var c = { k: QE.k, c: $('#qeC').value.trim(), a: $('#qeA').value.trim().replace(/서울특별시/g, '서울시'), a2: $('#qeA2').value.trim().replace(/서울특별시/g, '서울시') };
   if (QE.co) {
     if (!c.c) return toast('업체 이름을 적어 주세요');
-    return qkSeq(QE.co.map(function (r) { return Object.assign({ r: r.r, old: { c: r.c, p: r.p, t: r.t }, p: r.p, j: r.j || '', t: r.t, m: r.m }, c); }), $('#qeS'), '업체 정보를 고쳤어요');
+    // 순서: 고치기 → 새 담당자(맨 아래 추가) → 빼기(아래 줄부터, 줄 번호 안 밀리게)
+    var P = QE.ppl.map(function (x) { return { r: x.r, del: x.del, p: String(x.p).trim(), j: String(x.j).trim().replace(/님$/, ''), t: String(x.t).trim(), m: x.m }; });
+    var keep = P.filter(function (x) { return x.r && !x.del; }), add = P.filter(function (x) { return !x.r && (x.p || x.t); }), del = P.filter(function (x) { return x.r && x.del; });
+    if (!keep.length && !add.length && del.length) return toast('담당자를 다 빼려면 아래 삭제를 눌러 주세요');
+    var ops = keep.map(function (x) { var r = x.r; return Object.assign({ r: r.r, old: { c: r.c, p: r.p, t: r.t }, p: x.p, j: x.j, t: x.t, m: x.m }, c); })
+      .concat(add.map(function (x) { return Object.assign({ p: x.p, j: x.j, t: x.t, m: '' }, c); }))
+      .concat(del.sort(function (a, b) { return b.r.r - a.r.r; }).map(function (x) { var r = x.r; return { r: r.r, old: { c: r.c, p: r.p, t: r.t }, del: true }; }));
+    return qkSeq(ops, $('#qeS'), '업체·담당자를 저장했어요');
   }
   var o = Object.assign(c, { p: $('#qeP').value.trim(), j: $('#qeJ').value.trim().replace(/님$/, ''), t: $('#qeH').value.trim(), m: $('#qeM').value.trim() });
   if (!o.c && !o.p) return toast('업체나 담당자를 적어 주세요');
