@@ -724,10 +724,10 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .pjb { width:34px; height:34px; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; border:0; padding:0; -webkit-touch-callout:none; user-select:none; }
 .pjb svg { width:17px; height:17px; } .pjb.off { opacity:.3; }
 .ntbox { background:#fff; border-radius:18px; padding:14px 16px 10px; margin-bottom:12px; }
-.nth { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; } .nth b { font-size:15px; }
-.nth button { border:0; background:var(--chip); color:var(--sub); border-radius:999px; font-size:12px; font-weight:700; padding:6px 11px; }
-.nti { display:flex; gap:10px; align-items:baseline; width:100%; border:0; background:none; text-align:left; padding:9px 0; border-top:1px solid var(--line); color:var(--txt); font-size:15px; font-weight:600; line-height:1.45; }
-.nti:first-of-type { border-top:0; } .nti span { flex:1; min-width:0; } .nti small { flex:none; color:var(--mute); font-size:12px; font-weight:500; }
+.nth { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; } .nth b { font-size:13px; color:var(--sub); }
+.nth button { border:0; background:var(--chip); color:var(--sub); border-radius:50%; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; } .nth button svg { width:14px; height:14px; margin:0; }
+.nti { display:flex; gap:10px; align-items:baseline; width:100%; border:0; background:none; text-align:left; padding:9px 0; border-top:1px solid var(--line); color:var(--txt); font-size:13px; font-weight:600; line-height:1.45; }
+.nti:first-of-type { border-top:0; } .nti span { flex:1; min-width:0; } .nti small { flex:none; color:var(--mute); font-size:11px; font-weight:500; }
 .ntno { color:var(--mute); font-size:13px; margin:4px 0 4px; }
 .wkf { display:block; width:100%; border:0; background:var(--chip); color:var(--sub); border-radius:10px; padding:8px; font-size:13px; font-weight:700; margin:6px 0; }
 .wkf { display:flex !important; align-items:center; justify-content:center; } .wkf .chev { display:inline-block; width:8px; height:8px; border-right:2px solid var(--faint); border-bottom:2px solid var(--faint); transform:rotate(45deg); margin:0 0 4px 8px; } .wkf .chev.up { transform:rotate(-135deg); margin-bottom:-2px; }
@@ -1003,7 +1003,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020qk2';
+var APP_VER = '20261020nt1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2609,7 +2609,7 @@ $('#nsS').onclick = function () {
 /* ───── 팀 공지 (2026-10-20): TO DO 맨 위 · TODO 시트에 구분 '공지' · 디자이너 '팀' 으로 저장 ───── */
 function ntHtml() {
   var N = tdRows(function (x) { return x.k === '공지' && !x.c; }).sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
-  return '<div class="ntbox"><div class="nth"><b>팀 공지</b><button id="ntAdd">' + IC_PS + '공지 쓰기</button></div>' +
+  return '<div class="ntbox"><div class="nth"><b>팀 공지</b><button id="ntAdd" aria-label="공지 쓰기">' + IC_PS + '</button></div>' +
     (N.length ? N.map(function (x) { return '<button class="nti" data-nt="' + esc(x.id) + '"><span>' + esc(x.t) + '</span><small>' + dot(x.d) + '</small></button>'; }).join('') : '<p class="ntno">공지가 없어요</p>') + '</div>';
 }
 var NT = null;
