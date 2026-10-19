@@ -590,6 +590,9 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .tdwho { border:0; background:none; padding:0; font-size:14px; color:var(--txt); }
 .rph .tdc { color:var(--faint); font-size:12px; font-weight:700; margin-left:auto; }
 .bd.tdcard .bdh .tdwho b { font-size:17px; }
+.tddh { display:flex; align-items:baseline; gap:6px; font-size:13px; font-weight:800; color:var(--sub); margin:14px 0 4px; padding-top:10px; border-top:1px solid #f2f4f6; }
+.tddh:first-child { margin-top:6px; padding-top:0; border-top:0; }
+.tddh small { color:var(--faint); font-size:12px; font-weight:700; margin-left:auto; }
 .tdday em { font-style:normal; color:var(--acc); font-weight:800; }
 .tmsum .tdsh { color:var(--sub); font-size:12px; font-weight:700; text-decoration:none; border-radius:999px; padding:7px 10px; background:var(--chip); }
 .tmsum .tdsh + button { margin-left:6px; }
@@ -740,7 +743,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td4';
+var APP_VER = '20261019td6';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1951,52 +1954,40 @@ function homeMemo(H) {
   var ws = monOf(H), we = addD(ws, 6);
   var tl = tdRows(function (x) { return x.k === '오늘메모' && x.d === H; }).sort(tdSort);
   var wl = tdRows(function (x) { return x.k === '주간메모' && x.d === ws; }).sort(tdSort);
-  return '<div class="bd memo"><div class="bdh"><div><b>' + (H === TODAY ? 'TODAY' : 'DAY') + '</b><small>메모 ' + (tdCount(tl) ? '· ' + tdCount(tl) : '') + '</small></div></div>' +
+  return '<div class="bd memo"><div class="bdh"><div><b>' + (H === TODAY ? 'TODAY' : 'DAY') + '</b></div></div>' +
     '<div class="tdl">' + (tl.length ? tl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">' + (H === TODAY ? '오늘' : '이날') + ' 메모가 없어요</div>') + '</div>' + tdAddRow('오늘메모', H, '', 1) + '</div>' +
-    '<div class="bd memo"><div class="bdh"><div><b>WEEK</b><small>' + dot(ws) + ' – ' + we.slice(5).replace('-', '.') + (tdCount(wl) ? ' · ' + tdCount(wl) : '') + '</small></div></div>' +
+    '<div class="bd memo"><div class="bdh"><div><b>WEEK</b></div></div>' +
     '<div class="tdl">' + (wl.length ? wl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">이번 주 메모가 없어요</div>') + '</div>' + tdAddRow('주간메모', ws, '', 1) + '</div>';
 }
 
 // TO DO LIST: 전체 / 디자이너별 — 이번 주 할 일은 위에 고정, 아래로 데일리
 function renderTodo() {
-  S.tw = S.tw || monOf(TODAY);
-  var ws = S.tw, we = addD(ws, 6), cur = TODAY >= ws && TODAY <= we, T = team();
+  // 상단: 날짜(기본 오늘) + 기간(일·주·월·반년·한해·전체) + 이동 버튼 (2026-10-19)
+  var p = S.tdp || ls.get('d4:tdp') || 'd'; S.tdp = p; S.tdd = S.tdd || TODAY;
+  var rg = dRange(p, S.tdd), one = p === 'd', T = team();
   var tp = ls.get('d4:tp') || ''; if (tp && T.indexOf(tp) < 0) tp = '';
-  if (!S.tday || S.tday < ws || S.tday > we) S.tday = cur ? TODAY : ws;
-  var D0 = tdRows(function (x) { return x.k === '데일리' && x.d >= ws && x.d <= we; });
-  var h = phd('', dot(ws) + ' – ' + we.slice(5).replace('-', '.') + ' 주', (cur ? '' : '<button class="tod" id="twT">이번 주</button>') + '<button id="twP" aria-label="지난주">‹</button><button id="twN" aria-label="다음 주">›</button>');
-  h += '<div class="tabs2" id="tdP"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
-  if (tp) {
-    for (var i = 0; i < 7; i++) {
-      var d = addD(ws, i), dl = D0.filter(function (x) { return x.p === tp && x.d === d; }).sort(tdSort);
-      if (i >= 5 && !dl.length && d !== TODAY) continue;
-      var hl = hol(d);
-      h += '<div class="bd tdd' + (d === TODAY ? ' td' : '') + (d < TODAY && !dl.length ? ' past' : '') + '"><div class="bdh"><div><b>' + mdw(d) + '</b><small>' + [d === TODAY ? '오늘' : '', hl, tdCount(dl) ? tdCount(dl) + ' 완료' : ''].filter(String).map(esc).join(' · ') + '</small></div>' +
-        '<button class="add" data-pst="' + d + '|' + esc(tp) + '">붙여넣기</button></div>' +
-        '<div class="tdl">' + (dl.length ? dl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">할 일 없음</div>') + '</div>' + tdAddRow('데일리', d, tp) + '</div>';
-    }
-  } else {
-    var day = S.tday, dd = D0.filter(function (x) { return x.d === day; }), dDone = dd.filter(function (x) { return x.c; }).length;
-    h += '<div class="tmsum"><span>' + (day === TODAY ? '오늘' : dw(day).slice(3)) + ' <b class="ok">' + dDone + '</b>/' + dd.length + ' 완료</span>' +
-      (S.D.tdUrl ? '<a class="tdsh" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener">시트</a>' : '') + '<button id="tdPaste">+ 업무보고</button></div>';
-    h += '<div class="tabs2 tdday" id="tdD">' + [0, 1, 2, 3, 4, 5, 6].map(function (i) {
-      var d = addD(ws, i), n = D0.filter(function (x) { return x.d === d; }).length; if (i >= 5 && !n && d !== TODAY) return '';
-      return '<button data-d="' + d + '" class="' + (d === day ? 'on' : '') + '">' + W[P(d).getDay()] + ' ' + P(d).getDate() + (n ? ' <em>' + n + '</em>' : '') + '</button>';
-    }).join('') + '</div>';
-    h += T.map(function (n) {
-      var l = dd.filter(function (x) { return x.p === n; }).sort(tdSort);
-      return '<div class="bd tdd tdcard"><div class="bdh"><div><button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button><small>' + mdw(day) + (tdCount(l) ? ' · ' + tdCount(l) + ' 완료' : '') + '</small></div>' +
-        '<button class="add" data-pst="' + day + '|' + esc(n) + '">붙여넣기</button></div>' +
-        '<div class="tdl">' + (l.length ? l.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">아직 없어요</div>') + '</div>' + tdAddRow('데일리', day, n) + '</div>';
-    }).join('');
-  }
+  var R = tdRows(function (x) { return x.k === '데일리' && x.d >= rg[0] && x.d <= rg[1]; });
+  var h = perHead('tdSeg', p, rg, S.tdd, 'tdm');
+  h += '<div class="tabs2" id="tdW"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+  var done = R.filter(function (x) { return x.c; }).length;
+  var dates = function (L) { return L.map(function (x) { return x.d; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(); };
+  var list = function (L) { return L.length ? L.sort(tdSort).map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">' + (one ? '아직 없어요' : '이 기간에 없어요') + '</div>'; };
+  var byDate = function (L) { return dates(L).map(function (d) { var c = tdCount(L.filter(function (x) { return x.d === d; })); return '<div class="tddh">' + mdw(d) + (d === TODAY ? ' · 오늘' : '') + (c ? '<small>' + c + '</small>' : '') + '</div>' + list(L.filter(function (x) { return x.d === d; })); }).join('') || '<div class="empty2">이 기간에 없어요</div>'; };
+  if (!tp) h += '<div class="tmsum"><span>' + (one ? (S.tdd === TODAY ? '오늘' : '이날') : '기간') + ' <b class="ok">' + done + '</b>/' + R.length + ' 완료</span>' +
+    (S.D.tdUrl ? '<a class="tdsh" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener">시트</a>' : '') + '<button id="tdPaste">+ 업무보고</button></div>';
+  (tp ? [tp] : T).forEach(function (n) {
+    var L = R.filter(function (x) { return x.p === n; });
+    h += '<div class="bd tdd tdcard"><div class="bdh"><div>' + (tp ? '<b>' + esc(n) + '</b>' : '<button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button>') +
+      (tdCount(L) ? '<small>' + tdCount(L) + ' 완료</small>' : '') + '</div>' + (one ? '<button class="add" data-pst="' + S.tdd + '|' + esc(n) + '">붙여넣기</button>' : '') + '</div>' +
+      '<div class="tdl">' + (one ? list(L) : byDate(L)) + '</div>' + (one ? tdAddRow('데일리', S.tdd, n) : '') + '</div>';
+  });
   var y0 = window.scrollY;
   $('#main').innerHTML = h; window.scrollTo(0, y0); bindTd();
-  $('#twP').onclick = function () { S.tw = addD(S.tw, -7); S.tday = ''; render(); };
-  $('#twN').onclick = function () { S.tw = addD(S.tw, 7); S.tday = ''; render(); };
-  if ($('#twT')) $('#twT').onclick = function () { S.tw = monOf(TODAY); S.tday = ''; render(); };
-  $$('#tdP button').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.n); window.scrollTo(0, 0); render(); }; });
-  $$('#tdD button').forEach(function (b) { b.onclick = function () { S.tday = b.dataset.d; render(); }; });
+  $$('#tdSeg button').forEach(function (b) { b.onclick = function () { S.tdp = b.dataset.p; ls.set('d4:tdp', S.tdp); render(); }; });
+  if ($('#tdSegD')) $('#tdSegD').onchange = function () { if (this.value) { S.tdd = this.value; render(); } };
+  if ($('#tdmP')) { $('#tdmP').onclick = function () { S.tdd = dMove(p, S.tdd, -1); render(); }; $('#tdmN').onclick = function () { S.tdd = dMove(p, S.tdd, 1); render(); }; }
+  if ($('#nT')) $('#nT').onclick = function () { S.tdd = TODAY; render(); };
+  $$('#tdW button').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.n); window.scrollTo(0, 0); render(); }; });
   $$('[data-go]').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.go); window.scrollTo(0, 0); render(); }; });
   $$('[data-pst]').forEach(function (b) { b.onclick = function () { var a = b.dataset.pst.split('|'); openPaste({ d: a[0], p: a[1] }); }; });
   if ($('#tdPaste')) $('#tdPaste').onclick = function () { openPaste(); };
