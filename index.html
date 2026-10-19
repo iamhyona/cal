@@ -874,7 +874,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wla';
+var APP_VER = '20261019wlb';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2482,7 +2482,7 @@ function qkSeq(list, btn, msg) {
     .catch(function (e) { if (res) { S.qk = res; ls.set('d4:qk', JSON.stringify(res)); render(); } toast(errMsg(e)); }).then(function () { btn.classList.remove('busy'); });
 }
 $('#qeS').onclick = function () {
-  var c = { k: QE.k, c: $('#qeC').value.trim(), a: $('#qeA').value.trim(), a2: $('#qeA2').value.trim() };
+  var c = { k: QE.k, c: $('#qeC').value.trim(), a: $('#qeA').value.trim().replace(/서울특별시/g, '서울시'), a2: $('#qeA2').value.trim().replace(/서울특별시/g, '서울시') };
   if (QE.co) {
     if (!c.c) return toast('업체 이름을 적어 주세요');
     return qkSeq(QE.co.map(function (r) { return Object.assign({ r: r.r, old: { c: r.c, p: r.p, t: r.t }, p: r.p, t: r.t, m: r.m }, c); }), $('#qeS'), '업체 정보를 고쳤어요');
@@ -2505,7 +2505,7 @@ sure($('#qeDel'), function () {
 var QP = null;
 function qpWho(r) { var p = String(r.p || '').trim(); if (p && !/님$/.test(p)) p += '님'; return [p, r.t].filter(String).join(' '); }
 function qpHtml(r) {
-  return '<div class="ad">' + esc(r[QP.a] || r.a || r.a2 || '') + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '');
+  return '<div class="ad">' + esc(String(r[QP.a] || r.a || r.a2 || '').replace(/서울특별시/g, '서울시')) + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '');
 }
 function openQp(r) {
   QP = { r: r, a: r.a ? 'a' : 'a2' };
