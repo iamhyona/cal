@@ -984,7 +984,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020td5';
+var APP_VER = '20261020pj3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2525,7 +2525,6 @@ function renderPj() {
   PJL = F;
   var h = '<div class="spf"><input id="gQ" type="search" placeholder="아티스트, 프로젝트명 검색" value="' + esc(S.gq) + '">' +
     '<div class="sps"><select id="gY"><option value="">연도 전체</option>' + ys.map(function (y) { return '<option' + (S.gy === y ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select><select id="gA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.ga === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
-  h += '<div class="pjlg"><span>' + IC_CAL + '제작일정</span><span>' + IC_DOC + '사양서</span><span>' + IC_DIR + 'NAS</span></div>';
   h += '<div class="bd spl">' + (F.length ? F.map(function (o, i) {
     var g = o.g, sp = o.sp, nx = g && g.next, nas = nasOf(o);
     var sub = g ? (nx ? dot(nx.d) + ' ' + esc(nx.t) : '남은 일정 없음') : '사양서만 있어요';
