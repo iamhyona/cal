@@ -760,7 +760,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td13';
+var APP_VER = '20261019td14';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -846,7 +846,7 @@ function renderSpecList() {
     '<select id="spA"><option value="">아티스트 전체</option>' + as.map(function (a) { return '<option' + (S.sa === a ? ' selected' : '') + '>' + esc(a) + '</option>'; }).join('') + '</select></div></div>';
   if (!S.SL) h += '<div class="ld">불러오는 중…</div>';
   else h += '<div class="bd spl">' + (F.length ? F.map(function (o) {
-    return '<button class="spi" data-sp="' + o.id + '"><span class="m"><div>' + esc(o.artist || o.title) + '</div><small class="sub">' + esc(o.artist ? o.title : '') + '</small></span><span class="d">' + dot(o.at) + '</span></button>';
+    return '<button class="spi" data-sp="' + o.id + '"><span class="m gsi"><div><b>' + esc(o.artist) + '</b>' + (o.artist ? ' ' : '') + '<span class="gst">' + esc(sgFix(o.title)) + '</span></div></span><span class="d">' + dot(o.at) + '</span></button>';
   }).join('') : '<div class="empty2">찾는 사양서가 없어요</div>') + '</div>';
   var y0 = window.scrollY, foc = document.activeElement && document.activeElement.id === 'spQ';
   M.innerHTML = h; window.scrollTo(0, y0);
