@@ -875,7 +875,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wld';
+var APP_VER = '20261019wlf';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2532,8 +2532,22 @@ sure($('#qeDel'), function () {
 /* 라벨 인쇄: A4 세로, 위쪽 반 장에 주소 · 업체 · 담당자 연락처, 가운데 절취선 */
 var QP = null;
 function qpWho(r) { var p = String(r.p || '').trim(); if (p && !/님$/.test(p)) p += '님'; return [p, r.t].filter(String).join(' '); }
+// 주소가 한 줄(인쇄 폭 170mm · 32pt)에 안 들어가면 끝의 층·호수를 업체명 줄 앞으로 내림
+function qpFits(t) {
+  var el = qpFits.el;
+  if (!el) { el = qpFits.el = document.createElement('span'); el.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;font-weight:800;font-size:42.7px;line-height:1;'; document.body.appendChild(el); }
+  el.textContent = t; return el.offsetWidth <= 636;
+}
 function qpHtml(r) {
-  return '<div class="ad">' + esc(String(r[QP.a] || r.a || r.a2 || '').replace(/서울특별시/g, '서울시')) + '</div><div class="co">' + esc(r.c || '') + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '');
+  var ad = String(r[QP.a] || r.a || r.a2 || '').replace(/서울특별시/g, '서울시').trim(), co = String(r.c || '').trim();
+  if (!qpFits(ad)) {
+    var m = ad.match(/^(.*?\S)\s+((?:지하\s*\d+\s*층|B\d+\s*층?|\d+\s*층)(?:\s*\d+\s*호)?|\d+\s*호)$/);
+    if (m) { ad = m[1]; co = m[2] + (co ? ' ' + co : ''); }
+  }
+  // 그래도 길면 괄호 앞에서 줄바꿈
+  var adH = esc(ad);
+  if (!qpFits(ad)) { var k = ad.indexOf(' ('); if (k > 0) adH = esc(ad.slice(0, k)) + '<br>' + esc(ad.slice(k + 1)); }
+  return '<div class="ad">' + adH + '</div><div class="co">' + esc(co) + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '');
 }
 function openQp(r) {
   QP = { r: r, a: r.a ? 'a' : 'a2' };
