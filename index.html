@@ -250,7 +250,7 @@ textarea.dx { width:100%; border:0; background:var(--chip); border-radius:14px; 
 .mcal { background:#fff; border-radius:20px; padding:12px 6px 8px; margin-bottom:12px; }
 .mcal { padding:18px 16px 14px !important; }
 .mcal .wd, .mcal .grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
-.mcal .wd div { text-align:right; padding-right:4px; font-size:10px; letter-spacing:.04em; color:var(--mute); padding-bottom:6px; font-weight:600; }
+.mcal .wd div { text-align:left; padding-left:4px; font-size:10px; letter-spacing:.04em; color:var(--mute); padding-bottom:6px; font-weight:600; }
 .mcal .wd div:first-child, .mcal .wd div:last-child { color:var(--red); }
 .mcal .grid > button { border:0; background:none; min-height:84px; padding:3px 1px 4px; border-top:1px solid #f2f4f6; display:flex; flex-direction:column; align-items:stretch; gap:2px; min-width:0; text-align:left; }
 .mcal .grid > button.out { opacity:.35; }
@@ -813,6 +813,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow wlex" style="margin-top:12px;display:none"><div class="f"><label>외근 내용</label><input id="wlEx" maxlength="80" placeholder="예) 인쇄 감리 · 파주"></div></div>
   <div class="frow wltx" style="margin-top:12px"><div class="f"><label>야근택시비</label><input id="wlFare" inputmode="numeric" placeholder="예) 23400"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>야근식사 · 같이 먹은 사람</label><input id="wlM" maxlength="120" placeholder="예) 혜선, 이시 · 안 먹었으면 비워 두기"></div></div>
+  <p class="srcinfo">출근·퇴근은 4팀 근무표(디자인본부근무현황)와 같이 저장돼요.</p>
   <div id="wlDay"></div>
   <div class="acts"><button class="del" id="wlDel">삭제</button><button class="save" id="wlS">저장</button></div>
 </div>
@@ -849,6 +850,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow" style="margin-top:12px"><div class="f"><label>날짜</label><input id="wl1D" type="date"></div></div>
   <div class="frow" style="margin-top:12px"><div class="f"><label>한 줄로 적기</label><input id="wl1T" maxlength="120" placeholder="예) 출근 · 퇴근 · 야식 혜선 이시 · 택시 23400" autocomplete="off"></div></div>
   <div id="wl1Pv" class="wl1pv"></div>
+  <p class="srcinfo">출근·퇴근은 4팀 근무표(디자인본부근무현황)와 같이 저장돼요.</p>
   <div class="acts"><button class="del" id="wl1More">자세히</button><button class="save" id="wl1S">저장</button></div>
 </div>
 <div id="qkLabel"></div>
@@ -900,7 +902,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlr';
+var APP_VER = '20261019wls';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2253,7 +2255,7 @@ function renderTodo() {
     var L = R.filter(function (x) { return x.p === n; });
     h += '<div class="bd tdd tdcard"><div class="bdh"><div>' + '<div class="tdnm">' + (tp ? '<b>' + esc(n) + '</b>' : '<button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button>') +
       (tdCount(L) ? '<span class="tdcn">' + tdCount(L) + ' 완료</span>' : '') + '</div></div>' +
-      (L.length ? (S.tdEdit === n ? '<button class="tded on" data-ted="' + esc(n) + '">완료</button>' : '<button class="tded" data-ted="' + esc(n) + '" aria-label="편집"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>') : '') + '</div>' +
+      (L.length ? (S.tdEdit === n ? '<button class="tded on" data-ted="' + esc(n) + '">저장</button>' : '<button class="tded" data-ted="' + esc(n) + '" aria-label="편집"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>') : '') + '</div>' +
       (S.tdEdit === n ? tdEditList(L) : '<div class="tdl">' + (one ? list(L) : byDate(L)) + '</div>' + (one ? tdAddRow('데일리', S.tdd, n) : '')) + '</div>';
   });
   var y0 = window.scrollY;
@@ -2265,7 +2267,7 @@ function renderTodo() {
   if ($('#tdF')) { $('#tdF').onchange = function () { if (this.value) { S.tdf = this.value; ls.set('d4:tdf', S.tdf); render(); } }; $('#tdT').onchange = function () { if (this.value) { S.tdt = this.value; ls.set('d4:tdt', S.tdt); render(); } }; }
   $$('#tdW button').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.n); window.scrollTo(0, 0); render(); }; });
   $$('[data-go]').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.go); window.scrollTo(0, 0); render(); }; });
-  $$('[data-ted]').forEach(function (b) { b.onclick = function () { S.tdEdit = S.tdEdit === b.dataset.ted ? '' : b.dataset.ted; render(); }; });
+  $$('[data-ted]').forEach(function (b) { b.onmousedown = function (e) { e.preventDefault(); }; b.onclick = function () { var a = document.activeElement; if (a && a.closest && a.closest('.tdei')) a.blur(); S.tdEdit = S.tdEdit === b.dataset.ted ? '' : b.dataset.ted; render(); }; });
   bindTdEdit();
   $$('[data-pst]').forEach(function (b) { b.onclick = function () { var a = b.dataset.pst.split('|'); openPaste({ d: a[0], p: a[1] }); }; });
   if ($('#tdPaste')) $('#tdPaste').onclick = function () { openPaste(); };
