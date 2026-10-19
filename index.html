@@ -976,7 +976,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020pj1';
+var APP_VER = '20261020pj2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2472,11 +2472,11 @@ function pjTk(t) { return String(t || '').toLowerCase().replace(/20\d\d/g, '').r
 function pjMerged() {
   var G = pfs().map(sheetInfo), P = specList(), used = {}, out = [];
   G.forEach(function (g) {
-    var k = pjKey(g.artist, g.title), tk = pjTk(g.title), si = -1;
-    P.some(function (s, i) { if (!used[i] && pjKey(s.artist, s.title) === k) { si = i; return true; } });
-    if (si < 0) P.some(function (s, i) { if (!used[i] && s.artist === g.artist && tk && pjTk(s.title) === tk && (!g.year || !s.year || g.year === s.year)) { si = i; return true; } });
+    // 아티스트·제목에서 연도·공백을 빼고 비교 (예: '예나 2027 시즌그리팅' = 예나 + '시즌그리팅 2027'), 같은 연도 먼저
+    var tk = pjTk(g.artist + ' ' + g.title), si = -1;
+    [true, false].some(function (sameY) { return P.some(function (s, i) { if (!used[i] && tk && pjTk(s.artist + ' ' + s.title) === tk && (!sameY || s.year === g.year)) { si = i; return true; } }); });
     if (si >= 0) used[si] = 1;
-    out.push({ artist: g.artist, title: g.title, year: g.year || (si >= 0 ? P[si].year : '') || '', g: g, sp: si >= 0 ? P[si] : null });
+    out.push({ artist: g.artist, title: g.title, year: (si >= 0 ? P[si].year : '') || g.year || '', g: g, sp: si >= 0 ? P[si] : null });
   });
   P.forEach(function (s, i) { if (!used[i]) out.push({ artist: s.artist, title: s.title, year: s.year || '', g: null, sp: s }); });
   return out;
