@@ -569,6 +569,29 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .phd .hwd, .hm2 .hmt .hwd { font-size:13px; }
 .phd { margin:0 4px 14px !important; min-height:36px !important; align-items:center !important; }
 .hm2 { margin:0 4px 14px; }
+
+/* TO DO LIST · HOME 메모 (2026-10-19) */
+.f select { width:100%; border:0; background:var(--chip); border-radius:12px; padding:0 12px; outline:0; font-size:16px; height:46px; color:var(--txt); -webkit-appearance:none; appearance:none; }
+.tdadd { display:flex; gap:6px; align-items:center; margin:10px 0 4px; }
+.tdadd select { flex:0 1 38%; min-width:0; height:38px; border:0; background:var(--chip); border-radius:10px; padding:0 8px; font-size:13px; color:var(--sub); -webkit-appearance:none; appearance:none; text-overflow:ellipsis; }
+.tdadd .tdi { flex:1; min-width:0; height:38px; border:0; background:var(--chip); border-radius:10px; padding:0 11px; font-size:15px; outline:0; }
+.tdadd .tdb { flex:none; height:38px; border:0; background:var(--txt); color:#fff; border-radius:10px; padding:0 12px; font-size:13px; font-weight:700; }
+.tdadd .tdstar { flex:none; width:38px; height:38px; border:0; background:var(--chip); border-radius:10px; font-size:16px; color:#c9ced4; }
+.tdadd .tdstar[aria-pressed=true] { background:#fef3dc; color:#f59e0b; }
+.rpi.imp:not(.done) { background:#fff7e8; border-radius:10px; }
+.rpi.imp:not(.done) .tx { font-weight:800; }
+.rpi .star { font-style:normal; color:#f59e0b; margin-right:4px; }
+.rpi.done .star { color:var(--faint); }
+.rpi.tmp { opacity:.55; }
+.bd.memo .bdh b { color:var(--txt); }
+.bd.tdd.td { box-shadow:inset 0 0 0 1.5px var(--acc); }
+.bd.tdd.past { opacity:.75; }
+.tdwho { border:0; background:none; padding:0; font-size:14px; color:var(--txt); }
+.rph .tdc { color:var(--faint); font-size:12px; font-weight:700; margin-left:auto; }
+.tdday em { font-style:normal; color:var(--acc); font-weight:800; }
+.tmsum .tdsh { color:var(--sub); font-size:12px; font-weight:700; text-decoration:none; border-radius:999px; padding:7px 10px; background:var(--chip); }
+.tmsum .tdsh + button { margin-left:6px; }
+.tmsum .tdsh { margin-left:auto; }
 </style>
 </head>
 <body>
@@ -589,7 +612,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     </div>
   </div>
   <nav id="nav">
-    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="project">TODO</button><button data-v="tl">TIMELINE</button><button data-v="spec">SPEC</button>
+    <button data-v="home">HOME</button><button data-v="month">CALENDAR</button><button data-v="tl">SCHEDULE</button><button data-v="todo">TO DO LIST</button><button data-v="spec">SPEC</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -658,6 +681,16 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="fl" style="margin-top:4px">상태</div><div class="chips" id="reS"></div>
   <div class="acts"><button class="del" id="reDel">삭제</button><button class="save" id="reSave">저장</button></div>
 </div>
+<!-- 할 일·메모 고치기 (TO DO LIST · HOME) -->
+<div class="bs" id="te">
+  <h3 id="teT">할 일 고치기</h3>
+  <div class="chips" id="teK"></div>
+  <div class="frow" style="margin-top:14px"><div class="f"><label>날짜</label><input id="teD" type="date"></div><div class="f tdonly"><label>디자이너</label><select id="teP"></select></div></div>
+  <div class="fl tdonly" style="margin-top:6px">프로젝트</div><div class="rpvp tdonly" style="margin:0"><select id="teJ" style="background-color:var(--chip)"></select></div>
+  <div class="frow" style="margin-top:14px"><div class="f"><label>내용</label><input id="teX" maxlength="120"></div></div>
+  <div class="frow tdonly" style="margin-top:14px"><div class="f"><label>메모</label><input id="teM" maxlength="120" placeholder="비워 둬도 돼요"></div></div>
+  <div class="acts"><button class="del" id="teDel">삭제</button><button class="save" id="teS">저장</button></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -687,8 +720,9 @@ var PROJ_K = ['디자인', '리터칭', '소속사', '데드라인', '공식'], 
 var PCOL = ['#6f9fe8', '#e08aa6', '#6dba8f', '#e2aa5e', '#a092e0', '#5fb4d4', '#e48f80', '#6cbcb2', '#c08fd8', '#e7a173'];
 var S = { pin: ls.get('d4:pin') || '', view: ls.get('d4:view') || 'home', y: +TODAY.slice(0, 4), m: +TODAY.slice(5, 7), ws: sunOf(TODAY),
   off: JSON.parse(ls.get('d4:off') || '{}'), D: null, sel: null };
-if (S.view === 'designer' || S.view === 'team') S.view = 'project';
-if (['home', 'month', 'project', 'tl', 'spec'].indexOf(S.view) < 0) S.view = 'home';
+S.cv = ls.get('d4:cv') || 'cal';
+if (S.view === 'designer' || S.view === 'team' || S.view === 'project') { S.view = 'month'; S.cv = 'proj'; }
+if (['home', 'month', 'tl', 'todo', 'spec'].indexOf(S.view) < 0) S.view = 'home';
 
 S.pj = ls.get('d4:pj'); S.mm = ls.get('d4:mm') || 'sched'; S.pm = ls.get('d4:pm') || 'sched'; S.dp = ls.get('d4:dp') || 'd'; S.dn = ls.get('d4:dn') || ''; S.dd = TODAY; S.pf = ls.get('d4:pf') || ''; S.fold = !!ls.get('d4:fold'); S.lp = ls.get('d4:lp') || 'a'; S.ld = TODAY; S.tl = ls.get('d4:tl') || 'date';
 var API = 'https://script.google.com/macros/s/AKfycbzpvNlxuCa95ZxGvg8N4SiPqmsPzyYx_n9ikhmdRlIng7VzWzks_WS6DDyviPXsfoaO/exec';
@@ -704,7 +738,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261007v4';
+var APP_VER = '20261019td1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -732,13 +766,13 @@ function setData(d) {
   d.events.forEach(function (e) { e.file = FM[e.f]; });
   d.events = d.events.filter(function (e) { return e.file; });
   d.events.sort(function (a, b) { return a.d === b.d ? (a.file.type === b.file.type ? (a.s - b.s) : (a.file.type === 'proj' ? -1 : 1)) : (a.d < b.d ? -1 : 1); });
-  d.rep = (d.rep || []).sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? -1 : 1); }); d.alias = d.alias || {};
+  d.todo = d.todo || []; d.rep = (d.rep || []).sort(function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? -1 : 1); }); d.alias = d.alias || {};
   d.FM = FM; S.D = d;
 }
 function load() {
   $('#rfBtn').classList.add('spin');
   return call('appAll', S.pin).then(function (d) {
-    S.at = Date.now(); ls.set('d4:data', JSON.stringify({ files: d.files, events: d.events, hol: d.hol, rep: d.rep, alias: d.alias, repUrl: d.repUrl, at: d.at }));
+    S.at = Date.now(); ls.set('d4:data', JSON.stringify({ files: d.files, events: d.events, hol: d.hol, rep: d.rep, alias: d.alias, repUrl: d.repUrl, todo: d.todo || [], tdUrl: d.tdUrl || '', evDone: d.evDone || [], at: d.at }));
     setData(d); render();
   }).catch(function (e) {
     if (/PIN/.test(errMsg(e))) { S.pin = ''; ls.set('d4:pin', ''); return showPin(); }
@@ -1070,8 +1104,8 @@ function render() {
 }
 function renderView() {
   $$('#nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.view); });
-  $('#fab').style.display = S.view === 'spec' || S.view === 'calc' || S.view === 'tl' ? 'none' : '';
-  ({ home: renderHome, month: renderMonth, week: renderWeek, project: renderProject, tl: renderSheetList, designer: renderDesigner, team: renderTeam, spec: renderSpec, calc: renderCalc })[S.view]();
+  $('#fab').style.display = S.view === 'spec' || S.view === 'calc' || S.view === 'tl' || S.view === 'todo' ? 'none' : '';
+  ({ home: renderHome, month: renderCal, todo: renderTodo, week: renderWeek, project: renderProject, tl: renderSheetList, designer: renderDesigner, team: renderTeam, spec: renderSpec, calc: renderCalc })[S.view]();
 }
 $$('#nav button').forEach(function (b) { b.onclick = function () { S.view = b.dataset.v; ls.set('d4:view', S.view); window.scrollTo(0, 0); render(); }; });
 $('#brand').onclick = function () { S.view = 'home'; ls.set('d4:view', 'home'); window.scrollTo(0, 0); render(); };
@@ -1138,7 +1172,7 @@ function bds() { return '<div class="bds"></div>'; }
 function latestOpen(rows) { // 같은 사람·프로젝트·업무는 가장 최근 것만
   var seen = {}, out = [];
   rows.slice().sort(function (a, b) { return a.d < b.d ? 1 : -1; }).forEach(function (r) { var k = r.p + '|' + pnorm(r.j) + '|' + r.t; if (!seen[k]) { seen[k] = 1; out.push(r); } });
-  return out.sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? -1 : 1); });
+  return out.sort(function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? -1 : 1); });
 }
 function renderHome() {
   // 기준 날짜: 날짜 글자를 눌러 고르거나 좌우 단추로 이동 (2026.10.06)
@@ -1147,16 +1181,17 @@ function renderHome() {
   var isDl = function (e) { return e.k === '데드라인' || e.k === '공식'; };
   var h = '<div class="hm2"><label class="hmt">' + mdw(H) + (hl ? '<em class="hwd">' + esc(hl) + '</em>' : '') + '<input type="date" class="dpk" id="hD" value="' + H + '"></label>' +
     '<div class="arw">' + (isT ? '' : '<button class="tod" id="hT">오늘</button>') + '<button id="hP" aria-label="전날">‹</button><button id="hN" aria-label="다음날">›</button></div></div>';
+  h += homeMemo(H);   // 내 메모 TODAY · WEEK (2026-10-19)
   // TODAY (고른 날)
   var te = L.filter(function (e) { return e.d === H; }), tr = R0.filter(function (r) { return r.d === H; });
-  h += '<div class="bd"><div class="bdh"><div><b>' + (isT ? 'TODAY' : 'DAY') + '</b></div><button class="add" data-add="' + H + '">+ 일정</button></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>제작일정</b><small>' + (isT ? '오늘' : '이날') + '</small></div><button class="add" data-add="' + H + '">+ 일정</button></div>' +
     bds('제작일정') + (te.length ? te.map(function (e) { return itemHtml(e, true); }).join('') : '<div class="empty2">' + (isT ? '오늘' : '이날') + ' 일정이 없어요</div>') +
     '</div>';   // TODAY에는 제작일정만 (팀 업무 뺌 — 2026.10.07)
   // WEEK
   var wl = L.filter(function (e) { return e.d > H && e.d <= we; });
   var carry = latestOpen(R0.filter(function (r) { return r.d >= ws && r.d < H && r.s !== '완료'; }))
     .filter(function (r) { return !tr.some(function (x) { return x.p === r.p && x.t === r.t; }); });
-  h += '<div class="bd"><div class="bdh"><div><b>WEEK</b></div></div>' +
+  h += '<div class="bd"><div class="bdh"><div><b>제작일정</b><small>이번 주</small></div></div>' +
     bds('남은 일정', wl.length) + (wl.length ? wl.map(function (e) { return itemHtml(e, true); }).join('') : '<div class="empty2">이번 주 남은 일정이 없어요</div>') +
     '</div>';
   // MONTH
@@ -1168,7 +1203,7 @@ function renderHome() {
       return itemHtml(e, true, false, n ? 'D-' + n : 'D-DAY');
     }).join('') : '<div class="empty2">이번 달 남은 데드라인이 없어요</div>') +
     '</div>';
-  $('#main').innerHTML = h; bindItems(); bindAdd(); bindRep();
+  $('#main').innerHTML = h; bindItems(); bindAdd(); bindRep(); bindTd();
   if ($('#hPaste')) $('#hPaste').onclick = openPaste;
   $('#hD').onchange = function () { if (this.value) { S.hd = this.value; render(); } };
   $('#hP').onclick = function () { S.hd = addD(H, -1); render(); };
@@ -1311,7 +1346,7 @@ function tmRow(r, left, sub) {
     '<button class="rpt" data-r="' + r.r + '"><span class="d3">' + left + '</span><span class="tx tx2"><small>' + esc(sub) + '</small>' + esc(r.t) + '</span>' +
     (r.s === '대기' ? '<span class="wt">대기</span>' : '') + '</button></div>';
 }
-function tmSorted() { var T = team(); return (S.D.rep || []).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (a.r - b.r); }); }
+function tmSorted() { var T = team(); return (S.D.rep || []).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (rid(a.r) - rid(b.r)); }); }
 // 팀 업무 전체(날짜별): 날짜마다 카드 (최근부터)
 function pjTeamDate() {
   var R = tmSorted(); if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
@@ -1333,7 +1368,7 @@ function pjTeamProj() {
 }
 // 팀 업무: 디자이너별로 한 일 리스트 (최근 날짜부터)
 function pjTeam(p) {
-  var R = (p ? repProj(p.name) : (S.D.rep || []).slice()).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? 1 : -1); });
+  var R = (p ? repProj(p.name) : (S.D.rep || []).slice()).filter(function (r) { return inL(r.d); }).sort(function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? 1 : -1); });
   if (!R.length) return '<div class="day"><div class="empty2">업무보고가 없어요</div></div>';
   return team().filter(function (n) { return R.some(function (r) { return r.p === n; }); }).map(function (n) {
     var mine = R.filter(function (r) { return r.p === n; });
@@ -1511,7 +1546,7 @@ $('#npGo').onclick = function () {
 };
 
 /* ───── 업무보고 ───── */
-var TEAM0 = ['이혜선', '유이시', '허희원', '박주영'];
+var TEAM0 = ['박현아', '이혜선', '유이시', '허희원', '박주영'];
 var RCOL = '#8b95a1';
 // 프로젝트 이름 비교용: 연도·공백·기호 제거, SG/시그/시즌그리팅 통일
 function pnorm(x) {
@@ -1569,11 +1604,11 @@ function repBlock(rows, opt) {
   }).join('');
 }
 function bindRep(root) {
-  (root || document).querySelectorAll('[data-r]').forEach(function (b) { b.onclick = function () { openRepEdit(+b.dataset.r); }; });
-  (root || document).querySelectorAll('[data-ck]').forEach(function (b) { b.onclick = function (ev) { ev.stopPropagation(); toggleDone(+b.dataset.ck); }; });
+  (root || document).querySelectorAll('[data-r]').forEach(function (b) { b.onclick = function () { openRepEdit(b.dataset.r); }; });
+  (root || document).querySelectorAll('[data-ck]').forEach(function (b) { b.onclick = function (ev) { ev.stopPropagation(); toggleDone(b.dataset.ck); }; });
 }
 function saveCache() {
-  try { ls.set('d4:data', JSON.stringify({ files: S.D.files.map(function (f) { return { id: f.id, name: f.name, type: f.type, url: f.url, from: f.from, to: f.to }; }), events: S.D.events.map(function (e) { return { id: e.id, f: e.f, d: e.d, k: e.k, s: e.s, t: e.t }; }), hol: S.D.hol, rep: S.D.rep.map(function (y) { return { r: y.r, d: y.d, p: y.p, j: y.j, t: y.t, s: y.s }; }), alias: S.D.alias, evDone: S.D.evDone || [], repUrl: S.D.repUrl, at: S.D.at })); } catch (e) {}
+  try { ls.set('d4:data', JSON.stringify({ files: S.D.files.map(function (f) { return { id: f.id, name: f.name, type: f.type, url: f.url, from: f.from, to: f.to }; }), events: S.D.events.map(function (e) { return { id: e.id, f: e.f, d: e.d, k: e.k, s: e.s, t: e.t }; }), hol: S.D.hol, rep: S.D.rep.map(function (y) { return { r: y.r, d: y.d, p: y.p, j: y.j, t: y.t, s: y.s }; }), alias: S.D.alias, evDone: S.D.evDone || [], repUrl: S.D.repUrl, todo: S.D.todo || [], tdUrl: S.D.tdUrl || '', at: S.D.at })); } catch (e) {}
 }
 // 체크: 완료 <-> 진행(내용에 '대기'가 있으면 대기)
 function toggleDone(r) {
@@ -1598,7 +1633,7 @@ function renderTeam() {
   h += '<div class="tabs2" id="dfl"><button data-n="" class="' + (dn ? '' : 'on') + '">전체</button>' + team().map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (dn === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
   var done = R0.filter(function (r) { return r.s === '완료'; }).length, wait = R0.filter(function (r) { return r.s === '대기'; }).length;
   if (p === 'd' || p === 'w' || p === 'm') h += '<div class="tmsum"><span>업무 <b>' + R0.length + '</b></span><span>완료 <b class="ok">' + done + '</b></span><span>대기 <b class="w">' + wait + '</b></span><button id="rpOpen2">+ 업무보고 붙여넣기</button></div>';
-  var byDate = function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? -1 : 1); };
+  var byDate = function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? -1 : 1); };
   if (p === 'd') {
     people.forEach(function (n) {
       var mine = R0.filter(function (r) { return r.p === n; }).sort(byDate);
@@ -1644,7 +1679,7 @@ function renderTeam() {
   $$('[data-go]').forEach(function (b) { b.onclick = function () { S.dp = 'd'; ls.set('d4:dp', 'd'); S.dd = b.dataset.go; window.scrollTo(0, 0); render(); }; });
   $$('[data-pjgo]').forEach(function (b) { b.onclick = function () {
     var k = pnorm(b.dataset.pjgo), q = projList().filter(function (x) { return pnorm(x.name) === k; })[0];
-    S.view = 'project'; S.pm = 'team'; S.pj = q ? q.name : b.dataset.pjgo; S.lp = 'a';
+    S.view = 'month'; S.cv = 'proj'; ls.set('d4:cv', 'proj'); S.pm = 'team'; S.pj = q ? q.name : b.dataset.pjgo; S.lp = 'a';
     ls.set('d4:view', S.view); ls.set('d4:pm', 'team'); ls.set('d4:pj', S.pj); ls.set('d4:lp', 'a'); window.scrollTo(0, 0); render();
   }; });
   $$('[data-unit]').forEach(function (b) { b.onclick = function () { S.dp = b.dataset.gp; ls.set('d4:dp', S.dp); S.dd = b.dataset.unit; window.scrollTo(0, 0); render(); }; });
@@ -1655,7 +1690,7 @@ function renderTeam() {
 // TO DO 업무 리스트: 전체보기(날짜순) · 전체보기(디자이너별)
 function tdList(R0, people) {
   var who = S.tl === 'who', T = team();
-  var R = R0.slice().sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (a.r - b.r); });
+  var R = R0.slice().sort(function (a, b) { return a.d !== b.d ? (a.d < b.d ? 1 : -1) : (T.indexOf(a.p) - T.indexOf(b.p)) || (rid(a.r) - rid(b.r)); });
   var h = '<div class="tabs2" id="tlv"><button data-l="date" class="' + (who ? '' : 'on') + '">전체보기(날짜순)</button><button data-l="who" class="' + (who ? 'on' : '') + '">전체보기(디자이너별)</button></div>';
   if (!R.length) return h + '<div class="day"><div class="empty2">이 기간 업무보고가 없어요</div></div>';
   var card = function (title, rows, left) {
@@ -1819,7 +1854,7 @@ function dMove(p, d, n) {
 function renderDesigner() {
   var p = S.dp, rg = dRange(p, S.dd), dn = S.dn && team().indexOf(S.dn) >= 0 ? S.dn : '';
   var R0 = (S.D.rep || []).filter(function (r) { return r.d >= rg[0] && r.d <= rg[1] && (!dn || r.p === dn); })
-    .sort(function (a, b) { return a.d === b.d ? a.r - b.r : (a.d < b.d ? 1 : -1); });
+    .sort(function (a, b) { return a.d === b.d ? rid(a.r) - rid(b.r) : (a.d < b.d ? 1 : -1); });
   var cur = TODAY >= rg[0] && TODAY <= rg[1];
   var h = p === 'a' ? phd('', '전체') : navBar('', rg[2], 'nP', 'nN', !cur);
   h += '<div class="seg" id="dSeg">' + DPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
@@ -1878,6 +1913,194 @@ function sure(btn, fn) {
 function unsure(btn) { if (btn.classList.contains('sure')) { btn.classList.remove('sure'); btn.textContent = btn.dataset.t; } }
 
 /* ───── 시작: PIN ───── */
+
+/* ───── TO DO LIST · HOME 메모 · CALENDAR 합치기 (2026-10-19) ─────
+ * 시트: 업무일지 폴더 @4팀_TODO_2026 (월별 탭) — 한 줄 = 할 일 하나
+ * 구분: 주간(그 주 월요일 날짜) · 데일리 · 오늘메모 · 주간메모(HOME) */
+function rid(r) { var p = String(r || '').split('|'), ym = p[0].split('-'); return (+ym[0] || 0) * 1e7 + (+ym[1] || 0) * 1e5 + (+p[1] || 0); }
+function monOf(s) { var d = P(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return F(d); }
+function tdRows(fn) { return (S.D.todo || []).filter(fn); }
+function tdWait(x) { return /대기/.test(x.m || ''); }
+function tdImp(x) { return /중요/.test(x.m || ''); }
+function tdSort(a, b) { return (a.c - b.c) || (tdImp(b) - tdImp(a)) || (rid(a.id) - rid(b.id)); }
+function tdCount(L) { var n = L.filter(function (x) { return x.c; }).length; return L.length ? n + '/' + L.length : ''; }
+
+// CALENDAR = 달력 + 프로젝트(예전 TODO)
+function renderCal() {
+  if (S.cv === 'proj') renderProject(); else renderMonth();
+  $('#main').insertAdjacentHTML('afterbegin', '<div class="seg" id="cvSeg"><button data-c="cal" class="' + (S.cv !== 'proj' ? 'on' : '') + '">달력</button><button data-c="proj" class="' + (S.cv === 'proj' ? 'on' : '') + '">프로젝트</button></div>');
+  $$('#cvSeg button').forEach(function (b) { b.onclick = function () { S.cv = b.dataset.c; ls.set('d4:cv', S.cv); window.scrollTo(0, 0); render(); }; });
+}
+
+// 한 줄
+function tdItem(x, opt) {
+  opt = opt || {};
+  var pj = x.j && !opt.noPj ? '<small style="color:' + pinfo(x.j).color + '"><i class="sq" style="background:' + pinfo(x.j).color + '"></i>' + esc(x.j) + '</small>' : '';
+  var who = opt.who ? '<span class="who">' + esc(dshort(x.p || '')) + '</span>' : '';
+  return '<div class="rpi' + (x.c ? ' done' : '') + (tdImp(x) ? ' imp' : '') + (x.tmp ? ' tmp' : '') + '" data-tdrow="' + esc(x.id) + '">' +
+    '<button class="ck" data-tdck="' + esc(x.id) + '" aria-label="완료">' + CKSVG + '</button>' +
+    '<button class="rpt" data-tdx="' + esc(x.id) + '">' + who + '<span class="tx' + (pj ? ' tx2' : '') + '">' + pj + (tdImp(x) ? '<em class="star">★</em>' : '') + esc(x.t) + '</span>' +
+    (tdWait(x) ? '<span class="wt">대기</span>' : '') + '</button></div>';
+}
+function tdProjOpts() {
+  var names = projList().map(function (p) { return p.name; });
+  tdRows(function (x) { return x.j; }).forEach(function (x) { if (names.indexOf(x.j) < 0) names.push(x.j); });
+  var last = ls.get('d4:tdj') || '';
+  return '<option value="">프로젝트 없음</option>' + names.map(function (n) { return '<option' + (n === last ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+}
+function tdAddRow(k, d, p, memo) {
+  return '<div class="tdadd" data-k="' + k + '" data-d="' + d + '" data-p="' + esc(p || '') + '">' +
+    (memo ? '<button class="tdstar" aria-label="중요 표시" aria-pressed="false">★</button>' : '<select class="tdj">' + tdProjOpts() + '</select>') +
+    '<input class="tdi" placeholder="' + (memo ? '메모 적기' : '할 일 추가') + '" maxlength="120" enterkeyhint="done"><button class="tdb">추가</button></div>';
+}
+
+// HOME: 내 메모 (TODAY · WEEK) — 중요(★)는 위로 + 강조
+function homeMemo(H) {
+  var ws = monOf(H), we = addD(ws, 6);
+  var tl = tdRows(function (x) { return x.k === '오늘메모' && x.d === H; }).sort(tdSort);
+  var wl = tdRows(function (x) { return x.k === '주간메모' && x.d === ws; }).sort(tdSort);
+  return '<div class="bd memo"><div class="bdh"><div><b>' + (H === TODAY ? 'TODAY' : 'DAY') + '</b><small>메모 ' + (tdCount(tl) ? '· ' + tdCount(tl) : '') + '</small></div></div>' +
+    '<div class="tdl">' + (tl.length ? tl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">' + (H === TODAY ? '오늘' : '이날') + ' 메모가 없어요</div>') + '</div>' + tdAddRow('오늘메모', H, '', 1) + '</div>' +
+    '<div class="bd memo"><div class="bdh"><div><b>WEEK</b><small>' + dot(ws) + ' – ' + we.slice(5).replace('-', '.') + (tdCount(wl) ? ' · ' + tdCount(wl) : '') + '</small></div></div>' +
+    '<div class="tdl">' + (wl.length ? wl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">이번 주 메모가 없어요</div>') + '</div>' + tdAddRow('주간메모', ws, '', 1) + '</div>';
+}
+
+// TO DO LIST: 전체 / 디자이너별 — 이번 주 할 일은 위에 고정, 아래로 데일리
+function renderTodo() {
+  S.tw = S.tw || monOf(TODAY);
+  var ws = S.tw, we = addD(ws, 6), cur = TODAY >= ws && TODAY <= we, T = team();
+  var tp = ls.get('d4:tp') || ''; if (tp && T.indexOf(tp) < 0) tp = '';
+  if (!S.tday || S.tday < ws || S.tday > we) S.tday = cur ? TODAY : ws;
+  var inW = function (x) { return x.d >= ws && x.d <= we; };
+  var W0 = tdRows(function (x) { return x.k === '주간' && x.d === ws; }), D0 = tdRows(function (x) { return x.k === '데일리' && inW(x); });
+  var h = phd('TO DO LIST', dot(ws) + ' – ' + we.slice(5).replace('-', '.') + ' 주', (cur ? '' : '<button class="tod" id="twT">이번 주</button>') + '<button id="twP" aria-label="지난주">‹</button><button id="twN" aria-label="다음 주">›</button>');
+  h += '<div class="tabs2" id="tdP"><button data-n="" class="' + (tp ? '' : 'on') + '">전체</button>' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (tp === n ? 'on' : '') + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+  if (tp) {
+    var wl = W0.filter(function (x) { return x.p === tp; }).sort(tdSort);
+    h += '<div class="bd tdw"><div class="bdh"><div><b>이번 주 할 일</b><small>' + esc(tp) + (tdCount(wl) ? ' · ' + tdCount(wl) + ' 완료' : '') + '</small></div></div>' +
+      '<div class="tdl">' + (wl.length ? wl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">이번 주 할 일을 적어 주세요</div>') + '</div>' + tdAddRow('주간', ws, tp) + '</div>';
+    for (var i = 0; i < 7; i++) {
+      var d = addD(ws, i), dl = D0.filter(function (x) { return x.p === tp && x.d === d; }).sort(tdSort), wk = i >= 5;
+      if (wk && !dl.length && d !== TODAY) continue;
+      var hl = hol(d);
+      h += '<div class="bd tdd' + (d === TODAY ? ' td' : '') + (d < TODAY && !dl.length ? ' past' : '') + '"><div class="bdh"><div><b>' + mdw(d) + '</b><small>' + [d === TODAY ? '오늘' : '', hl, tdCount(dl) ? tdCount(dl) + ' 완료' : ''].filter(String).map(esc).join(' · ') + '</small></div></div>' +
+        '<div class="tdl">' + (dl.length ? dl.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2">할 일 없음</div>') + '</div>' + tdAddRow('데일리', d, tp) + '</div>';
+    }
+  } else {
+    var day = S.tday, dd = D0.filter(function (x) { return x.d === day; });
+    var wDone = W0.filter(function (x) { return x.c; }).length, dDone = dd.filter(function (x) { return x.c; }).length;
+    h += '<div class="tmsum"><span>이번 주 <b>' + wDone + '</b>/' + W0.length + '</span><span>' + (day === TODAY ? '오늘' : dw(day).slice(3)) + ' <b class="ok">' + dDone + '</b>/' + dd.length + '</span>' +
+      (S.D.tdUrl ? '<a class="tdsh" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener">시트</a>' : '') + '<button id="tdPaste">+ 업무보고</button></div>';
+    h += '<div class="bd tdw"><div class="bdh"><div><b>이번 주 할 일</b><small>디자이너별</small></div></div>' + T.map(function (n) {
+      var l = W0.filter(function (x) { return x.p === n; }).sort(tdSort);
+      return '<div class="rpg"><div class="rph"><button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button><small class="tdc">' + tdCount(l) + '</small></div>' +
+        (l.length ? l.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2" style="padding-left:8px">아직 없어요</div>') + '</div>';
+    }).join('') + '</div>';
+    h += '<div class="tabs2 tdday" id="tdD">' + [0, 1, 2, 3, 4, 5, 6].map(function (i) {
+      var d = addD(ws, i), n = D0.filter(function (x) { return x.d === d; }).length; if (i >= 5 && !n && d !== TODAY) return '';
+      return '<button data-d="' + d + '" class="' + (d === day ? 'on' : '') + '">' + W[P(d).getDay()] + ' ' + P(d).getDate() + (n ? ' <em>' + n + '</em>' : '') + '</button>';
+    }).join('') + '</div>';
+    h += '<div class="bd tdd"><div class="bdh"><div><b>' + mdw(day) + '</b><small>' + (day === TODAY ? '오늘 · ' : '') + '데일리</small></div></div>' + T.map(function (n) {
+      var l = dd.filter(function (x) { return x.p === n; }).sort(tdSort);
+      return '<div class="rpg"><div class="rph"><button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button><small class="tdc">' + tdCount(l) + '</small></div>' +
+        (l.length ? l.map(function (x) { return tdItem(x); }).join('') : '<div class="empty2" style="padding-left:8px">아직 없어요</div>') + '</div>';
+    }).join('') + '</div>';
+  }
+  var y0 = window.scrollY;
+  $('#main').innerHTML = h; window.scrollTo(0, y0); bindTd();
+  $('#twP').onclick = function () { S.tw = addD(S.tw, -7); S.tday = ''; render(); };
+  $('#twN').onclick = function () { S.tw = addD(S.tw, 7); S.tday = ''; render(); };
+  if ($('#twT')) $('#twT').onclick = function () { S.tw = monOf(TODAY); S.tday = ''; render(); };
+  $$('#tdP button').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.n); window.scrollTo(0, 0); render(); }; });
+  $$('#tdD button').forEach(function (b) { b.onclick = function () { S.tday = b.dataset.d; render(); }; });
+  $$('[data-go]').forEach(function (b) { b.onclick = function () { ls.set('d4:tp', b.dataset.go); window.scrollTo(0, 0); render(); }; });
+  if ($('#tdPaste')) $('#tdPaste').onclick = openPaste;
+}
+
+function bindTd(root) {
+  root = root || document;
+  root.querySelectorAll('[data-tdck]').forEach(function (b) { b.onclick = function (ev) { ev.stopPropagation(); tdToggle(b.dataset.tdck); }; });
+  root.querySelectorAll('[data-tdx]').forEach(function (b) { b.onclick = function () { openTd(b.dataset.tdx); }; });
+  root.querySelectorAll('.tdadd').forEach(function (w) {
+    var inp = w.querySelector('.tdi'), st = w.querySelector('.tdstar');
+    if (st) st.onclick = function () { var on = st.getAttribute('aria-pressed') !== 'true'; st.setAttribute('aria-pressed', on ? 'true' : 'false'); inp.focus(); };
+    function go() {
+      var t = inp.value.trim(); if (!t) return inp.focus();
+      var sel = w.querySelector('.tdj'), j = sel ? sel.value : '';
+      if (sel) ls.set('d4:tdj', j);
+      tdAdd({ d: w.dataset.d, k: w.dataset.k, p: w.dataset.p, j: j, t: t, c: false, m: st && st.getAttribute('aria-pressed') === 'true' ? '중요' : '' });
+    }
+    w.querySelector('.tdb').onclick = go;
+    inp.onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } };
+  });
+}
+function tdAdd(o) {
+  var tmp = Object.assign({ id: 'tmp|' + Date.now(), tmp: 1 }, o);
+  S.D.todo.push(tmp); S.tdFocus = o.k + '|' + o.d + '|' + o.p; render(); tdRefocus();
+  call('appTodoAdd', S.pin, [o]).then(function () { return load(); }).then(tdRefocus)
+    .catch(function (e) { S.D.todo = S.D.todo.filter(function (x) { return x !== tmp; }); render(); toast(errMsg(e)); });
+}
+function tdRefocus() {
+  if (!S.tdFocus) return;
+  var a = S.tdFocus.split('|'), w = $$('.tdadd').filter(function (x) { return x.dataset.k === a[0] && x.dataset.d === a[1] && x.dataset.p === (a[2] || ''); })[0];
+  if (w && (!document.activeElement || document.activeElement === document.body)) w.querySelector('.tdi').focus({ preventScroll: true });
+}
+function tdFind(id) { return (S.D.todo || []).filter(function (x) { return x.id === id; })[0]; }
+function tdToggle(id) {
+  var x = tdFind(id); if (!x || x.tmp || x.busy) return;
+  x.c = !x.c; x.busy = 1;
+  var paint = function () { $$('[data-tdrow="' + id + '"]').forEach(function (el) { el.classList.toggle('done', x.c); }); var r = (S.D.rep || []).filter(function (y) { return y.r === id; })[0]; if (r) r.s = x.c ? '완료' : (tdWait(x) ? '대기' : '진행'); };
+  paint();
+  call('appTodoEdit', S.pin, { id: x.id, old: { d: x.d, p: x.p, t: x.t }, c: x.c })
+    .then(function () { saveCache(); })
+    .catch(function (e) { x.c = !x.c; paint(); toast(errMsg(e)); })
+    .then(function () { delete x.busy; if (S.view === 'todo' || S.view === 'home') render(); });
+}
+// 업무보고(데일리) 체크도 같은 시트를 고치도록
+toggleDone = function (r) {
+  var x = tdFind(r); if (x) return tdToggle(r);
+  toast('새로고침 후 다시 눌러 주세요');
+};
+
+/* 한 줄 고치기 */
+var TE = null;
+function openTd(id) {
+  var x = tdFind(id); if (!x || x.tmp) return;
+  var memo = /메모$/.test(x.k);
+  TE = { x: x, k: x.k, imp: tdImp(x), wait: tdWait(x) };
+  $('#teT').textContent = memo ? '메모 고치기' : '할 일 고치기';
+  $('#teD').value = x.d; $('#teX').value = x.t;
+  $('#teP').innerHTML = team().map(function (n) { return '<option' + (n === x.p ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  $('#teJ').innerHTML = tdProjOpts(); $('#teJ').value = x.j || '';
+  if ($('#teJ').value !== (x.j || '')) { $('#teJ').insertAdjacentHTML('beforeend', '<option>' + esc(x.j) + '</option>'); $('#teJ').value = x.j; }
+  $('#teM').value = String(x.m || '').replace(/\s*(대기|중요)\s*/g, ' ').trim();
+  $$('#te .tdonly').forEach(function (el) { el.style.display = memo ? 'none' : ''; });
+  drawTe(); unsure($('#teDel'));
+  var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#te'); }, was ? 230 : 0);
+}
+function drawTe() {
+  var memo = /메모$/.test(TE.k), ks = memo ? [['오늘메모', 'TODAY'], ['주간메모', 'WEEK']] : [['주간', '이번 주 할 일'], ['데일리', '데일리']];
+  $('#teK').innerHTML = ks.map(function (k) { return '<button data-k="' + k[0] + '" class="' + (TE.k === k[0] ? 'on' : '') + '">' + k[1] + '</button>'; }).join('') +
+    '<button data-f="imp" class="' + (TE.imp ? 'on' : '') + '">★ 중요</button>' + (memo ? '' : '<button data-f="wait" class="' + (TE.wait ? 'on' : '') + '">대기</button>');
+  $$('#teK button').forEach(function (b) { b.onclick = function () { if (b.dataset.k) TE.k = b.dataset.k; else TE[b.dataset.f] = !TE[b.dataset.f]; drawTe(); }; });
+}
+$('#teS').onclick = function () {
+  var x = TE.x, d = $('#teD').value, t = $('#teX').value.trim();
+  if (!d || !t) return toast('날짜와 내용을 채워 주세요');
+  if (TE.k === '주간' || TE.k === '주간메모') d = monOf(d);
+  var m = [$('#teM').value.trim(), TE.imp ? '중요' : '', TE.wait ? '대기' : ''].filter(String).join(' ');
+  var memo = /메모$/.test(TE.k);
+  var o = { id: x.id, old: { d: x.d, p: x.p, t: x.t }, d: d, k: TE.k, p: memo ? x.p : $('#teP').value, j: memo ? x.j : $('#teJ').value, t: t, m: m };
+  var b = $('#teS'); b.classList.add('busy');
+  call('appTodoEdit', S.pin, o).then(function () { closeBs(); toast('저장했어요'); return load(); })
+    .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
+};
+sure($('#teDel'), function () {
+  var x = TE.x, b = $('#teDel'); b.classList.add('busy');
+  call('appTodoEdit', S.pin, { id: x.id, old: { d: x.d, p: x.p, t: x.t }, del: true }).then(function () { closeBs(); toast('삭제했어요'); return load(); })
+    .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
+});
+
 var pinMode = 'enter';
 function showPin() {
   $('#pinScr').classList.remove('hide'); $('#pinIn').value = '';
