@@ -599,6 +599,9 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .tdpj:first-child { margin-top:4px; }
 .tdpj i { width:7px; height:7px; border-radius:2px; flex:none; }
 .tdl .tdpj ~ .rpi { padding-left:4px; }
+.memo .rpi .tx { font-size:18px; font-weight:700; color:var(--txt); line-height:1.45; }
+.memo .rpi.done .tx { font-weight:500; }
+.memo .rpi .ck { transform:scale(1.1); }
 .tdnm { display:flex; align-items:baseline; gap:8px; }
 .tdnm b { font-size:17px; font-weight:800; }
 .tdcn { font-size:12px; font-weight:700; color:var(--mute); }
@@ -875,7 +878,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019wlg';
+var APP_VER = '20261019wlh';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
