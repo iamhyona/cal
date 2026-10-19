@@ -103,7 +103,7 @@ header { position:sticky; top:0; z-index:10; background:var(--bg); padding:calc(
 <div class="bs" id="ed">
   <h3 id="edT"></h3>
   <div class="sub" id="edS"></div>
-  <div class="frow"><div class="f"><label>출근</label><input id="edI" type="time"></div><div class="f"><label>퇴근</label><input id="edO" type="time"></div><div class="f"><label>저녁식사</label><select id="edDn"><option value="0">없음</option><option value="30">30분</option><option value="60">1시간</option><option value="90">1시간 30분</option></select></div></div>
+  <div class="frow"><div class="f"><label>출근</label><input id="edI" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="09:00"></div><div class="f"><label>퇴근</label><input id="edO" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="18:00"></div><div class="f"><label>저녁식사</label><select id="edDn"><option value="0">없음</option><option value="30">30분</option><option value="60">1시간</option><option value="90">1시간 30분</option></select></div></div>
     <div class="f" style="margin-top:14px"><label>야근 사유 (근무표 날짜 칸 댓글과 연동)</label><textarea id="edR" rows="3" maxlength="500"></textarea></div>
   <div class="chips"><button data-q="9-18">09:00 – 18:00</button><button data-q="9-19">09:00 – 19:00</button><button data-q="9-20">09:00 – 20:00</button><button data-q="off">비우기 (휴가·휴일)</button></div>
   <div class="acts"><button class="no" id="edX">닫기</button><button class="ok" id="edGo">저장</button></div>
@@ -215,7 +215,7 @@ function renderPerson() {
           (x.rs ? '<span class="rs">' + esc(x.rs) + '</span>' : '') + '</button>';
       }).join('') + '</div>';
   }).join('');
-  h += '<p class="note">점심·휴게 1시간은 시트에서 자동으로 빠져요. 연차·공휴일은 비워 두세요. 월이 걸친 주는 목요일이 속한 달에 있어요.</p>';
+  h += '<p class="note">퇴근이 자정을 넘기면 24:00, 25:30 처럼 적어 주세요. 점심·휴게 1시간은 시트에서 자동으로 빠져요. 연차·공휴일은 비워 두세요. 월이 걸친 주는 목요일이 속한 달에 있어요.</p>';
   shell(h);
   $$('[data-w]').forEach(function (b) { b.onclick = function () { openEd(d, +b.dataset.w, +b.dataset.k); }; });
   $$('[data-ap]').forEach(function (b) {
@@ -239,11 +239,20 @@ function openEd(d, wi, k) {
 }
 function edDn() { var e = $('#edDn'); if (![].some.call(e.options, function (o) { return +o.value === ED.dn; })) e.insertAdjacentHTML('beforeend', '<option value="' + ED.dn + '">' + ED.dn + '분</option>'); e.value = String(ED.dn); }
 $('#edDn').onchange = function () { ED.dn = +this.value || 0; };
+function hmN(v) {
+  v = String(v || '').trim().replace(/[^\d:]/g, ''); if (!v) return '';
+  var h, m, a = v.split(':');
+  if (a.length > 1) { h = +a[0]; m = +(a[1] || 0); } else if (v.length <= 2) { h = +v; m = 0; } else { h = +v.slice(0, v.length - 2); m = +v.slice(-2); }
+  if (isNaN(h) || isNaN(m) || h > 30 || m > 59) return '';
+  return pad(h) + ':' + pad(m);
+}
+function hmOut(i, o) { if (!i || !o) return o; if (o < i && +o.slice(0, 2) < 12) return pad(+o.slice(0, 2) + 24) + o.slice(2); return o; }
+['#edI', '#edO'].forEach(function (k) { $(k).onblur = function () { var v = hmN(this.value); if (k === '#edO') v = hmOut(hmN($('#edI').value), v); this.value = v; }; });
 function closeEd() { $('#dim').classList.remove('open'); $('#ed').classList.remove('open'); }
 $('#dim').onclick = closeEd; $('#edX').onclick = closeEd;
 $$('#ed [data-q]').forEach(function (b) { b.onclick = function () { var q = b.dataset.q; if (q === 'off') { $('#edI').value = ''; $('#edO').value = ''; return; } var p = q.split('-'); $('#edI').value = pad(+p[0]) + ':00'; $('#edO').value = pad(+p[1]) + ':00'; }; });
 $('#edGo').onclick = function () {
-  var d = ED.d, w = d.weeks[ED.wi], i = $('#edI').value, o = $('#edO').value;
+  var d = ED.d, w = d.weeks[ED.wi], i = hmN($('#edI').value), o = hmOut(i, hmN($('#edO').value));
   if (!!i !== !!o) return toast('출근과 퇴근을 둘 다 적거나 둘 다 비워 주세요');
   var b = $('#edGo'); b.classList.add('busy');
   call('appWtSet', S.pin, { id: d.id, ym: d.ym, row: w.row, k: ED.k, i: i, o: o, dn: ED.dn, rs: $('#edR').value.trim() }).then(function (r) {
