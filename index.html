@@ -759,7 +759,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261019td9';
+var APP_VER = '20261019td11';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1225,7 +1225,17 @@ function bindAdd() { $$('[data-add]').forEach(function (b) { b.onclick = functio
 
 // MONTH: 달력에 일정 막대
 var DCOL = ['#3182f6', '#e1306c', '#16a34a', '#f59e0b', '#8b5cf6', '#0ea5e9', '#ef4444', '#14b8a6'];
-function dcol(n) { var i = team().indexOf(n); return DCOL[(i < 0 ? 0 : i) % DCOL.length]; }
+// 디자이너 색 (2026-10-19): 혜선 빨강 · 이시 파랑 · 희원 핑크 · 주영 주황 · 현아 검정
+// 시즌그리팅 앞에는 항상 2027 (2026-10-19) — 'ONF 27 시즌그리팅', '김선호 SG', '시즌그리팅 2027' 모두 → '… 2027 시즌그리팅'
+function sgFix(n) {
+  n = String(n || '');
+  if (!/시즌\s*그리팅|(^|\s)SG(\s|$)|시그(?!니)/i.test(n)) return n;
+  return n.replace(/(^|\s)20\d\d(?=\s|$)/g, '$1').replace(/(^|\s)SG(?=\s|$)/gi, '$1시즌그리팅').replace(/시그(?!니)/g, '시즌그리팅').replace(/시즌\s*그리팅/g, '시즌그리팅')
+    .replace(/(^|\s)(20)?2[0-9]\s*(?=시즌그리팅)/g, '$1').replace(/(시즌그리팅)\s*(20)?2[0-9](?=\s|$)/g, '$1')
+    .replace(/\s*시즌그리팅/, ' 2027 시즌그리팅').replace(/\s+/g, ' ').trim();
+}
+var PCOLOR = { '이혜선': '#ef4444', '유이시': '#3182f6', '허희원': '#ec4899', '박주영': '#f97316', '박현아': '#191f28' };
+function dcol(n) { if (PCOLOR[n]) return PCOLOR[n]; var i = team().indexOf(n); return DCOL[(i < 0 ? 0 : i) % DCOL.length]; }
 function dshort(n) { return n.length === 3 ? n.slice(1) : n; }
 // 날짜별 접는 카드: 오늘만 기본으로 열림, 연 상태는 기억
 function foldDay(d, sub, body) {
@@ -1837,7 +1847,7 @@ $('#rpS').onclick = function () {
   var seen = {}, add = [], upd = [];
   RP.rows.forEach(function (r) {
     var k = r.d + '|' + r.p + '|' + tkey(r.t); if (seen[k]) return; seen[k] = 1;   // 붙여넣은 글 안의 중복도 한 번만
-    var j = RP.map[r.raw], x = repDup(r);
+    var j = sgFix(RP.map[r.raw]), x = repDup(r);
     if (!x) add.push({ d: r.d, p: r.p, j: j, t: r.t, s: r.s });
     else if (pnorm(x.j) !== pnorm(j) || x.t !== r.t || (x.s !== '완료' && x.s !== r.s)) upd.push({ r: x.r, old: { d: x.d, p: x.p, t: x.t }, d: r.d, p: r.p, j: j, t: r.t.replace(/\s+/g, ' ').trim(), s: x.s === '완료' ? '완료' : r.s });
   });
@@ -1988,7 +1998,7 @@ function renderCal() {
 // 한 줄
 function tdItem(x, opt) {
   opt = opt || {};
-  var pj = x.j && !opt.noPj ? '<small style="color:' + pinfo(x.j).color + '">' + esc(x.j) + '</small>' : '';
+  var pj = x.j && !opt.noPj ? '<small style="color:' + pinfo(x.j).color + '">' + esc(sgFix(x.j)) + '</small>' : '';
   var who = opt.who ? '<span class="who">' + esc(dshort(x.p || '')) + '</span>' : '';
   return '<div class="rpi' + (x.c ? ' done' : '') + (tdImp(x) ? ' imp' : '') + (x.tmp ? ' tmp' : '') + '" data-tdrow="' + esc(x.id) + '">' +
     '<button class="ck" data-tdck="' + esc(x.id) + '" aria-label="완료">' + CKSVG + '</button>' +
@@ -1999,7 +2009,8 @@ function tdProjOpts() {
   var names = projList().map(function (p) { return p.name; });
   tdRows(function (x) { return x.j; }).forEach(function (x) { if (names.indexOf(x.j) < 0) names.push(x.j); });
   var last = ls.get('d4:tdj') || '';
-  return '<option value="">프로젝트 없음</option>' + names.map(function (n) { return '<option' + (n === last ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  var seen = {}; names = names.map(sgFix).filter(function (n) { var k = pnorm(n); if (seen[k]) return false; seen[k] = 1; return true; });
+  return '<option value="">프로젝트 없음</option>' + names.map(function (n) { return '<option' + (pnorm(n) === pnorm(last) ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
 }
 function tdAddRow(k, d, p, memo) {
   return '<div class="tdadd" data-k="' + k + '" data-d="' + d + '" data-p="' + esc(p || '') + '">' +
@@ -2024,7 +2035,7 @@ function tdGroup(L) {
   var h = '', cur = null, many = L.some(function (x) { return x.j; });
   L.sort(tdSort).forEach(function (x) {
     var j = x.j || '';
-    if (j !== cur) { cur = j; if (j || many) h += '<div class="tdpj" style="color:' + (j ? pinfo(j).color : 'var(--mute)') + '">' + esc(j || '기타') + '</div>'; }
+    if (j !== cur) { cur = j; if (j || many) h += '<div class="tdpj" style="color:' + (j ? dcol(x.p) : 'var(--mute)') + '">' + esc(j ? sgFix(j) : '기타') + '</div>'; }
     h += tdItem(x, { noPj: 1 });
   });
   return h;
@@ -2072,7 +2083,7 @@ function bindTd(root) {
       var t = inp.value.trim(); if (!t) return inp.focus();
       var sel = w.querySelector('.tdj'), j = sel ? sel.value : '';
       if (sel) ls.set('d4:tdj', j);
-      tdAdd({ d: w.dataset.d, k: w.dataset.k, p: w.dataset.p, j: j, t: t, c: false, m: st && st.getAttribute('aria-pressed') === 'true' ? '중요' : '' });
+      tdAdd({ d: w.dataset.d, k: w.dataset.k, p: w.dataset.p, j: sgFix(j), t: t, c: false, m: st && st.getAttribute('aria-pressed') === 'true' ? '중요' : '' });
     }
     w.querySelector('.tdb').onclick = go;
     inp.onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } };
@@ -2143,7 +2154,7 @@ $('#teS').onclick = function () {
   if (TE.k === '주간' || TE.k === '주간메모') d = monOf(d);
   var m = [$('#teM').value.trim(), TE.imp ? '중요' : '', TE.wait ? '대기' : ''].filter(String).join(' ');
   var memo = /메모$/.test(TE.k);
-  var o = { id: x.id, old: { d: x.d, p: x.p, t: x.t }, d: d, k: TE.k, p: memo ? x.p : $('#teP').value, j: memo ? x.j : $('#teJ').value, t: t, m: m };
+  var o = { id: x.id, old: { d: x.d, p: x.p, t: x.t }, d: d, k: TE.k, p: memo ? x.p : $('#teP').value, j: memo ? x.j : sgFix($('#teJ').value), t: t, m: m };
   var b = $('#teS'); b.classList.add('busy');
   call('appTodoEdit', S.pin, o).then(function (res) { closeBs(); toast('저장했어요'); if (!tdMerge(res)) return load(); })
     .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
