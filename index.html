@@ -575,8 +575,11 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 #cP button { font-size:13px; }
 .cst.c2 { grid-template-columns:1.6fr 1fr; }
 #tdSeg { gap:4px; }
+#tdSeg .tdshi { width:32px; height:32px; border-radius:50%; background:#fff; color:var(--sub); display:inline-flex; align-items:center; justify-content:center; flex:none; }
+#tdSeg .tdshi svg { width:16px; height:16px; }
+
 #tdSeg button { width:32px; height:32px; padding:0 !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:-0.04em; flex:none; }
-@media (max-width:520px) { .hm2a { gap:6px; } .hm2a .arw .tod { display:none; } .hm2a .aseg button { padding-left:5px; padding-right:5px; } .hm2a .arw button { width:26px; height:26px; } }
+@media (max-width:520px) { .hm2a { gap:6px; } .hm2a .arw .tod { display:none; } .hm2a .aseg button { padding-left:5px; padding-right:5px; } }
 .hm2 .arw .fbtn { font-size:18px; font-weight:500; line-height:1; }
 .phd b, .hm2 .hmt { font-size:18px !important; font-weight:800; letter-spacing:-0.02em; }
 .phd .hwd, .hm2 .hmt .hwd { font-size:13px; }
@@ -611,7 +614,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .tdpj i { width:7px; height:7px; border-radius:2px; flex:none; }
 .tdl .tdpj ~ .rpi { padding-left:4px; }
 .tdcard .bdh { align-items:center; }
-.tded { flex:none; width:32px; height:32px; border:0; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; padding:0; }
+.tded { flex:none; width:28px; height:28px; border:0; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; padding:0; }
 .tded svg { width:15px; height:15px; }
 .tded.on { width:auto; padding:0 12px; border-radius:999px; background:var(--txt); color:#fff; font-size:12px; font-weight:700; }
 .tdel { margin-top:8px; }
@@ -718,7 +721,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .pjr { gap:8px; } .pjic { display:flex; gap:6px; flex:none; }
 .pjb { width:34px; height:34px; border-radius:50%; background:var(--chip); color:var(--sub); display:inline-flex; align-items:center; justify-content:center; border:0; padding:0; -webkit-touch-callout:none; user-select:none; }
 .pjb svg { width:17px; height:17px; } .pjb.off { opacity:.3; }
-.ntbox { background:#fff; border-radius:18px; padding:14px 16px 10px; margin-bottom:12px; border-left:4px solid var(--txt); }
+.ntbox { background:#fff; border-radius:18px; padding:14px 16px 10px; margin-bottom:12px; }
 .nth { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; } .nth b { font-size:15px; }
 .nth button { border:0; background:var(--chip); color:var(--sub); border-radius:999px; font-size:12px; font-weight:700; padding:6px 11px; }
 .nti { display:flex; gap:10px; align-items:baseline; width:100%; border:0; background:none; text-align:left; padding:9px 0; border-top:1px solid var(--line); color:var(--txt); font-size:15px; font-weight:600; line-height:1.45; }
@@ -978,7 +981,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020pl3';
+var APP_VER = '20261020pl4';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2331,7 +2334,8 @@ function renderTodo() {
   var tp = ls.get('d4:tp') || ''; if (tp && T.indexOf(tp) < 0) tp = '';
   var R = tdRows(function (x) { return x.k === '데일리' && x.d >= rg[0] && x.d <= rg[1]; });
   var TPER = [['d', '일'], ['w', '주'], ['m', '월'], ['r', '기간']];
-  var segH = '<div class="aseg" id="tdSeg">' + TPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  var segH = '<div class="aseg" id="tdSeg">' + TPER.map(function (o) { return '<button data-p="' + o[0] + '" class="' + (o[0] === p ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') +
+    (S.D.tdUrl ? '<a class="tdshi" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener" aria-label="TODO 시트 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></a>' : '') + '</div>';
   var h = p === 'r'
     ? '<div class="hm2 tdrg"><div class="tdrgi"><input type="date" id="tdF" value="' + rg[0] + '"><span>–</span><input type="date" id="tdT" value="' + rg[1] + '"></div>' + segH + '</div>'
     : (function () { var cur = TODAY >= rg[0] && TODAY <= rg[1]; return '<div class="hm2 hm2a"><label class="hmt">' + perTitle(p, rg) + '<input type="date" class="dpk" id="tdSegD" value="' + S.tdd + '"></label>' + segH +
@@ -2342,7 +2346,7 @@ function renderTodo() {
   var list = function (L) { return L.length ? tdGroup(L) : '<div class="empty2">' + (one ? '아직 없어요' : '이 기간에 없어요') + '</div>'; };
   var byDate = function (L) { return dates(L).map(function (d) { var c = tdCount(L.filter(function (x) { return x.d === d; })); return '<div class="tddh">' + mdw(d) + (d === TODAY ? ' · 오늘' : '') + (c ? '<small>' + c + '</small>' : '') + '</div>' + list(L.filter(function (x) { return x.d === d; })); }).join('') || '<div class="empty2">이 기간에 없어요</div>'; };
   if (!tp) h += '<div class="tmsum"><span>' + (one ? (S.tdd === TODAY ? '오늘' : '이날') : '기간') + ' <b class="ok">' + done + '</b>/' + R.length + ' 완료</span>' +
-    (S.D.tdUrl ? '<a class="tdsh" href="' + esc(S.D.tdUrl) + '" target="_blank" rel="noopener">시트</a>' : '') + '<button id="tdPaste">+ 업무보고</button></div>';
+    '</div>';
   (tp ? [tp] : T).forEach(function (n) {
     var L = R.filter(function (x) { return x.p === n; });
     h += '<div class="bd tdd tdcard"><div class="bdh"><div>' + '<div class="tdnm">' + (tp ? '<b>' + esc(n) + '</b>' : '<button class="tdwho" data-go="' + esc(n) + '"><b>' + esc(n) + '</b></button>') +
