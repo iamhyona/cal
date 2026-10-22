@@ -131,7 +131,8 @@ header { position:sticky; top:0; z-index:10; background:var(--bg); padding:calc(
 .hdt { font-size:13px; font-weight:600; color:var(--mute); }
 .ib { width:38px; height:38px; border:0; border-radius:50%; background:#fff; display:inline-flex; align-items:center; justify-content:center; color:var(--sub); padding:0; flex:none; }
 .ib svg { width:19px; height:19px; }
-nav { display:flex; justify-content:flex-start; gap:20px; max-width:560px; margin:6px auto 0; border-bottom:1px solid var(--line); }
+nav { display:flex; justify-content:flex-start; gap:20px; max-width:560px; margin:6px auto 0; border-bottom:1px solid var(--line); overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-x; overscroll-behavior-x:contain; }
+nav::-webkit-scrollbar { display:none; }
 nav button { flex:none; border:0; background:none; padding:12px 0 10px; font-size:12px; font-weight:700; letter-spacing:.03em; color:var(--faint); border-bottom:2px solid transparent; margin-bottom:-1px; }
 nav button.on { color:var(--txt); border-bottom-color:var(--txt); }
 
@@ -1003,7 +1004,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261020nt3';
+var APP_VER = '20261022nv1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1411,6 +1412,7 @@ function render() {
 }
 function renderView() {
   $$('#nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === (S.view === 'spec' ? 'pj' : S.view)); });
+  try { var nb = document.querySelector('#nav button.on'), nv = document.getElementById('nav'); if (nb && nv) { var br = nb.getBoundingClientRect(), vr = nv.getBoundingClientRect(); if (br.left < vr.left || br.right > vr.right) nv.scrollBy({ left: br.left - vr.left - 16, behavior: 'smooth' }); } } catch (e) {}
   $('#fab').style.display = S.view === 'spec' || S.view === 'calc' || S.view === 'tl' || S.view === 'exp' || S.view === 'pj' ? 'none' : '';
   $('#fab').setAttribute('aria-label', S.view === 'qk' ? '연락처 추가' : '추가');
   ({ home: renderHome, month: renderCal, todo: renderTodo, wl: renderWl, qk: renderQk, exp: renderExp, pj: renderPj, week: renderWeek, project: renderProject, tl: renderSheetList, designer: renderDesigner, team: renderTeam, spec: renderSpec, calc: renderCalc })[S.view]();
