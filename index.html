@@ -962,6 +962,8 @@ var $ = function (s) { return document.querySelector(s); };
 var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 var ls = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+// 2026-10-23: 지출결의 목록의 '시트 열기' 아이콘 (전역으로 둬서 어디서든 사용 — 없으면 올리기 후 목록 그리다 오류)
+var SHIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
 var W = ['일', '월', '화', '수', '목', '금', '토'];
 var WEN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];   // 달력 상단 요일 (2026-10-19)
 function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -1004,7 +1006,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261022nv1';
+var APP_VER = '20261023ex1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
