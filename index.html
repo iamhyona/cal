@@ -791,7 +791,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     <div class="hr">
       <button class="ib" style="display:none" id="rpBtn" aria-label="업무보고"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></button>
       <button class="ib" id="rfBtn" aria-label="동기화" title="시트와 동기화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M16 3l4 4-4 4"/><path d="M20 17H4M8 13l-4 4 4 4"/></svg></button>
-      <a class="ib" id="drvBtn" href="https://drive.google.com/drive/folders/1RFQjMoSTOQQNA4mJD9DfVgCkU5caYj-p" target="_blank" rel="noopener" aria-label="구글 드라이브 폴더"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+      <a class="ib" id="drvBtn" href="https://drive.google.com/drive/folders/11nRHl1v00YxiSLaQyQy07cUN8hq8rbY8" target="_blank" rel="noopener" aria-label="구글 드라이브 폴더"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
       <button class="ib" style="display:none" id="setBtn" aria-label="시트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
     </div>
   </div>
@@ -2552,12 +2552,24 @@ function nasLoad(force) {
   S.nasAt = Date.now();
   call('appNas', S.pin).then(function (r) { S.nas = r; ls.set('d4:nas', JSON.stringify(r)); if (S.view === 'pj') renderPj(); }).catch(function () { S.nasAt = 0; });
 }
-function nasOf(o) { var k = pjKey(o.artist, o.title); return ((S.nas && S.nas.rows) || []).filter(function (r) { return pjKey(r.a, r.t) === k && r.u; })[0]; }
+// 프로젝트 폴더 (2026.10.28): 폴더 아이콘 = PLASH/01_프로젝트/[아티스트] 프로젝트명/SHARE/Client
+function pdLoad(force) {
+  if (!S.pd) { try { S.pd = JSON.parse(ls.get('d4:pd') || 'null'); } catch (e) {} }
+  if (S.pdAt && !force) return;
+  S.pdAt = Date.now();
+  call('appPjDirs', S.pin, !!force).then(function (r) { S.pd = r; ls.set('d4:pd', JSON.stringify(r)); if (S.view === 'pj') renderPj(); }).catch(function () { S.pdAt = 0; });
+}
+function clOf(o) {
+  var ids = [o.g && o.g.f && o.g.f.id, o.sp && o.sp.id].filter(Boolean);
+  var d = (S.pd || []).filter(function (x) { return ids.some(function (i) { return (x.f || []).indexOf(i) >= 0; }); })[0];
+  return d && d.cl;
+}
+function nasOf(o) { var c = clOf(o); if (c) return { u: c, cl: 1 }; var k = pjKey(o.artist, o.title); return ((S.nas && S.nas.rows) || []).filter(function (r) { return pjKey(r.a, r.t) === k && r.u; })[0]; }
 var PJL = [];
 function renderPj() {
   if (!S.SL) { try { S.SL = JSON.parse(ls.get('d4:sl') || 'null'); } catch (e) {} }
   if (!S.SL || !S.slAt) loadSpecs().then(function () { if (S.view === 'pj') renderPj(); }).catch(function () {});
-  nasLoad();
+  nasLoad(); pdLoad();
   var L = pjMerged();
   var as = L.map(function (o) { return o.artist; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }).sort(function (a, b) { return a.localeCompare(b, 'ko'); });
   var ys = L.map(function (o) { return o.year; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }).sort().reverse();
@@ -2576,9 +2588,9 @@ function renderPj() {
     return '<div class="spi gsi pjr"><button class="m" data-pj="' + i + '">' + artHtml(o) + '<small style="margin:3px 0 0;font-weight:500">' + sub + '</small></button><div class="pjic">' +
       (g ? '<a class="pjb" href="' + esc(g.f.url) + '" target="_blank" rel="noopener" aria-label="제작일정 시트">' + IC_CAL + '</a>' : '<span class="pjb off">' + IC_CAL + '</span>') +
       (sp && sp.url ? '<a class="pjb" href="' + esc(sp.url) + '" target="_blank" rel="noopener" aria-label="사양서 시트">' + IC_DOC + '</a>' : '<span class="pjb off">' + IC_DOC + '</span>') +
-      '<button class="pjb' + (nas ? '' : ' off') + '" data-nas="' + i + '" aria-label="NAS 폴더">' + IC_DIR + '</button></div></div>';
+      '<button class="pjb' + (nas ? '' : ' off') + '" data-nas="' + i + '" aria-label="프로젝트 Client 폴더">' + IC_DIR + '</button></div></div>';
   }).join('') : '<div class="empty2">' + (S.SL ? '찾는 프로젝트가 없어요' : '불러오는 중…') + '</div>') + '</div>';
-  h += '<p class="srcinfo" style="text-align:center">폴더 아이콘을 길게 누르면 NAS 링크를 바꿀 수 있어요' + (S.nas && S.nas.url ? ' · <a href="' + esc(S.nas.url) + '" target="_blank" style="color:inherit">NAS 링크 시트</a>' : '') + '</p>';
+  h += '<p class="srcinfo" style="text-align:center">폴더 아이콘은 프로젝트의 SHARE/Client 폴더로 열려요 (폴더가 없으면 길게 눌러 NAS 링크 지정)' + (S.nas && S.nas.url ? ' · <a href="' + esc(S.nas.url) + '" target="_blank" style="color:inherit">NAS 링크 시트</a>' : '') + '</p>';
   var y0 = window.scrollY, foc = document.activeElement && document.activeElement.id === 'gQ';
   $('#main').innerHTML = h; window.scrollTo(0, y0);
   var qi = $('#gQ'); if (foc) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
