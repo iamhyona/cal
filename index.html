@@ -1020,7 +1020,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261023ex1';
+var APP_VER = '20261028ex3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -2711,11 +2711,10 @@ function renderExp() {
 function exDraftSave() {
   var X = S.ex; if (!$('#exA')) return;
   X.dr = { ym: X.ym, d: $('#exD').value, a: $('#exA').value, v: $('#exV').value, u: $('#exU').value };
-  try { localStorage.setItem('d4:exdr', JSON.stringify({ dr: X.dr, img: X.img || '' })); } catch (e) { try { localStorage.setItem('d4:exdr', JSON.stringify({ dr: X.dr, img: '' })); } catch (e2) {} }
 }
 function exDraftLoad() {
   var X = S.ex; if (X.dr) return;
-  try { var o = JSON.parse(localStorage.getItem('d4:exdr') || 'null'); if (o && o.dr) { X.dr = o.dr; if (!X.img && o.img) X.img = o.img; } } catch (e) {}
+  try { localStorage.removeItem('d4:exdr'); } catch (e) {}   // 새로고침하면 작성 중 내용은 비워짐 (2026-10-28) — 화면 안에서만 임시 보관
 }
 // 영수증 자동 인식 (2026-10-28): 사진을 고르면 서버(구글 OCR)가 금액·날짜·지출처·사용목적을 읽어 빈 칸만 채움
 //  택시 → [아티스트명] 프로젝트명 야근사유 야근택시비 / (합정·공덕>도착동 HH:MM~HH:MM)
