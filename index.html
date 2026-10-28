@@ -2726,9 +2726,10 @@ function exOcr(b64, edit) {
   var lab = $(k.t), keep = lab.innerHTML; lab.textContent = '영수증 읽는 중…';
   call('appExpOcr', S.pin, { img: b64, p: X.p, d: $(k.d).value }).then(function (r) {
     var n = 0;
-    if (r.d && !edit) { $(k.d).value = r.d; n++; }
-    if (r.a && !$(k.a).value) { $(k.a).value = (+r.a).toLocaleString('ko-KR'); n++; }
-    if (r.v && !$(k.v).value.trim()) { $(k.v).value = r.v; n++; }
+    // 결제일자·금액·지출처는 영수증 값이 기준이라 항상 채움, 사용목적은 비어 있을 때만 (2026-10-28)
+    if (r.d) { $(k.d).value = r.d; n++; }
+    if (r.a) { $(k.a).value = (+r.a).toLocaleString('ko-KR'); n++; }
+    if (r.v) { $(k.v).value = r.v; n++; }
     if (r.u && !$(k.u).value.trim()) { $(k.u).value = r.u; n++; }
     if (!edit) exDraftSave();
     toast(n ? '영수증에서 읽어 채웠어요 · 맞는지 확인해 주세요' : '영수증 글자를 못 읽었어요. 직접 적어 주세요');
