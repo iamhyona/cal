@@ -759,6 +759,8 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .exi em { font-style:normal; width:22px; height:22px; border-radius:50%; background:var(--chip); font-size:12px; font-weight:700; color:var(--sub); display:flex; align-items:center; justify-content:center; flex:none; }
 .exi div { flex:1; min-width:0; } .exi b { display:block; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .exi small { color:var(--mute); font-size:12px; }
 .exi span { font-weight:700; font-size:15px; }
+.exi[data-exi] { cursor:pointer; }
+.exi[data-exi]:active { opacity:.6; }
 .tdea { display:flex; align-items:center; gap:6px; margin-top:6px; } .tdea input { flex:1; min-width:0; height:38px; border:1.5px dashed var(--line); background:none; border-radius:10px; padding:0 11px; font-size:15px; outline:0; color:var(--txt); box-sizing:border-box; } .tdea input:focus { border-style:solid; border-color:var(--sub); } .tdea.busy { opacity:.5; } .tdea::after { content:''; flex:none; width:34px; }
 .exxl { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:10px; border-radius:14px; background:var(--txt); color:#fff; padding:14px; font-size:14px; font-weight:700; text-decoration:none; box-sizing:border-box; } .exxl svg { width:16px; height:16px; }
 .extidy { width:100%; margin-top:10px; border:0; border-radius:14px; background:var(--chip); color:var(--sub); padding:14px; font-size:14px; font-weight:600; }
@@ -879,6 +881,16 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   <div class="frow" style="margin-top:14px"><div class="f"><label>내용</label><input id="teX" maxlength="120"></div></div>
   <div class="frow tdonly" style="margin-top:14px"><div class="f"><label>메모</label><input id="teM" maxlength="120" placeholder="비워 둬도 돼요"></div></div>
   <div class="acts"><button class="del" id="teDel">삭제</button><button class="save" id="teS">저장</button></div>
+</div>
+<div class="bs" id="exE">
+  <h3>영수증 고치기</h3>
+  <p class="srcinfo" id="exET" style="margin:-6px 2px 12px;font-size:14px;color:var(--sub)"></p>
+  <div class="frow"><div class="f"><label>지출일자</label><input id="exED" type="date"></div><div class="f"><label>사용금액</label><input id="exEA" inputmode="numeric" autocomplete="off"></div></div>
+  <div class="frow"><div class="f"><label>지출처</label><input id="exEV" maxlength="40"></div></div>
+  <div class="frow"><div class="f"><label>사용목적</label><input id="exEU" maxlength="80"></div></div>
+  <label class="expic" id="exEPic"><input id="exEF" type="file" accept="image/*" hidden><span id="exEPicT"></span><img id="exEImg" alt=""></label>
+  <button class="more" id="exENo" style="display:block;width:100%;margin-top:10px;text-align:center">사진 빼기</button>
+  <div class="acts" style="margin-top:14px"><button class="del" id="exEDel">삭제</button><button class="save" id="exES">저장</button></div>
 </div>
 <div class="bs" id="ns">
   <h3>NAS 링크</h3>
@@ -2663,6 +2675,9 @@ function exLoad(force) {
 }
 function renderExp() {
   var X = S.ex, T = team(); if (X.p && T.indexOf(X.p) < 0) X.p = '';
+  // 2026-10-28: 사진 고르러 갔다 오면(화면 숨김→복귀) 자동 새로고침이 폼을 다시 그려서 적던 내용이 사라지던 문제 → 폼이 있으면 목록만 다시 그림 + 작성 중 내용은 임시 저장
+  if ($('#exA') && $('#exS')) { exList(); return; }
+  exDraftLoad();
   if (!X.ym) X.ym = TODAY.slice(0, 7);
   var h = '<div class="exbox"><div class="fl" style="margin-top:0">디자이너</div><div class="chips" id="exP">' + T.map(function (n) { return '<button data-n="' + esc(n) + '" class="' + (X.p === n ? 'on' : '') + '"><i style="background:' + dcol(n) + '"></i>' + esc(n) + '</button>'; }).join('') + '</div>';
   h += '<div class="frow" style="margin-top:14px"><div class="f"><label>작성 연월</label><select id="exY" class="exsel">' + exYms().map(function (y) { return '<option value="' + y + '"' + (y === X.ym ? ' selected' : '') + '>' + (+y.slice(0, 4)) + '년 ' + (+y.slice(5, 7)) + '월</option>'; }).join('') + '</select></div><div class="f"><label>지출일자</label><input id="exD" type="date" class="dpk" value="' + (TODAY.slice(0, 7) === X.ym ? TODAY : X.ym + '-01') + '"></div></div>';
@@ -2678,13 +2693,66 @@ function renderExp() {
   $('#exF').onchange = function () {
     var f = this.files && this.files[0]; this.value = ''; if (!f) return;
     $('#exPicT').textContent = '사진 줄이는 중…';
-    exShrink(f).then(function (b64) { X.img = b64; $('#exImg').src = 'data:image/jpeg;base64,' + b64; $('#exPic').classList.add('on'); $('#exPicT').textContent = '사진 바꾸기'; })
+    exShrink(f).then(function (b64) { X.img = b64; exDraftSave(); $('#exImg').src = 'data:image/jpeg;base64,' + b64; $('#exPic').classList.add('on'); $('#exPicT').textContent = '사진 바꾸기'; })
       .catch(function (e) { toast(errMsg(e)); $('#exPicT').innerHTML = IC_PS + '영수증 사진 첨부'; });
   };
   $('#exS').onclick = exSave;
+  ['#exD', '#exA', '#exV', '#exU'].forEach(function (k) { $(k).addEventListener('input', exDraftSave); $(k).addEventListener('change', exDraftSave); });
+  if (X.dr) { if (X.dr.d && X.dr.d.slice(0, 7) === X.ym) $('#exD').value = X.dr.d; $('#exA').value = X.dr.a || ''; $('#exV').value = X.dr.v || ''; $('#exU').value = X.dr.u || ''; }
   if (X.img) { $('#exImg').src = 'data:image/jpeg;base64,' + X.img; $('#exPic').classList.add('on'); $('#exPicT').textContent = '사진 바꾸기'; }
   exList(); exLoad();
 }
+// 작성 중 내용 임시 저장 (새로고침·앱 업데이트로 화면이 다시 열려도 그대로)
+function exDraftSave() {
+  var X = S.ex; if (!$('#exA')) return;
+  X.dr = { ym: X.ym, d: $('#exD').value, a: $('#exA').value, v: $('#exV').value, u: $('#exU').value };
+  try { localStorage.setItem('d4:exdr', JSON.stringify({ dr: X.dr, img: X.img || '' })); } catch (e) { try { localStorage.setItem('d4:exdr', JSON.stringify({ dr: X.dr, img: '' })); } catch (e2) {} }
+}
+function exDraftLoad() {
+  var X = S.ex; if (X.dr) return;
+  try { var o = JSON.parse(localStorage.getItem('d4:exdr') || 'null'); if (o && o.dr) { X.dr = o.dr; if (!X.img && o.img) X.img = o.img; } } catch (e) {}
+}
+function exDraftClear() { S.ex.dr = null; try { localStorage.removeItem('d4:exdr'); } catch (e) {} }
+// 올린 영수증 고치기 (2026-10-28): 목록을 누르면 내용 수정 · 사진 교체/빼기 · 삭제
+var EXE = null;
+function exEdit(x) {
+  var X = S.ex; if (!x) return; EXE = { x: x, img: '', noImg: false };
+  $('#exET').textContent = X.p + ' · ' + (+X.ym.slice(5, 7)) + '월 ' + x.n + '번 영수증';
+  $('#exED').value = x.d || ''; $('#exEA').value = x.a ? (+x.a).toLocaleString('ko-KR') : ''; $('#exEV').value = x.v || ''; $('#exEU').value = x.u || '';
+  $('#exEImg').removeAttribute('src'); $('#exEPic').classList.remove('on');
+  $('#exEPicT').innerHTML = IC_PS + (x.im ? '사진 바꾸기 (안 고르면 지금 사진 그대로)' : '영수증 사진 첨부');
+  $('#exENo').style.display = x.im ? '' : 'none'; $('#exENo').textContent = '사진 빼기';
+  unsure($('#exEDel'));
+  var was = !!$('.bs.open'); closeBs(); setTimeout(function () { openBs('#exE'); }, was ? 230 : 0);
+}
+function exEditSend(o, b, msg) {
+  var X = S.ex; b.classList.add('busy');
+  call('appExpEdit', S.pin, o).then(function (res) { X.D[X.p + '|' + X.ym] = res; closeBs(); exList(); toast(msg); })
+    .catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
+}
+$('#exEA').oninput = function () { var v = this.value.replace(/[^\d]/g, ''); this.value = v ? (+v).toLocaleString('ko-KR') : ''; };
+$('#exED').addEventListener('click', function () { try { if (this.showPicker) this.showPicker(); } catch (e) {} });
+$('#exEF').onchange = function () {
+  var f = this.files && this.files[0]; this.value = ''; if (!f || !EXE) return;
+  $('#exEPicT').textContent = '사진 줄이는 중…';
+  exShrink(f).then(function (b64) { EXE.img = b64; EXE.noImg = false; $('#exENo').textContent = '사진 빼기'; $('#exEImg').src = 'data:image/jpeg;base64,' + b64; $('#exEPic').classList.add('on'); $('#exEPicT').textContent = '이 사진으로 바꿔요 · 누르면 다른 사진'; })
+    .catch(function (e) { toast(errMsg(e)); $('#exEPicT').innerHTML = IC_PS + '영수증 사진 첨부'; });
+};
+$('#exENo').onclick = function () {
+  if (!EXE) return; EXE.noImg = !EXE.noImg; EXE.img = '';
+  $('#exEImg').removeAttribute('src'); $('#exEPic').classList.remove('on');
+  this.textContent = EXE.noImg ? '사진 빼기 취소' : '사진 빼기';
+  $('#exEPicT').innerHTML = IC_PS + (EXE.noImg ? '저장하면 사진이 빠져요' : '사진 바꾸기 (안 고르면 지금 사진 그대로)');
+};
+$('#exES').onclick = function () {
+  var X = S.ex; if (!EXE || this.classList.contains('busy')) return;
+  var o = { p: X.p, ym: X.ym, n: EXE.x.n, d: $('#exED').value, a: $('#exEA').value.replace(/[^\d]/g, ''), v: $('#exEV').value.trim(), u: $('#exEU').value.trim(), img: EXE.img, noImg: EXE.noImg };
+  if (!o.d) return toast('지출일자를 골라 주세요');
+  if (!+o.a) return toast('사용금액을 적어 주세요');
+  if (!o.u) return toast('사용목적을 적어 주세요');
+  exEditSend(o, this, '고쳤어요');
+};
+sure($('#exEDel'), function () { var X = S.ex; if (!EXE) return; exEditSend({ p: X.p, ym: X.ym, n: EXE.x.n, del: true }, $('#exEDel'), '지웠어요'); });
 function exList() {
   var X = S.ex, el = $('#exL'); if (!el) return;
   if (!X.p) { el.innerHTML = '<p class="srcinfo" style="margin-top:14px">디자이너를 고르면 이 달에 올린 영수증이 아래에 보여요.</p>'; return; }
@@ -2693,11 +2761,13 @@ function exList() {
   if (r.err) { el.innerHTML = '<div class="ld">' + esc(r.err) + '</div>'; return; }
   var L = r.items || [], tot = L.reduce(function (s, x) { return s + (+x.a || 0); }, 0);
   var h = '<div class="exhd"><b>' + esc(X.p) + ' · ' + (+X.ym.slice(5, 7)) + '월</b><span>' + L.length + '건 · ₩' + won(tot) + '</span>' + (r.url ? '<a class="spgo2" href="' + esc(r.url) + '" target="_blank" rel="noopener" aria-label="시트 열기">' + SHIC + '</a>' : '') + '</div>';
-  h += L.length ? '<div class="exls">' + L.map(function (x, i) { return '<div class="exi"><em>' + (i + 1) + '</em><div><b>' + esc(x.u || '-') + '</b><small>' + esc(x.d ? dw(x.d) : '') + (x.v ? ' · ' + esc(x.v) : '') + '</small></div><span>₩' + won(x.a) + '</span></div>'; }).join('') + '</div>' : '<p class="srcinfo">아직 올린 영수증이 없어요. 첫 건을 올리면 지출결의서 폴더에 파일이 만들어져요.</p>';
+  h += L.length ? '<div class="exls">' + L.map(function (x, i) { return '<div class="exi" data-exi="' + i + '" role="button"><em>' + (i + 1) + '</em><div><b>' + esc(x.u || '-') + '</b><small>' + esc(x.d ? dw(x.d) : '') + (x.v ? ' · ' + esc(x.v) : '') + (x.im === false ? ' · 사진 없음' : '') + '</small></div><span>₩' + won(x.a) + '</span></div>'; }).join('') + '</div>' : '<p class="srcinfo">아직 올린 영수증이 없어요. 첫 건을 올리면 지출결의서 폴더에 파일이 만들어져요.</p>';
   // 엑셀 다운로드: 구글 시트 그대로(지출결의서·영수증증빙 탭 2개, 영수증 사진 포함) .xlsx 로 내려받기
   if (L.length && r.url) { var xid = (r.url.match(/\/d\/([\w-]+)/) || [])[1]; if (xid) h += '<a class="exxl" href="https://docs.google.com/spreadsheets/d/' + xid + '/export?format=xlsx" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>엑셀 다운로드</a>'; }
   if (L.length) h += '<button class="extidy" id="exT">제출 전 정리 · 빈 칸 지우기</button>';
   el.innerHTML = h;
+  $$('#exL [data-exi]').forEach(function (b) { b.onclick = function () { exEdit(L[+b.dataset.exi]); }; });
+  if (L.length) el.insertAdjacentHTML('beforeend', '<p class="srcinfo" style="text-align:center">올린 영수증을 누르면 내용·사진을 고칠 수 있어요</p>');
   if ($('#exT')) $('#exT').onclick = function () {
     var b = this; b.classList.add('busy');
     call('appExpTidy', S.pin, X.p, X.ym).then(function (res) { X.D[X.p + '|' + X.ym] = res; exList(); toast('빈 칸을 지웠어요'); }).catch(function (e) { toast(errMsg(e)); }).then(function () { b.classList.remove('busy'); });
@@ -2716,7 +2786,7 @@ function exSave() {
   call('appExpAdd', S.pin, o).then(function (res) {
     X.D[X.p + '|' + X.ym] = res; X.img = '';
     $('#exA').value = ''; $('#exU').value = ''; $('#exV').value = ''; $('#exImg').removeAttribute('src'); $('#exPic').classList.remove('on'); $('#exPicT').innerHTML = IC_PS + '영수증 사진 첨부';
-    exList(); toast(res.made ? '새 지출결의서를 만들고 올렸어요' : '영수증증빙에 올렸어요');
+    exDraftClear(); exList(); toast(res.made ? '새 지출결의서를 만들고 올렸어요' : '영수증증빙에 올렸어요');
   }).catch(function (e) { toast(errMsg(e)); }).then(function () { X.busy = false; b.classList.remove('busy'); b.textContent = '올리기'; });
   function confirm0() { if (X.noImgOk) return true; X.noImgOk = true; toast('영수증 사진이 없어요. 사진 없이 올리려면 한 번 더 눌러 주세요'); return false; }
 }
