@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PLYSH GUIDE</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#f4f6f9;
+  --ink:#141820;
+  --muted:#5d6675;
+  --line:#e2e6ec;
+  --accent:#2f5bd6;
+  --font:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --track:-0.025em;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151b;--surface:#1b2029;--ink:#e9edf3;--muted:#9aa4b3;--line:#2a313c;--accent:#7f9dff;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b;--surface:#1b2029;--ink:#e9edf3;--muted:#9aa4b3;--line:#2a313c;--accent:#7f9dff;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);letter-spacing:var(--track);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-block;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;margin-bottom:20px}
+.back:hover{color:var(--ink)}
+header{display:grid;gap:10px;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12.5px;font-weight:600;color:var(--accent);letter-spacing:0.02em}
+h1{font-size:32px;line-height:1.25;font-weight:700;margin:0;letter-spacing:-0.035em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+.list{display:grid;gap:10px;padding-top:28px}
+.item{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:center;padding:18px 20px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);background:var(--bg);transition:border-color .15s,background .15s}
+.item:hover,.item:focus-visible{border-color:var(--accent);background:var(--surface);outline:none}
+.item .t{font-size:17px;font-weight:700;letter-spacing:-0.03em}
+.item .s{grid-column:1;font-size:13.5px;color:var(--muted)}
+.item .go{grid-row:1 / span 2;grid-column:2;font-size:18px;font-weight:600;color:var(--accent)}
+@media (max-width:560px){h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="../">← PLYSH</a>
+<header>
+  <div class="eyebrow">SOUND CONTENTS 디자인본부 · 디자인4팀</div>
+  <h1>GUIDE</h1>
+  <p class="lede">4팀 작업 기준과 가이드를 모아둔 곳이에요.</p>
+</header>
+<nav class="list">
+  <a class="item" href="folder-file.html">
+    <span class="t">폴더및파일가이드라인</span>
+    <span class="s">NAS 프로젝트 폴더 구조, 폴더·파일명 규칙, 일러스트 저장·전달 기준</span>
+    <span class="go" aria-hidden="true">→</span>
+  </a>
+</nav>
+</div>
+</body>
+</html>
