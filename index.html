@@ -828,7 +828,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
     </div>
   </div>
   <nav id="nav">
-    <button data-v="pj">PROJECT</button><button data-v="month">CALENDAR</button><button data-v="qk">QUICK</button><button data-v="todo">TO DO LIST</button><button data-v="exp">EXPENSE</button><button data-v="wl">WORK LOG</button>
+    <button data-v="pj">PROJECT</button><button data-v="month">CALENDAR</button><button data-v="qk">QUICK</button><button data-v="todo">TO DO LIST</button><button data-v="exp">EXPENSE</button><button data-v="wl">WORK LOG</button><button id="navGuide" type="button">GUIDE</button>
   </nav>
 </header>
 <main id="main"><div class="ld">불러오는 중…</div></main>
@@ -1462,7 +1462,7 @@ function renderView() {
   $('#fab').setAttribute('aria-label', S.view === 'qk' ? '연락처 추가' : '추가');
   ({ home: renderHome, month: renderCal, todo: renderTodo, wl: renderWl, qk: renderQk, exp: renderExp, pj: renderPj, week: renderWeek, project: renderProject, tl: renderSheetList, designer: renderDesigner, team: renderTeam, spec: renderSpec, calc: renderCalc })[S.view]();
 }
-$$('#nav button').forEach(function (b) { b.onclick = function () { S.view = b.dataset.v; ls.set('d4:view', S.view); window.scrollTo(0, 0); render(); }; });
+$$('#nav button').forEach(function (b) { b.onclick = function () { S.view = b.dataset.v; ls.set('d4:view', S.view); window.scrollTo(0, 0); render(); }; }); (function () { var g = document.getElementById('navGuide'); if (g) g.onclick = function () { location.href = 'guide/'; }; })();
 $('#brand').onclick = function () { S.view = 'pj'; ls.set('d4:view', 'pj'); window.scrollTo(0, 0); render(); };
 $('#rfBtn').onclick = function () { load().then(function () { toast('시트에서 새로 불러왔어요'); }); };
 
