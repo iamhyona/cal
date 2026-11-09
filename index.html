@@ -675,11 +675,11 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 .qklb .fr { font-size:9px; font-weight:600; letter-spacing:.18em; margin-top:16px; color:#666; }
 .qklb .fra { font-size:9px; font-weight:500; margin-top:3px; color:#666; }
 .qklb .ct { font-size:15px; font-weight:500; line-height:1.4; color:#000; margin-top:10px; }
-.qklb.full { aspect-ratio:210/297; justify-content:flex-start; padding:9% 7% 5%; }
-.qklb.full .ad, .qklb.full .co { font-size:15px; }
-.qklb.full .ct { font-size:11px; margin-top:6px; }
-.qklb.full .nt { font-size:9px; margin-top:6px; }
-.qklb .mp { width:78%; margin-top:10px; border-radius:4px; }
+.qklb.full { aspect-ratio:210/297; justify-content:flex-start; padding:9.5% 9.5% 0; container-type:inline-size; }
+.qklb.full .ad, .qklb.full .co { font-size:4.7cqw; }
+.qklb.full .ct { font-size:3.4cqw; margin-top:2.4cqw; }
+.qklb.full .nt { font-size:2.35cqw; margin-top:2.4cqw; }
+.qklb .mp { width:100%; margin-top:3.8cqw; }
 @media print {
   @page { size:A4 portrait; margin:0; }
   body > *:not(#qkLabel) { display:none !important; }
@@ -701,7 +701,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
   .lbfull .ad, .lbfull .co { font-size:28pt; }
   .lbfull .ct { font-size:20pt; margin-top:5mm; }
   .lbfull .nt { font-size:14pt; margin-top:5mm; }
-  .lbmap { width:150mm; height:150mm; object-fit:contain; margin-top:8mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .lbmap { width:170mm; height:170mm; object-fit:contain; margin-top:8mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 .wlcal .grid > button { min-height:70px; }
 .wlbars { display:flex; flex-wrap:wrap; gap:4px; padding:5px 3px 0; }
@@ -1049,7 +1049,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261109qk2';
+var APP_VER = '20261109qk3';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
