@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>PLASH</title>
+<title>PLYSH</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="PLASH">
+<meta name="apple-mobile-web-app-title" content="PLYSH">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f2f4f6">
 <link rel="manifest" href="manifest.webmanifest">
@@ -811,7 +811,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 </head>
 <body>
 <div class="full hide" id="pinScr">
-  <h1>PLASH</h1>
+  <h1>PLYSH</h1>
   <p id="pinMsg">팀 PIN 4자리를 입력해 주세요</p>
   <input class="pinIn" id="pinIn" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
   <button class="btn" id="pinBtn">확인</button>
@@ -819,7 +819,7 @@ details.fday:not([open]) > summary { margin-bottom:0; }
 
 <header>
   <div class="hd">
-    <button class="brand" id="brand">PLASH</button>
+    <button class="brand" id="brand">PLYSH</button>
     <div class="hr">
       <button class="ib" style="display:none" id="rpBtn" aria-label="업무보고"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></button>
       <button class="ib" id="rfBtn" aria-label="동기화" title="시트와 동기화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M16 3l4 4-4 4"/><path d="M20 17H4M8 13l-4 4 4 4"/></svg></button>
@@ -1049,7 +1049,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261109qk5';
+var APP_VER = '20261109ply1';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
