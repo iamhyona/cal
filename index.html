@@ -1049,7 +1049,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261109qk1';
+var APP_VER = '20261109qk2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -3137,7 +3137,7 @@ function qpFits(t) {
   el.textContent = t; return el.offsetWidth <= 636;
 }
 // 지도 넣는 업체: A4 한 장에 주소 + 지도 하나만 (업체명 → 지도 파일)
-var QK_MAP = { '갤럭시코퍼레이션': 'ifc-map.png' };
+var QK_MAP = { '갤럭시코퍼레이션': 'ifc-map.svg' };
 function qpMap(r) { return QK_MAP[qkNorm(r.c)] || ''; }
 function qpHtml(r) {
   var ad = qkSeoul(String(r[QP.a] || r.a || r.a2 || '').trim()), co = String(r.c || '').trim();
