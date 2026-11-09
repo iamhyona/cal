@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DESIGN_4 폴더·파일명 규칙</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#f4f6f9;
+  --ink:#141820;
+  --muted:#5d6675;
+  --line:#e2e6ec;
+  --accent:#2f5bd6;
+  --ok:#1f8a5b;
+  --ng:#c8412f;
+  --font:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --track:-0.025em;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151b;--surface:#1b2029;--ink:#e9edf3;--muted:#9aa4b3;--line:#2a313c;--accent:#7f9dff;--ok:#4cc38a;--ng:#ff7b67;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b;--surface:#1b2029;--ink:#e9edf3;--muted:#9aa4b3;--line:#2a313c;--accent:#7f9dff;--ok:#4cc38a;--ng:#ff7b67;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);letter-spacing:var(--track);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-block;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;margin-bottom:20px}
+.back:hover{color:var(--ink)}
+header{display:grid;gap:10px;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12.5px;font-weight:600;color:var(--accent);letter-spacing:0.02em}
+h1{font-size:32px;line-height:1.25;font-weight:700;margin:0;text-wrap:balance;letter-spacing:-0.035em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+section{padding-block:36px;border-bottom:1px solid var(--line);display:grid;gap:16px}
+section:last-of-type{border-bottom:0}
+h2{font-size:21px;font-weight:700;margin:0;letter-spacing:-0.03em;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-size:13px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+p{margin:0;max-width:65ch}
+.muted{color:var(--muted)}
+code{font-family:var(--font);font-weight:600;font-size:0.94em;background:var(--surface);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.tree{background:var(--surface);border-radius:10px;padding:20px 22px;overflow-x:auto}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree ul ul{padding-left:20px;border-left:1px solid var(--line);margin:4px 0 8px 7px}
+.tree li{padding:2px 0;white-space:nowrap}
+.tree .root{font-weight:700}
+.tree .f{font-weight:600}
+.tree .d{color:var(--muted);font-weight:400;margin-left:10px;font-size:13.5px}
+.tree .sub{font-weight:500}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--ink)}
+td:first-child{white-space:nowrap;font-weight:600}
+.formula{background:var(--surface);border-radius:10px;padding:18px 20px;display:grid;gap:12px;overflow-x:auto}
+.formula .line{font-size:19px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap}
+.formula .line span{color:var(--accent)}
+.parts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted)}
+.parts b{color:var(--ink);font-weight:600}
+ul.rules{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+ul.rules li{display:grid;grid-template-columns:20px 1fr;gap:8px}
+ul.rules li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:10px;margin-left:4px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp>div{min-width:0;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.cmp .tag{font-size:12.5px;font-weight:700}
+.cmp .ok .tag{color:var(--ok)}
+.cmp .ng .tag{color:var(--ng)}
+.cmp .ex{font-weight:600;font-size:14px;word-break:break-all}
+.cmp .why{font-size:13px;color:var(--muted)}
+.files{display:grid;gap:8px}
+.file{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline;padding:12px 16px;border:1px solid var(--line);border-radius:10px}
+.file .ext{font-size:12px;font-weight:700;color:var(--accent);min-width:58px}
+.file .name{font-weight:600;font-size:14.5px;word-break:break-all;min-width:0}
+.file .desc{grid-column:2;font-size:13px;color:var(--muted)}
+.check{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.check li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.box{width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px;margin-top:4px}
+footer{padding-top:28px;font-size:13px;color:var(--muted)}
+@media (max-width:560px){
+  h1{font-size:26px}
+  .cmp{grid-template-columns:1fr}
+  .formula .line{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="./">← 가이드 목록</a>
+<header>
+  <div class="eyebrow">SOUND CONTENTS 디자인본부 · 디자인4팀</div>
+  <h1>폴더·파일명 규칙</h1>
+  <p class="lede">NAS DESIGN_4에 프로젝트를 만들고 파일을 저장·전달할 때 지키는 기준이에요. 새 프로젝트는 템플릿 폴더를 복사해서 시작해요.</p>
+  <div class="meta"><span>템플릿 위치 <b>DESIGN_4 / _FolderTemplate / [ARTIST]ProjectName</b></span><span>적용 <b>2026.11~</b></span></div>
+</header>
+
+<section>
+  <h2><span class="n">01</span>프로젝트 폴더 구조</h2>
+  <p class="muted">템플릿을 복사한 뒤 최상위 폴더 이름만 바꿔요. 하위 폴더 이름과 번호는 바꾸지 않아요.</p>
+  <div class="tree">
+    <ul>
+      <li class="root">[ARTIST]ProjectName
+        <ul>
+          <li><span class="f">00_Final</span><span class="d">최종 확정된 디자인만</span>
+            <ul>
+              <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
+              <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
+            </ul></li>
+          <li><span class="f">01_Document</span><span class="d">주고받는 문서 전부</span>
+            <ul>
+              <li class="sub">01_FromClient<span class="d">소속사 → 우리</span></li>
+              <li class="sub">02_ToClient<span class="d">우리 → 소속사</span></li>
+              <li class="sub">03_FromVendor<span class="d">인쇄소 → 우리</span></li>
+              <li class="sub">04_Spec<span class="d">사양서</span></li>
+              <li class="sub">05_Quote<span class="d">견적서</span></li>
+            </ul></li>
+          <li><span class="f">02_Design</span><span class="d">카테고리별 작업 파일</span>
+            <ul>
+              <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
+              <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
+            </ul></li>
+          <li><span class="f">03_Photo</span><span class="d">촬영 원본부터 보정본까지</span>
+            <ul>
+              <li class="sub">01_All(High)</li><li class="sub">02_All(Low)</li>
+              <li class="sub">03_Select(High)</li><li class="sub">04_Select(Low)</li>
+              <li class="sub">05_UsedCut(High)</li><li class="sub">06_UsedCut(Low)</li>
+              <li class="sub">07_Retouched</li>
+            </ul></li>
+          <li><span class="f">04_Sample</span><span class="d">인쇄소에 본작업 전 넘기는 파일</span>
+            <ul><li class="sub">yymmdd(ItemName)<span class="d">예: 261110(Calendar)</span></li></ul></li>
+          <li><span class="f">05_Backup</span><span class="d">팀 내부 공유·백업</span>
+            <ul>
+              <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
+              <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
+            </ul></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">02</span>폴더별 용도</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>폴더</th><th>넣는 것</th></tr></thead>
+    <tbody>
+      <tr><td>00_Final</td><td>소속사 컨펌이 끝난 최종 디자인만. 작업 중인 파일은 넣지 않아요.</td></tr>
+      <tr><td>01_FromClient</td><td>소속사가 보낸 기획안, 피드백, 제작일정 등</td></tr>
+      <tr><td>02_ToClient</td><td>우리가 보내는 디자인 컨펌 요청, 제안서, 기획서, 일정 공유 PDF</td></tr>
+      <tr><td>03_FromVendor</td><td>인쇄소·제작처가 준 로고, 칼선 등 작업 소스</td></tr>
+      <tr><td>04_Spec · 05_Quote</td><td>사양서 · 견적서</td></tr>
+      <tr><td>02_Design</td><td>카테고리별로 작업 중인 파일</td></tr>
+      <tr><td>03_Photo</td><td>All 전체컷 → Select 소속사 셀렉컷 → UsedCut 실제 사용컷 → Retouched 보정본</td></tr>
+      <tr><td>04_Sample</td><td>인쇄소에 본작업 전 샘플용으로 넘긴 파일. 보낸 날짜별로 폴더를 만들어요.</td></tr>
+      <tr><td>05_Backup</td><td>팀 내부에서 공유하거나 백업해 두는 파일</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>프로젝트 폴더 이름</h2>
+  <div class="formula">
+    <div class="line"><span>[ARTIST]</span>ProjectName</div>
+    <div class="parts"><span><b>[ARTIST]</b> 아티스트·배우 이름, 영문 대문자</span><span><b>ProjectName</b> 연도 + 프로젝트명</span></div>
+  </div>
+  <ul class="rules">
+    <li><span>배우·아티스트 이름은 모두 영문으로 써요. 한글 이름을 쓰지 않아요.</span></li>
+    <li><span>폴더 이름에는 프로젝트명을 줄이지 않고 전부 써요.</span></li>
+  </ul>
+  <div class="cmp">
+    <div class="ok"><span class="tag">이렇게</span><span class="ex">[JUNGHAEIN]2027SG_COMESTAY</span><span class="why">영문 이름, 연도 4자리</span></div>
+    <div class="ng"><span class="tag">이렇게 하지 않기</span><span class="ex">[정해인]27SG COMESTAY</span><span class="why">한글 이름, 연도 2자리, 띄어쓰기</span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">04</span>파일 이름</h2>
+  <div class="formula">
+    <div class="line"><span>[Artist]</span>ProjectName_<span>Item</span>(yymmdd)<span>V2</span></div>
+    <div class="parts"><span><b>Item</b> 품목명</span><span><b>(yymmdd)</b> 작업 날짜 6자리</span><span><b>V2</b> 같은 품목·같은 날짜 파일이 여러 개일 때만</span></div>
+  </div>
+  <ul class="rules">
+    <li><span>띄어쓰기 대신 단어 첫 글자를 대문자로 구분해요. 예: <code>WishingYouABrightFuture</code></span></li>
+    <li><span>한글은 되도록 쓰지 않아요.</span></li>
+    <li><span>마침표 <code>.</code> 쉼표 <code>,</code> 물음표 <code>?</code> 느낌표 <code>!</code>는 쓰지 않아요. 하이픈 <code>-</code> 언더바 <code>_</code> 괄호 <code>( )</code>만 써요.</span></li>
+    <li><span>프로젝트명이 길면 파일 이름에서는 줄이거나 빼요.</span></li>
+    <li><span>같은 품목을 같은 날짜에 여러 개 저장할 때만 날짜 괄호 바로 뒤에 <code>V1</code> <code>V2</code>를 붙여요. 하나뿐이면 붙이지 않고, 앞에 하이픈이나 언더바를 넣지 않아요.</span></li>
+  </ul>
+  <div class="cmp">
+    <div class="ok"><span class="tag">이렇게</span><span class="ex">[P1H]2027SG_Calendar(261112)V2.ai</span><span class="why">긴 프로젝트명은 생략, 같은 날 두 번째 파일이라 V2</span></div>
+    <div class="ng"><span class="tag">이렇게 하지 않기</span><span class="ex">P1H 캘린더 최종_수정.v2!.ai</span><span class="why">띄어쓰기, 한글, 마침표·느낌표, 날짜 없음</span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">05</span>일러스트 파일 저장·전달</h2>
+  <p>Final에 넣거나 외부에 공유하는 일러스트 파일은 <b>세 개</b>로 저장하고 전달해요. Backup 폴더는 원본 하나만 저장해도 돼요.</p>
+  <div class="files">
+    <div class="file"><span class="ext">AI 원본</span><span class="name">[GD]2027FANKIT_Tshirt(261112)V2.ai</span><span class="desc">텍스트를 깨지 않은 수정 가능한 원본</span></div>
+    <div class="file"><span class="ext">AI 아웃라인</span><span class="name">[GD]2027FANKIT_Tshirt(261112)V2_Outline.ai</span><span class="desc">텍스트를 윤곽선으로 만든(깬) 파일. 인쇄소 전달용</span></div>
+    <div class="file"><span class="ext">PDF</span><span class="name">[GD]2027FANKIT_Tshirt(261112)V2.pdf</span><span class="desc">확인·컨펌용</span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">06</span>저장·전달 전 체크리스트</h2>
+  <ul class="check">
+    <li><span class="box" aria-hidden="true"></span><span>인디자인·일러스트 파일의 링크 이미지가 모두 제대로 연결돼 있는지 확인했나요?</span></li>
+    <li><span class="box" aria-hidden="true"></span><span>파일 이름에 띄어쓰기, 한글, 마침표, 쉼표, 물음표, 느낌표가 없나요?</span></li>
+    <li><span class="box" aria-hidden="true"></span><span>날짜(yymmdd)가 붙어 있나요? 같은 품목·같은 날짜 파일이 여러 개라면 V1, V2로 구분했나요?</span></li>
+    <li><span class="box" aria-hidden="true"></span><span>일러스트 파일은 원본, _Outline, PDF 세 개를 다 만들었나요?</span></li>
+    <li><span class="box" aria-hidden="true"></span><span>맞는 폴더(Final / ToClient / Sample)에 넣었나요?</span></li>
+  </ul>
+</section>
+
+<footer>디자인4팀 · 규칙이 바뀌면 이 문서와 _FolderTemplate을 함께 수정해요.</footer>
+</div>
+</body>
+</html>
