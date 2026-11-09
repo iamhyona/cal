@@ -1049,7 +1049,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261109qk3';
+var APP_VER = '20261109qk4';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -3144,6 +3144,9 @@ function qpHtml(r) {
   // 여러 줄 주소 (2026-11-09): 그대로 줄바꿈, ※ 줄은 아래에 빨간 안내 문구로
   if (/\n/.test(ad)) {
     var LN = ad.split(/\n/).map(function (x) { return x.trim(); }).filter(String), main = LN.filter(function (x) { return !/^※/.test(x); }), nt = LN.filter(function (x) { return /^※/.test(x); });
+    // 마지막 주소 줄이 길면 (동) 부분을 업체명 줄 앞으로: (여의도동) 갤럭시 코퍼레이션
+    var lst = main.length ? main[main.length - 1] : '', k2 = lst.indexOf(' (');
+    if (k2 > 0 && !qpFits(lst.replace(/\*\*/g, ''))) { main[main.length - 1] = lst.slice(0, k2); co = lst.slice(k2 + 1) + (co ? ' ' + co : ''); }
     return '<div class="ad">' + qkRich(main.join('\n')) + '</div><div class="co">' + esc(co) + '</div>' + (qpWho(r) ? '<div class="ct">' + esc(qpWho(r)) + '</div>' : '') + (nt.length ? '<div class="nt">' + qkRich(nt.join('\n')) + '</div>' : '');
   }
   if (!qpFits(ad)) {
