@@ -1,6 +1,6 @@
 {
-  "name": "PLASH",
-  "short_name": "PLASH",
+  "name": "PLYSH",
+  "short_name": "PLYSH",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
