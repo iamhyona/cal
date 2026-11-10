@@ -96,40 +96,40 @@ footer{padding-top:28px;font-size:13px;color:var(--muted)}
 </header>
 
 <section>
-  <h2><span class="n">01</span>프로젝트 폴더 구조</h2>
+  <h2><span class="n">01</span>프로젝트 폴더 구조·용도</h2>
   <p class="muted">템플릿을 복사한 뒤 최상위 폴더 이름만 바꿔요. 하위 폴더 이름과 번호는 바꾸지 않아요.</p>
   <div class="tree">
     <ul>
       <li class="root">[ARTIST]ProjectName
         <ul>
-          <li><span class="f">00_Final</span><span class="d">최종 확정된 디자인만</span>
+          <li><span class="f">00_Final</span><span class="d">소속사 컨펌이 끝난 최종 디자인만 · 작업 중인 파일은 넣지 않아요</span>
             <ul>
               <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
               <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
             </ul></li>
           <li><span class="f">01_Document</span><span class="d">주고받는 문서 전부</span>
             <ul>
-              <li class="sub">01_FromClient<span class="d">소속사 → 우리</span></li>
-              <li class="sub">02_ToClient<span class="d">우리 → 소속사</span></li>
-              <li class="sub">03_FromVendor<span class="d">인쇄소 → 우리</span></li>
+              <li class="sub">01_FromClient<span class="d">소속사 → 우리 · 기획안, 피드백, 제작일정 등</span></li>
+              <li class="sub">02_ToClient<span class="d">우리 → 소속사 · 디자인 컨펌 요청, 제안서, 기획서, 일정 공유 PDF</span></li>
+              <li class="sub">03_FromVendor<span class="d">인쇄소·제작처 → 우리 · 로고, 칼선 등 작업 소스</span></li>
               <li class="sub">04_Spec<span class="d">사양서</span></li>
               <li class="sub">05_Quote<span class="d">견적서</span></li>
             </ul></li>
-          <li><span class="f">02_Design</span><span class="d">카테고리별 작업 파일</span>
+          <li><span class="f">02_Design</span><span class="d">카테고리별로 작업 중인 파일</span>
             <ul>
               <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
               <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
             </ul></li>
           <li><span class="f">03_Photo</span><span class="d">촬영 원본부터 보정본까지</span>
             <ul>
-              <li class="sub">01_All(High)</li><li class="sub">02_All(Low)</li>
-              <li class="sub">03_Select(High)</li><li class="sub">04_Select(Low)</li>
-              <li class="sub">05_UsedCut(High)</li><li class="sub">06_UsedCut(Low)</li>
-              <li class="sub">07_Retouched</li>
+              <li class="sub">01_All(High)<span class="d">전체컷</span></li><li class="sub">02_All(Low)</li>
+              <li class="sub">03_Select(High)<span class="d">소속사 셀렉컷</span></li><li class="sub">04_Select(Low)</li>
+              <li class="sub">05_UsedCut(High)<span class="d">실제 사용컷</span></li><li class="sub">06_UsedCut(Low)</li>
+              <li class="sub">07_Retouched<span class="d">보정본</span></li>
             </ul></li>
-          <li><span class="f">04_Sample</span><span class="d">인쇄소에 본작업 전 넘기는 파일</span>
+          <li><span class="f">04_Sample</span><span class="d">인쇄소에 본작업 전 샘플용으로 넘긴 파일 · 보낸 날짜별로 폴더를 만들어요</span>
             <ul><li class="sub">yymmdd(ItemName)<span class="d">예: 261110(Calendar)</span></li></ul></li>
-          <li><span class="f">05_Backup</span><span class="d">팀 내부 공유·백업</span>
+          <li><span class="f">05_Backup</span><span class="d">팀 내부에서 공유하거나 백업해 두는 파일</span>
             <ul>
               <li class="sub">01_Asset</li><li class="sub">02_Merch</li><li class="sub">03_Packaging</li>
               <li class="sub">04_Packshot</li><li class="sub">05_Notice</li><li class="sub">06_Promotion</li>
@@ -141,25 +141,7 @@ footer{padding-top:28px;font-size:13px;color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="n">02</span>폴더별 용도</h2>
-  <div class="tbl"><table>
-    <thead><tr><th>폴더</th><th>넣는 것</th></tr></thead>
-    <tbody>
-      <tr><td>00_Final</td><td>소속사 컨펌이 끝난 최종 디자인만. 작업 중인 파일은 넣지 않아요.</td></tr>
-      <tr><td>01_FromClient</td><td>소속사가 보낸 기획안, 피드백, 제작일정 등</td></tr>
-      <tr><td>02_ToClient</td><td>우리가 보내는 디자인 컨펌 요청, 제안서, 기획서, 일정 공유 PDF</td></tr>
-      <tr><td>03_FromVendor</td><td>인쇄소·제작처가 준 로고, 칼선 등 작업 소스</td></tr>
-      <tr><td>04_Spec · 05_Quote</td><td>사양서 · 견적서</td></tr>
-      <tr><td>02_Design</td><td>카테고리별로 작업 중인 파일</td></tr>
-      <tr><td>03_Photo</td><td>All 전체컷 → Select 소속사 셀렉컷 → UsedCut 실제 사용컷 → Retouched 보정본</td></tr>
-      <tr><td>04_Sample</td><td>인쇄소에 본작업 전 샘플용으로 넘긴 파일. 보낸 날짜별로 폴더를 만들어요.</td></tr>
-      <tr><td>05_Backup</td><td>팀 내부에서 공유하거나 백업해 두는 파일</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
-<section>
-  <h2><span class="n">03</span>프로젝트 폴더 이름</h2>
+  <h2><span class="n">02</span>프로젝트 폴더 이름</h2>
   <div class="formula">
     <div class="line"><span>[ARTIST]</span>ProjectName</div>
     <div class="parts"><span><b>[ARTIST]</b> 아티스트·배우 이름, 영문 대문자</span><span><b>ProjectName</b> 연도 + 프로젝트명</span></div>
@@ -175,7 +157,7 @@ footer{padding-top:28px;font-size:13px;color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="n">04</span>파일 이름</h2>
+  <h2><span class="n">03</span>파일 이름</h2>
   <div class="formula">
     <div class="line"><span>[Artist]</span>ProjectName_<span>Item</span>(yymmdd)<span>V2</span></div>
     <div class="parts"><span><b>Item</b> 품목명</span><span><b>(yymmdd)</b> 작업 날짜 6자리</span><span><b>V2</b> 같은 품목·같은 날짜 파일이 여러 개일 때만</span></div>
@@ -194,7 +176,7 @@ footer{padding-top:28px;font-size:13px;color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="n">05</span>일러스트 파일 저장·전달</h2>
+  <h2><span class="n">04</span>일러스트 파일 저장·전달</h2>
   <p>Final에 넣거나 외부에 공유하는 일러스트 파일은 <b>세 개</b>로 저장하고 전달해요. Backup 폴더는 원본 하나만 저장해도 돼요.</p>
   <div class="files">
     <div class="file"><span class="ext">AI 원본</span><span class="name">[GD]2027FANKIT_Tshirt(261112)V2.ai</span><span class="desc">텍스트를 깨지 않은 수정 가능한 원본</span></div>
@@ -204,7 +186,7 @@ footer{padding-top:28px;font-size:13px;color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="n">06</span>저장·전달 전 체크리스트</h2>
+  <h2><span class="n">05</span>저장·전달 전 체크리스트</h2>
   <ul class="check">
     <li><span class="box" aria-hidden="true"></span><span>인디자인·일러스트 파일의 링크 이미지가 모두 제대로 연결돼 있는지 확인했나요?</span></li>
     <li><span class="box" aria-hidden="true"></span><span>파일 이름에 띄어쓰기, 한글, 마침표, 쉼표, 물음표, 느낌표가 없나요?</span></li>
