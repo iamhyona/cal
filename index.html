@@ -1064,7 +1064,7 @@ function call(fn) {
   function run(n) { return once().catch(function (e) { if (e.retry && n > 1) return new Promise(function (ok) { setTimeout(ok, 1200); }).then(function () { return run(n - 1); }); throw e; }); }
   return run(tries).then(function (o) { if (!o.ok) throw new Error(o.error || '오류가 났어요'); return o.data; });
 }
-var APP_VER = '20261110gd1';
+var APP_VER = '20261110gd2';
 function checkUpdate() {
   fetch('index.html?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
     var m = t.match(/var APP_VER = '(\w+)'/);
@@ -1480,7 +1480,7 @@ function openGd(g) {
   $('#gdT').textContent = g.t;
   var f = $('#gdF');
   f.onload = function () { try { var d = f.contentDocument; d.documentElement.setAttribute('data-theme', 'light'); var bk = d.querySelector('.back'); if (bk) bk.style.display = 'none'; var w = d.querySelector('.wrap'); if (w) w.style.paddingTop = '8px'; } catch (e) {} };
-  if (f.getAttribute('src') !== 'guide/' + g.f) f.setAttribute('src', 'guide/' + g.f); else f.onload();
+  f.setAttribute('src', 'guide/' + g.f + '?t=' + Date.now()); // 매번 최신 문서로
   var was = !!$('.bs.open'); closeBs();
   setTimeout(function () { openBs('#gd'); $('#gd').style.height = $('#gd').style.maxHeight; }, was ? 230 : 0);
 }
